@@ -8,21 +8,21 @@
         <p:dialog id="popUpBarSummary" widgetVar="barDialog"
                   modal="true" showEffect="fade" closable="false" closeOnEscape="false" hideEffect="fade" style="overflow-y: auto;">   
             <h:form id="TblRawDataTabForm">              
-                <h:outputText id="chartDataDebug" value="#{tblRawDataController.valoresJson}" rendered="false" />
-                <p:tabView id="responsiveTab">                                                        
-                    <p:tab title="InsertionOrder" id="idBarInsertionOrder">
+                <h:panelGroup id="responsive">
+                    <p:tabView id="responsiveTab" >                                                        
+                        <p:tab title="InsertionOrder" id="idBarInsertionOrder">
                         
-                        <c:set var="canvasId" value="barChart1" />
-                        <c:set var="labelsJson" value="#{tblRawDataController.labelsJson}" />
-                        <c:set var="valoresJson" value="#{tblRawDataController.valoresJson}" />
-                        <c:set var="chartType" value="bar" />
-                        <c:set var="chartTitle" value="InsertionOrder" />
-                        <c:set var="horizontal" value="true" />
-                        <ui:include src="/includes/chart-render.xhtml" />  
-                        
-                                                
-                    </p:tab>                                                                         
-                </p:tabView>                    
+                            <c:set var="canvasId" value="barChart1" />
+                            <c:set var="labelsJson" value="#{tblRawDataController.labelsJson}" />
+                            <c:set var="valoresJson" value="#{tblRawDataController.valoresJson}" />
+                            <c:set var="chartType" value="bar" />
+                            <c:set var="chartTitle" value="InsertionOrder" />
+                            <c:set var="horizontal" value="true" />
+                            <ui:include src="/includes/chart-render.xhtml" />  
+                                                                        
+                        </p:tab>                                                                         
+                    </p:tabView>                    
+                </h:panelGroup>
                 <p:commandButton value="Close" onclick="barDialog.hide()" style="float: right"/>
             </h:form>
         </p:dialog>             

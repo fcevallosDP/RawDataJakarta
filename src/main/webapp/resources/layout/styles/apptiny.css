@@ -1,0 +1,31 @@
+body .ui-menu .ui-menu-list .ui-menuitem .ui-menuitem-link .ui-menuitem-text {
+    float: none;
+    vertical-align: middle;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body .ui-menu.ui-menubar {
+    padding: .5rem;
+    background: #546E7A;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body .ui-menu .ui-menu-list .ui-menuitem .ui-menuitem-link .ui-menuitem-icon {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body .ui-menu .ui-menu-list .ui-menuitem .ui-menuitem-link .ui-icon-triangle-1-s:last-child {
+    font-family: "primeicons" !important;
+    font-style: normal;
+    font-weight: normal;
+    display: inline-block;
+    background: none;
+    margin-right: -0.5rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body .ui-menu .ui-menu-list .ui-menu-child {
+    background: #546E7A;
+    padding: .25rem 0;
+}

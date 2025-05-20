@@ -1,0 +1,44 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <p:submenu label="Pacing" icon="pi pi-star">
+        <p:menuitem value="BTracker" icon="pi pi-fw pi-mobile" url="/RawData/tblRawData/BTracker.xhtml"/>
+        <p:menuitem value="Spend" icon="pi pi-fw pi-dollar" url="/RawData/tblRawData/SpendPacing.xhtml"/>
+        <p:menuitem value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/HistoricalPacing.xhtml"/>
+    </p:submenu>
+
+    <p:submenu label="Operations" icon="pi pi-briefcase">
+        <p:menuitem value="Budget Tracker" icon="pi pi-fw pi-briefcase" url="/RawData/tblRawData/BudgetTracker.xhtml"/>
+        <p:menuitem value="Deal Tracker" icon="pi pi-fw pi-list" url="/RawData/tblRawData/DealTracker.xhtml"/>
+    </p:submenu>
+
+    <p:submenu label="Data" icon="pi pi-map">
+        <p:submenu label="DSP" icon="pi pi-fw pi-check-square">
+            <p:submenu label="SPEND" icon="pi pi-fw pi-check-square">
+                <p:menuitem value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/List.xhtml"/>
+                <p:menuitem value="Monthly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/MassiveList.xhtml"/>
+                <p:menuitem value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/DSPReport.xhtml"/>
+            </p:submenu>
+            <p:submenu label="PERFORMANCE" icon="pi pi-fw pi-check-square">
+                <p:menuitem value="Weekly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/Performance.xhtml"/>
+            </p:submenu>
+        </p:submenu>
+
+        <p:submenu label="SSP" icon="pi pi-fw pi-wallet">
+            <p:menuitem value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
+            <p:menuitem value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml"/>
+        </p:submenu>
+
+        <p:submenu label="Settings" icon="pi pi-fw pi-cog">
+            <p:menuitem value="Catalog" icon="pi pi-fw pi-wrench" url="/RawData/tblCatalog/List.xhtml"/>
+        </p:submenu>
+    </p:submenu>
+
+    <p:submenu label="Logout" icon="pi pi-fw pi-power-off">
+        <p:menuitem value="Logout" icon="pi pi-fw pi-power-off" ajax="false" action="#{loginBean.logout}"/>
+    </p:submenu>
+    
+    
+    
+</ui:composition>

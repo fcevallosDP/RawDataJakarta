@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="TblCatalogCreateDlg" widgetVar="TblCatalogCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.CreateTblCatalogTitle}">
+            <h:form id="TblCatalogCreateForm" style="min-width: 450px">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{tblCatalogController.selected != null}">
+                        <p:outputLabel value="Applies to" for="@next" />
+                        <p:selectOneButton id="lineSource" value="#{tblCatalogController.selected.vSource}" >
+                            <f:selectItem itemLabel="DSP" itemValue="D"/>
+                            <f:selectItem itemLabel="SSP" itemValue="S"/>
+                            <p:ajax update="optionType, lineDirection" event="change" listener="#{tblCatalogController.getItemsTypesBySource()}"/>
+                        </p:selectOneButton>                                                
+                        <p:outputLabel value="Category" for="@next" />
+                        <p:selectOneMenu id="optionType" value="#{tblCatalogController.selected.vType}">
+                            <f:selectItem itemLabel="Select One" itemValue=""/>
+                            <f:selectItems value="#{tblCatalogController.itemsTypes}" var="types"
+                                           itemLabel="#{types.VType}" itemValue="#{types.VType}"/>                            
+                        </p:selectOneMenu>                        
+                                                
+                        <p:outputLabel value="Show as" for="VValue" />
+                        <p:inputText id="VValue" value="#{tblCatalogController.selected.vValue}" maxlength="50" title="Value" style="min-width:150px;"/>
+                        
+                        <p:outputLabel value="Pattern" for="VPattern" />
+                        <p:inputText id="VPattern" value="#{tblCatalogController.selected.vPattern}" maxlength="50" title="Pattern" style="min-width:150px;"/>
+                                                
+                    </p:panelGrid>
+                    <p:fieldset legend="Search fields">
+                        <p class="m-0">
+                            <p:selectManyCheckbox id="lineDirection" value="#{tblCatalogController.selectedrawColumns}" layout="responsive" columns="8">
+                                <f:selectItems value="#{tblCatalogController.rawColumns}" var="colum" itemLabel="#{colum}" itemValue="#{colum}"/>
+                            </p:selectManyCheckbox>                        
+                        </p>
+                    </p:fieldset>
+                    <p:commandButton actionListener="#{tblCatalogController.create}" value="Save" update="display,:TblCatalogListForm:datalist, :TblCatalogListForm:messages" oncomplete="PF('TblCatalogCreateDialog').hide()"/>
+                    <p:commandButton value="Cancel" onclick="TblCatalogCreateDialog.hide()"/>
+                </h:panelGroup>
+                
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

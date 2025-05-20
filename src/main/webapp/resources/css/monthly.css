@@ -1,0 +1,27 @@
+            body{
+                overflow-y: hidden !important;
+                overflow-x: hidden !important;
+            }
+            .ui-datatable thead th, .ui-datatable tfoot td { text-align: center !important; }
+            .ui-datatable-footer{
+                padding: 0px !important;
+            }
+            .ui-panelgrid.showcase-text-align-center .ui-grid-responsive .ui-panelgrid-cell {
+                text-align: center;
+            }
+
+            .customPanelGrid .ui-panelgrid-content {
+                align-items: center;
+            }            
+
+            .ui-filter-column .ui-column-customfilter .custom-filter {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .ui-fileupload-files {
+                height: 200px !important;
+                overflow: auto;
+                display: list-item;
+                margin: auto;
+            }
+                

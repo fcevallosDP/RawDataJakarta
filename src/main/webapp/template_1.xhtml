@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+        <meta name="mobile-web-app-capable" content="yes"/>
+        <meta name="theme-color" content="bluegray"/>
+        <link href="#{resource['layout/images/favicon-32x32.png']}" rel="icon" type="image/png" sizes="32x32"/>
+        <link href="#{resource['layout/images/favicon-16x16.png']}" rel="icon" type="image/png" sizes="16x16"/>
+    </f:facet>
+    <title>Datapoint Intranet</title>        
+    <ui:insert name="head" />
+</h:head>
+
+<h:body>
+    <div class="layout-wrapper">
+        
+        <!-- Topbar --> 
+        <ui:include src="/fragments/topbar.xhtml" />        
+         
+        <!-- Contenedor principal -->
+        <div class="main-layout">
+
+            <div class="sidebar">
+                <h:form>
+                    <ui:include src="/fragments/menu.xhtml" />
+                </h:form>
+            </div>
+
+            <div class="content-area">
+                <ui:insert name="content" />
+            </div>
+            <!-- Footer -->
+            <ui:include src="/resources/sections/footer.xhtml" />            
+
+        </div>
+
+    </div>
+
+    <!-- Estilos -->
+
+    <h:outputStylesheet name="styles/app.css" library="layout" />
+</h:body>
+</html>

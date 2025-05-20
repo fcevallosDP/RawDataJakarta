@@ -1,0 +1,12 @@
+.pages-body {
+    &.notfound-page {
+        background: url("\#{resource['demo:images/notfound/404-bg.jpg']}");
+        background-size: cover;
+
+        .pages-panel {
+            .pages-header {
+                background: #455A64;
+            }
+        }
+    }
+}

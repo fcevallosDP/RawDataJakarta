@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="TblTypeSourcesViewDlg" widgetVar="TblTypeSourcesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle1.ViewTblTypeSourcesTitle}">
+            <h:form id="TblTypeSourcesViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{tblTypeSourcesController.selected != null}">
+                        <h:outputText value="#{bundle1.ViewTblTypeSourcesLabel_id}"/>
+                        <h:outputText value="#{tblTypeSourcesController.selected.id}" title="#{bundle1.ViewTblTypeSourcesTitle_id}"/>
+                        <h:outputText value="#{bundle1.ViewTblTypeSourcesLabel_VSource}"/>
+                        <h:outputText value="#{tblTypeSourcesController.selected.VSource}" title="#{bundle1.ViewTblTypeSourcesTitle_VSource}"/>
+                        <h:outputText value="#{bundle1.ViewTblTypeSourcesLabel_VType}"/>
+                        <h:outputText value="#{tblTypeSourcesController.selected.VType}" title="#{bundle1.ViewTblTypeSourcesTitle_VType}"/>
+                        <h:outputText value="#{bundle1.ViewTblTypeSourcesLabel_DSystemDate}"/>
+                        <h:outputText value="#{tblTypeSourcesController.selected.DSystemDate}" title="#{bundle1.ViewTblTypeSourcesTitle_DSystemDate}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{bundle1.ViewTblTypeSourcesLabel_IEstado}"/>
+                        <p:selectBooleanCheckbox value="#{tblTypeSourcesController.selected.IEstado}" disabled="true"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{bundle1.Close}" onclick="TblTypeSourcesViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

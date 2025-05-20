@@ -1,0 +1,89 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:panelGroup layout="block" styleClass="chart-wrapper">
+        <canvas id="#{canvasId}"
+                style="max-width: 100%; max-height: 400px;"
+                data-labels="#{labelsJson}"
+                data-valores="#{valoresJson}">
+        </canvas>
+    </h:panelGroup>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <h:outputScript target="body">
+        function drawChart_#{canvasId}() {
+            const tryDraw = () => {
+                const canvas = document.getElementById('#{canvasId}');
+                if (!canvas || !canvas.getContext) return setTimeout(tryDraw, 100);
+
+                let labels, data;
+                try {
+                    labels = JSON.parse(canvas.dataset.labels || "[]");
+                    data = JSON.parse(canvas.dataset.valores || "[]");
+                } catch (e) {
+                    return setTimeout(tryDraw, 100);
+                }
+
+                if (!Array.isArray(labels) || !Array.isArray(data) || labels.length === 0 || data.length === 0 || canvas.offsetWidth === 0) {
+                    return setTimeout(tryDraw, 100);
+                }
+
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                const ctx = canvas.getContext('2d');
+
+                if (window["chart_#{canvasId}"] instanceof Chart) {
+                    window["chart_#{canvasId}"].destroy();
+                }
+
+                const isHorizontal = #{horizontal eq 'true' ? 'true' : 'false'};
+                const isStacked = #{stacked eq 'true' ? 'true' : 'false'};
+
+                window["chart_#{canvasId}"] = new Chart(ctx, {
+                    type: '#{chartType}',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '#{chartTitle}',
+                            data: data,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: isHorizontal ? 'y' : 'x',
+                        responsive: true,
+                        plugins: {
+                            datalabels: {
+                                anchor: isHorizontal ? 'end' : 'end',
+                                align: isHorizontal ? 'right' : 'top',
+                                formatter: Math.round
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: isStacked,
+                                beginAtZero: true
+                            },
+                            y: {
+                                stacked: isStacked,
+                                beginAtZero: true
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            };
+
+            tryDraw();
+        }
+
+        drawChart_#{canvasId}();
+    </h:outputScript>
+</ui:composition>

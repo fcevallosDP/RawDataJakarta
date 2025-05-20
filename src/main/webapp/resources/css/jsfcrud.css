@@ -1,0 +1,121 @@
+.ui-widget {
+    font-size: 12px !important;
+}
+.ui-layout-north {
+    z-index: 20 !important;
+    overflow: visible !important;;
+}
+.ui-layout-north .ui-layout-unit-content {
+    overflow: visible !important;
+}
+.ui-widget-header {
+    text-align: center;
+    text-transform: uppercase;
+}
+.ui-button {
+    margin-top: 10px !important;
+}
+
+.row_estado{
+    
+    display:none
+}
+
+.first-row {
+     background-color: darkgray;    
+}
+
+.second-row {
+     background-color: aqua;  
+}
+
+.third-row {
+     background-color: yellow;  
+}
+
+.fourth-row {
+     background-color: tomato;
+}
+
+body .ui-panel .ui-panel-titlebar, .ui-panelgrid .ui-panelgrid-cell.ui-widget-header{
+     background-color: #083083 !important;
+     color: white;
+}
+
+button.ui-button {
+    margin-right: .5rem;
+}
+
+body .ui-button.rounded-button.ui-button-icon-only {
+    border-radius: 50%;
+    height: 2.357rem;
+    /*background: #FBC02D !important;*/
+    color: #FBC02D !important;
+    border: 1px solid #FBC02D !important;
+}
+
+body .ui-datatable thead th {
+    background-color: #083083 !important;
+    color: white !important;
+    text-align: center !important;
+    white-space: wrap !important;
+    text-wrap: wrap !important;
+}
+
+body .ui-button.ui-button-warning, body .ui-splitbutton.ui-button-warning > .ui-button {
+    background: #FBC02D;
+    color: #212529;
+    border: 1px solid #FBC02D;
+}
+
+body .ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-icon-left, .ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only, .ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only{
+    background: #607D8B;
+    color: #ffffff;
+    border: 1px solid #033e0d;
+}
+
+body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
+    background-color: #607D8B;
+    color: #fff;
+}
+
+body .ui-accordion .ui-accordion-header.ui-state-hover, body .ui-accordion .ui-accordion-header.ui-tabs-outline, body .ui-accordion .ui-accordion-header.ui-state-active {
+    outline: 0 none;
+    border: 1px solid #FBC02D;
+    background-color: #FBC02D;
+    color: #333;
+}
+
+.cellGray{
+    background: lightgray !important;
+}    
+.truncate {
+    max-width: 160px !important;
+    width: 160px !important;
+    max-height: 30px !important;
+    height: 30px !important;    
+}
+
+.truncate > div {
+    width: 160px !important;
+    height: 30px !important;    
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    -o-text-overflow: ellipsis !important;
+    -ms-text-overflow: ellipsis !important;
+    display: block !important;
+    position: absolute !important;
+}        
+
+.rightClass{
+    float: right;
+}
+
+.classFacetHeader{
+    text-align: center !important;
+}
+
+body .ui-datatable .ui-datatable-header {
+    text-align: center;
+}

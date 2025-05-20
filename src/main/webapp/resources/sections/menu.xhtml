@@ -1,0 +1,53 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutMenuForm">
+        
+        <p:tooltip globalSelector=".layout-menu-slim .layout-root-menuitem > a, .layout-menu-slim .layout-inline-menu-action-item > a, .layout-menu-slim .layout-inline-menu-action"
+            showEvent="mouseenter" hideEvent="mouseleave" styleClass="layout-menu-tooltip" />
+
+        <div class="layout-menu-wrapper">
+            <div class="layout-menu-container">           
+                
+                <p:menu widgetVar="layoutMenuWidget" styleClass="w-full" >
+                    <p:submenu id="m_favorites" label="Pacing" icon="pi pi-star">
+                        <p:menuitem id="m_btracker" value="BTracker" icon="pi pi-fw pi-mobile" url="/RawData/tblRawData/BTracker.xhtml" /> 
+                        <p:menuitem id="m_dashboardsales" value="Spend" icon="pi pi-fw pi-dollar" url="/RawData/tblRawData/SpendPacing.xhtml" />
+                        <p:menuitem id="m_dashboardanalytics" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/HistoricalPacing.xhtml"/>
+                    </p:submenu>
+                    <p:submenu id="m_budget" label="Operations" icon="pi pi-briefcase">
+                        <p:menuitem id="m_tracker" value="Budget Tracker" icon="pi pi-fw pi-briefcase" url="/RawData/tblRawData/BudgetTracker.xhtml" /> 
+                        <p:menuitem id="m_dtracker" value="Deal Tracker" icon="pi pi-fw pi-list" url="/RawData/tblRawData/DealTracker.xhtml" /> 
+                    </p:submenu>
+                    <p:submenu id="m_data" label="Data" icon="pi pi-map">
+                        <p:submenu id="m_primeblocks" label="DSP" icon="pi pi-fw pi-check-square"  >
+                            <p:submenu id="m_spend" label="SPEND" icon="pi pi-fw pi-check-square"  >
+                                <p:menuitem id="m_freeblocks" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/List.xhtml" />
+                                <p:menuitem id="m_allblocks" value="Monthly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/MassiveList.xhtml" />
+                                <p:menuitem id="m_landing" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/DSPReport.xhtml" />
+                            </p:submenu>
+                            <p:submenu id="m_performace" label="PERFORMANCE" icon="pi pi-fw pi-check-square"  >
+                                <p:menuitem id="m_weeklyperf" value="Weekly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/Performance.xhtml" />
+                            </p:submenu>
+                        </p:submenu>
+                        <p:submenu id="start" label="SSP" icon="pi pi-fw pi-wallet">
+                            <p:menuitem id="m_buy" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
+                            <p:menuitem id="m_doc" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml" />
+                        </p:submenu>  
+                        <p:submenu id="m_utils" label="Settings" icon="pi pi-fw pi-cog">
+                            <p:menuitem id="m_icons" value="Catalog" icon="pi pi-fw pi-wrench" url="/RawData/tblCatalog/List.xhtml" />                        
+                        </p:submenu>                        
+                    </p:submenu>
+                    <p:submenu id="m_exits" label="Logout" icon="pi pi-fw pi pi-power-off">
+                        <p:menuitem id="m_logout" value="Logout" ajax="false" icon="pi pi-fw pi pi-power-off" actionListener="#{loginBean.logout}"/>
+                    </p:submenu>    
+                </p:menu>
+            </div>
+        </div>
+                 
+    </h:form>
+</ui:composition>

@@ -1,0 +1,12 @@
+.pages-body {
+    &.error-page {
+        background: url("\#{resource['demo:images/auth/error-bg.jpg']}");
+        background-size: cover;
+
+        .pages-panel {
+            .pages-header {
+                background: #D81B60;
+            }
+        }
+    }
+}

@@ -1,0 +1,111 @@
+.layout-topbar {
+    color: $topbarItemTextColor;
+    background-color: $topbarBgColor;
+
+    a {
+        color: $topbarItemTextColor;
+
+        &:hover {
+            background-color: $topbarItemTextHoverBgColor;
+            transition: background-color $transitionDuration;
+        }
+    }
+
+    .layout-topbar-left {
+        background-color: $topbarLeftBgColor;
+
+        .layout-menu-button {
+            color: $topbarMenuButtonTextColor;
+            background-color: $topbarMenuButtonBgColor;
+
+            &:hover {
+                background-color: rgba($topbarMenuButtonBgColor,.7);
+                transition: background-color $transitionDuration;
+            }
+        }
+    }
+
+    .layout-topbar-right {
+        .layout-topbar-actions-left {
+            .layout-megamenu {
+                background: none;
+
+                &.ui-megamenu .ui-menu-parent {
+                    > .ui-menuitem-link {
+                        .ui-menuitem-text,
+                        .ui-menuitem-icon,
+                        .ui-icon-triangle-1-s:last-child {
+                            color: $topbarItemTextColor;
+                        }
+
+                        &:not(.ui-state-disabled):hover {
+                            background: $topbarItemTextHoverBgColor;
+                            transition: background-color $transitionDuration;
+                        }
+                    }
+                }
+            }
+        }
+
+        .layout-topbar-actions-right {
+            .layout-topbar-items {
+                .layout-topbar-action-panel {
+                    background-color: $overlayContentBgColor;
+                    color: $textColor;
+
+                    a {
+                        color: $textColor;
+
+                        &:hover {
+                            background-color: transparent;
+                            transition: none;
+                        }
+                    }
+
+                    .layout-topbar-action-item {
+                        &:hover {
+                            background-color: $hoverBgColor;
+                            transition: background-color $transitionDuration;
+                        }
+                    }
+                }
+
+                .layout-topbar-item {
+                    &.layout-search-item {
+                        .layout-search-panel {
+                                input {
+                                    background-color: $bodyBgColor;
+                                    color: $textColor;
+
+                                    &:hover {
+                                        background-color: $bodyBgColor;
+                                        color: $textColor;
+                                    }
+                                }
+
+                                .ui-inputgroup-addon:first-child,
+                                .ui-inputgroup button:first-child,
+                                .ui-inputgroup input:first-child {
+                                    background-color: $bodyBgColor;
+                                    color: $textColor;
+                                }
+
+                                .ui-inputgroup-addon:last-child,
+                                .ui-inputgroup button:last-child,
+                                .ui-inputgroup input:last-child {
+                                    background-color: $bodyBgColor;
+                                    color: $textColor;
+                                }
+
+                                .ui-inputgroup-addon {
+                                    .ui-button-text {
+                                        color: $textColor;
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,27 @@
+.floatlabel-demo {
+  .field {
+    margin-top: 2rem;
+  }
+}
+
+body {
+  &.layout-rtl,
+  .layout-rtl {
+    .floatlabel-demo {
+      .ui-float-label > label {
+        left: auto;
+        right: 0.75rem;
+      }
+
+      .ui-input-icon-right > i:last-of-type {
+        left: 0.75rem;
+        right: auto;
+      }
+
+      .ui-selectonemenu .ui-selectonemenu-trigger {
+        right: auto;
+        left: 0;
+      }
+    }
+  }
+}

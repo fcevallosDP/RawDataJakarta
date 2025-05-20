@@ -1,0 +1,40 @@
+/* Zona izquierda (logo) */
+.topbar .topbar-left {
+    background-color: #37474F;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Zona derecha (menú usuario) */
+.topbar .topbar-right {
+    background-color: #546E7A;
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+}
+
+/* Menú desplegable claro */
+.ui-menu.ui-menu-dynamic {
+    background-color: #f8f9fa !important;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.ui-menu .ui-menuitem-link {
+    color: #333;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.ui-menu .ui-menuitem-link:hover {
+    background-color: #e0e0e0;
+}
+
+.topbar .topbar-menu .p-submenu-link span,
+.topbar .topbar-menu .p-submenu-link {
+    color: white !important;
+}

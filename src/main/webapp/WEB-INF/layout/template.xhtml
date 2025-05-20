@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+        <meta name="apple-mobile-web-app-capable" content="yes"/>
+        <meta name="theme-color" content="#{app.topbarTheme}"/>
+
+        <link href="#{resource['layout/images/favicon-32x32.png']}" rel="icon" type="image/png" sizes="32x32"/>
+        <link href="#{resource['layout/images/favicon-16x16.png']}" rel="icon" type="image/png" sizes="16x16"/>
+    </f:facet>
+    <title>Datapoint</title>
+
+    <!-- **JS** -->
+    <!-- OPTIONAL DEPENDENCIES -->
+    <!-- When enabled, ripple animation is activated. -->
+    <h:outputScript name="ripple/ripple.js" library="layout" rendered="#{app.ripple}" />
+
+    <!-- LAYOUT DEPENDENCIES -->
+    <!-- The menu widget dependencies are loaded by UltimaMenu. @see UltimaMenu.java -->
+    <h:outputScript name="js/layout.js" library="layout" />
+
+    <!-- APP DEPENDENCIES -->
+    <ui:insert name="head" />
+</h:head>
+
+<h:body styleClass="#{app.bodyClass}">
+
+    <div class="layout-wrapper #{app.layoutClass}">
+        <ui:include src="./sections/topbar.xhtml" />
+        <ui:include src="./sections/rightmenu.xhtml" />
+        <ui:include src="./sections/menu.xhtml" />
+
+        <div class="layout-main">
+            <ui:include src="./sections/breadcrumb.xhtml" />
+
+            <div class="layout-content">
+                <ui:insert name="content"/>
+            </div>
+
+            <ui:include src="./sections/footer.xhtml"/>
+        </div>
+
+        <ui:include src="./sections/config.xhtml" />
+        <ui:include src="./sections/loader.xhtml" />
+    </div>
+
+    <!-- **CSS** -->
+    <!-- LAYOUT DEPENDENCIES -->
+    <h:outputStylesheet name="styles/#{app.layout}.css" library="layout" />
+
+    <!-- OPTIONAL DEPENDENCIES -->
+    <!-- PrimeFlex is a lightweight responsive CSS utility library. This app contains two seperate packages; primeflex.min.css(v3.x) and primeflex-v2.min.css(v2.x) -->
+    <h:outputStylesheet name="primeflex/primeflex.min.css" library="layout"/>
+    <!-- When enabled, ripple animation is activated. -->
+    <h:outputStylesheet name="ripple/ripple.css" library="layout" rendered="#{app.ripple}" />
+
+    <!-- APP DEPENDENCIES -->
+    <h:outputStylesheet name="styles/demo.css" library="demo" />
+</h:body>
+
+</html>

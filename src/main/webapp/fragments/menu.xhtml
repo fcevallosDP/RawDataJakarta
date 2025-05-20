@@ -1,0 +1,26 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui">
+
+    <!-- Menú fijo visible en pantallas grandes -->
+    <div class="p-d-none p-d-md-block layout-menu-container">
+        
+            <p:menu styleClass="w-full" style="border:none;">
+                <ui:include src="/fragments/menuItems.xhtml" />
+            </p:menu>
+        
+    </div>
+
+    <!-- Menú ocultable (sidebar) -->
+    <p:sidebar widgetVar="sidebarMenu"
+               position="left"
+               baseZIndex="10000"
+               styleClass="p-sidebar-sm">
+        
+            <p:menu styleClass="w-full">
+                <ui:include src="/fragments/menuItems.xhtml" />
+            </p:menu>
+        
+    </p:sidebar>
+</ui:composition>

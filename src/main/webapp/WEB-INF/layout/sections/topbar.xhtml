@@ -1,0 +1,238 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <h:form id="layoutTopbarForm">
+        <div class="layout-topbar shadow-4">
+            <div class="layout-topbar-left">
+                <a href="/ultima" class="layout-topbar-logo">
+                    <p:graphicImage id="app-logo" name="images/logo-#{app.isLogoLight() ? 'light' : 'dark'}.svg" library="layout" style="height: 2.25rem" />
+                </a>
+        
+                <a class="layout-menu-button shadow-6" data-p-ripple="true">
+                    <i class="pi pi-chevron-right"></i>
+                </a>
+        
+                <a class="layout-topbar-mobile-button" onclick="$('.layout-wrapper').toggleClass('layout-topbar-mobile-active')" data-p-ripple="true"
+                    data-p-styleclass="{ selector: '.layout-topbar-right', enterActiveClass: 'overlay-enter layout-topbar-mobile-active', enterToClass: 'layout-topbar-mobile-active', leaveActiveClass: 'overlay-leave layout-topbar-mobile-active' }">
+                    <i class="pi pi-ellipsis-v fs-large"></i>
+                </a>
+            </div>
+            
+            <div class="layout-topbar-right">
+                <div class="layout-topbar-actions-left">
+                    <p:megaMenu orientation="horizontal" autoDisplay="false" styleClass="layout-megamenu">
+                        <p:submenu label="UI KIT">
+                            <p:column>
+                                <p:submenu label="UI KIT 1">
+                                    <p:menuitem value="Form Layout" icon="pi pi-fw pi-id-card" url="/ultima/uikit/formlayout.xhtml" />
+                                    <p:menuitem value="Input" icon="pi pi-fw pi-check-square" url="/ultima/uikit/input.xhtml" />
+                                    <p:menuitem value="Float Label" icon="pi pi-fw pi-bookmark" url="/ultima/uikit/floatlabel.xhtml" />
+                                    <p:menuitem value="Button" icon="pi pi-fw pi-mobile" url="/ultima/uikit/buttons.xhtml" />
+                                    <p:menuitem value="File" icon="pi pi-fw pi-file" url="/ultima/uikit/file.xhtml" />
+                                </p:submenu>
+                            </p:column>
+                            <p:column>
+                                <p:submenu label="UI KIT 2">
+                                    <p:menuitem value="Table" icon="pi pi-fw pi-table" url="/ultima/uikit/table.xhtml" />
+                                    <p:menuitem value="List" icon="pi pi-fw pi-list" url="/ultima/uikit/list.xhtml" />
+                                    <p:menuitem value="Tree" icon="pi pi-fw pi-share-alt" url="/ultima/uikit/tree.xhtml" />
+                                    <p:menuitem value="Panel" icon="pi pi-fw pi-tablet" url="/ultima/uikit/panels.xhtml" />
+                                    <p:menuitem value="Chart" icon="pi pi-fw pi-chart-bar" url="/ultima/uikit/charts.xhtml" />
+                                </p:submenu>
+                            </p:column>
+                            <p:column>
+                                <p:submenu label="UI KIT 3">
+                                    <p:menuitem value="Overlay" icon="pi pi-fw pi-clone" url="/ultima/uikit/overlays.xhtml" />
+                                    <p:menuitem value="Media" icon="pi pi-fw pi-image" url="/ultima/uikit/media.xhtml" />
+                                    <p:menuitem value="Menu" icon="pi pi-fw pi-bars" url="/ultima/uikit/menus.xhtml" />
+                                    <p:menuitem value="Message" icon="pi pi-fw pi-comment" url="/ultima/uikit/messages.xhtml" />
+                                    <p:menuitem value="Misc" icon="pi pi-fw pi-circle-off" url="/ultima/uikit/misc.xhtml" />
+                                </p:submenu>
+                            </p:column>
+                        </p:submenu>
+                        <p:submenu label="UTILITIES">
+                            <p:column>
+                                <p:submenu label="UTILITIES 1">
+                                    <p:menuitem value="Icons" icon="pi pi-fw pi-prime" url="/ultima/utilities/icons.xhtml" />
+                                    <p:menuitem value="PrimeFlex" icon="pi pi-fw pi-desktop" url="https://www.primefaces.org/primeflex" />
+                                </p:submenu>
+                            </p:column>
+                        </p:submenu>
+                    </p:megaMenu>
+                </div>
+                <div class="layout-topbar-actions-right">
+                    <ul class="layout-topbar-items">
+                        <li class="layout-topbar-item layout-search-item">
+                            <a class="layout-topbar-action rounded-circle" data-p-ripple="true" 
+                                data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
+                                <i class="pi pi-search fs-large"></i>
+                            </a>
+
+                            <div class="layout-search-panel ui-inputgroup ui-fluid hidden">
+                                <span class="ui-inputgroup-addon inline-flex align-items-center"><i class="pi pi-search"></i></span>
+                                <p:inputText placeholder="Search" />
+                                <span class="ui-inputgroup-addon">
+                                    <p:commandButton icon="pi pi-times" class="rounded-button ui-button-flat ui-button-plain rounded-circle" pt:data-p-styleclass-hide="true" />
+                                </span>
+                            </div>
+                        </li>
+                        <li class="layout-topbar-item notifications">
+                            <a class="layout-topbar-action rounded-circle" data-p-ripple="true"
+                                data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
+                                <span class="p-overlay-badge">
+                                    <i class="pi pi-bell fs-large"></i>
+                                    <span class="p-badge p-badge-warning p-badge-dot"></span>
+                                </span>
+                            </a>
+
+                            <ul class="layout-topbar-action-panel shadow-6 hidden">
+                                <li class="mb-3">
+                                    <span class="px-3 fs-small">You have <b>4</b> new notifications</span>
+                                </li>
+                                <li class="layout-topbar-action-item" data-p-styleclass-hide="true">
+                                    <div class="flex flex-row align-items-center gap-3">
+                                        <p:graphicImage name="images/avatar/avatar-1.png" library="demo" />
+                                        <div class="flex flex-column flex-grow-1">
+                                            <div class="flex align-items-center justify-content-between mb-1">
+                                                <span class="fs-small font-bold">Jerome Bell</span>
+                                                <small>42 mins ago</small>
+                                            </div>
+                                            <span class="fs-small">How to write content about your photographs?</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="layout-topbar-action-item" data-p-styleclass-hide="true">
+                                    <div class="flex flex-row align-items-center gap-3">
+                                        <p:graphicImage name="images/avatar/avatar-2.png" library="demo" />
+                                        <div class="flex flex-column flex-grow-1">
+                                            <div class="flex align-items-center justify-content-between mb-1">
+                                                <span class="fs-small font-bold">Cameron Williamson</span>
+                                                <small>48 mins ago</small>
+                                            </div>
+                                            <span class="fs-small">Start a blog to reach your creative peak.</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="layout-topbar-action-item" data-p-styleclass-hide="true">
+                                    <div class="flex flex-row align-items-center gap-3">
+                                        <p:graphicImage name="images/avatar/avatar-3.png" library="demo" />
+                                        <div class="flex flex-column flex-grow-1">
+                                            <div class="flex align-items-center justify-content-between mb-1">
+                                                <span class="fs-small font-bold">Anna Miles</span>
+                                                <small>1 day ago</small>
+                                            </div>
+                                            <span class="fs-small">Caring is the new marketing</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="layout-topbar-action-item" data-p-styleclass-hide="true">
+                                    <div class="flex flex-row align-items-center gap-3">
+                                        <p:graphicImage name="images/avatar/avatar-4.png" library="demo" />
+                                        <div class="flex flex-column flex-grow-1">
+                                            <div class="flex align-items-center justify-content-between mb-1">
+                                                <span class="fs-small font-bold">Arlene Mccoy</span>
+                                                <small>4 day ago</small>
+                                            </div>
+                                            <span class="fs-small">Starting your traveling blog with Vasco.</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="layout-topbar-item app">
+                            <a class="layout-topbar-action rounded-circle" data-p-ripple="true"
+                                data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
+                                <i class="pi pi-table fs-large"></i>
+                            </a>
+
+                            <div class="layout-topbar-action-panel shadow-6 hidden">
+                                <div class="grid grid-nogutter">
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-image action indigo-bgcolor white-color"></i>
+                                            <span>Products</span>
+                                        </a>
+                                    </div>
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-file-pdf action orange-bgcolor white-color"></i>
+                                            <span>Reports</span>
+                                        </a>
+                                    </div>
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-dollar action teal-bgcolor white-color"></i>
+                                            <span>Balance</span>
+                                        </a>
+                                    </div>
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-cog action pink-bgcolor white-color"></i>
+                                            <span>Settings</span>
+                                        </a>
+                                    </div>
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-key action bluegrey-bgcolor white-color"></i>
+                                            <span>Credentials</span>
+                                        </a>
+                                    </div>
+                                    <div class="layout-topbar-action-item col-4">
+                                        <a class="flex align-items-center justify-content-center flex-column text-color" data-p-ripple="true" data-p-styleclass-hide="true">
+                                            <i class="pi pi-sitemap action cyan-bgcolor white-color"></i>
+                                            <span>Sitemap</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="layout-topbar-item">
+                            <a class="layout-topbar-action flex flex-row justify-content-center align-items-center px-2 rounded-circle" data-p-ripple="true"
+                                data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
+                                <p:graphicImage name="images/amyelsner.png" library="layout" style="width: 32px; height: 32px;" />
+                            </a>
+
+                            <ul class="layout-topbar-action-panel shadow-6 hidden">
+                                <li class="layout-topbar-action-item">
+                                    <a class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
+                                        <i class="pi pi-cog"></i>
+                                        <span>Settings</span>
+                                    </a>
+                                </li>
+                                <li class="layout-topbar-action-item">
+                                    <a class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
+                                        <i class="pi pi-file-o"></i>
+                                        <span>Terms of Usage</span>
+                                    </a>
+                                </li>
+                                <li class="layout-topbar-action-item">
+                                    <a class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
+                                        <i class="pi pi-compass"></i>
+                                        <span>Support</span>
+                                    </a>
+                                </li>
+                                <li class="layout-topbar-action-item">
+                                    <a class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
+                                        <i class="pi pi-power-off"></i>
+                                        <span>Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="layout-topbar-item">
+                            <a class="layout-topbar-action rounded-circle" onclick="PF('layoutRightMenuWidget').show()" data-p-ripple="true">
+                                <i class="pi fs-large #{app.rtl ? 'pi-arrow-right' : 'pi-arrow-left'}"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>        
+    </h:form>
+
+</ui:composition>

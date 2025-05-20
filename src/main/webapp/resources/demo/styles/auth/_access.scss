@@ -1,0 +1,12 @@
+.pages-body {
+    &.accessdenied-page {
+        background: url("\#{resource['demo:images/pages/accessDenied-bg.jpg']}");
+        background-size: cover;
+
+        .pages-panel {
+            .pages-header {
+                background: #FB8C00;
+            }
+        }
+    }
+}

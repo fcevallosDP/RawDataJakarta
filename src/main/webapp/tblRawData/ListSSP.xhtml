@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="/template.xhtml">
+
+        <ui:define name="title">
+            <h:outputText value="RawData"/>
+            
+        </ui:define>
+
+        <ui:define name="content">   
+	    <style>
+                .ui-filter-column .ui-column-customfilter .custom-filter {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .ui-datatable thead th {
+                    text-align: center !important;
+                }
+                /*.ui-menu {
+                    background: #607D8B !important;
+                }*/
+            </style>             
+            <h:form id="TblRawSSPDataListForm" enctype="multipart/form-data">
+                <p:growl id="messages"/>
+                <p:panel style="width: 100%;" id="idPanelCabecera">   
+                    <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 3rem"></i>
+                    </p:blockUI>                    
+                    <p:dataTable id="datalist" value="#{tblRawSSPDataController.items}" var="item"
+                                 selectionMode="single" selection="#{tblRawSSPDataController.selected}"
+                                 rowKey="#{item.id}" widgetVar="WSSPdataList"
+                                 globalFilterFunction="#{tblRawSSPDataController.globalFilterFunction}" 
+                                 filteredValue="#{tblRawSSPDataController.filteredItems}"
+                                 emptyMessage="No data found with given criteria"                                    
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                                 rowsPerPageTemplate="15,30,45,{ShowAll|'All'}"
+                                 style="width:100% !important; height: 100% !important; overflow-x: auto;" 
+                                 scrollable="true" resizableColumns="true" paginator="true" 
+                                 scrollRows="15" rows="15" stripedRows="true" paginatorPosition="top"
+                                 >
+                        <f:facet name="header">
+                            <h:outputText value="SSP Daily DATA" style="font-size: larger"/>
+                        </f:facet>                        
+                        <f:facet name="paginatorTopLeft">
+                                <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DDateSelected}"
+                                      readonlyInput="true" maxdate="#{tblRawSSPDataController.maxDate}" size="10">                                
+                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByDate()}" 
+                                            update="TblRawSSPDataListForm"
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"/>                                   
+                                </p:datePicker>
+                                <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
+                                                 disabled="#{empty tblRawSSPDataController.DDateSelected}" 
+                                                 icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 10px;"/>                                                                                                                
+                                <p:commandButton id="idunlock" title="Reprocess data" style="margin-left: 2px;" 
+                                                 actionListener="#{tblRawSSPDataController.complexLimpiar()}"
+                                                 disabled="#{empty tblRawSSPDataController.items}"
+                                                 icon="pi pi-trash" update="datalist, btnFilesUpload">                            
+                                    <p:confirm header="Confirmation" message="Are you sure you want to upload new data?" icon="pi pi-trash"/>                                                                                
+                                </p:commandButton>                                       
+                                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                                    <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+                                </p:confirmDialog>        
+
+                            <p:commandButton icon="pi pi-file-excel" ajax="false" style="margin-left: 2px;" title="Export as excel file" disabled="#{empty tblRawSSPDataController.items}">
+                                <p:dataExporter type="xls" target="datalist" fileName="RawData_SSP_#{tblRawSSPDataController.todayAsString}" exportHeader="true" />
+                            </p:commandButton>                                                   
+
+                            <p:commandButton id="excelButton" icon="pi pi-sync" style="margin-left: 2px;" ajax="false" title="Clear" type="button" onclick="location.reload();"/>                                             
+                             <p:commandButton title="Move to Historical" id="btnTransfer" 
+                                             rendered="#{tblRawSSPDataController.lbDataTransfer}" 
+                                             actionListener="#{tblRawSSPDataController.transferToHistorical()}"
+                                             icon="pi pi-window-maximize" style="margin-left: 2px; background: #0097A7;"
+                                             onstart="PF('buiDatatable').show()" oncomplete="PF('buiDatatable').hide()">
+                                <p:confirm header="Confirmation" message="Are you sure you want to transfer all month's data to Historical?" icon="pi pi-window-maximize"/>
+                            </p:commandButton>                                              
+                                
+                        </f:facet>  
+                        <f:facet name="paginatorTopRight">                                                        
+                            <p:inputText id="globalFilter" onkeyup="PF('WSSPdataList').filter()" style="width:150px;margin-right:5px;"
+                                         placeholder="Search all fields" />
+                        </f:facet>                        
+                        <p:column width="80" style="text-align: center" headerText="Advertiser" field="vAdvertiser" filterMatchMode="exact">                    
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idadvertiser" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawAdvertiser}" />
+                                </p:selectOneMenu>
+                            </f:facet>                               
+                            <h:outputText value="#{item.vAdvertiser}"/>
+                        </p:column>
+                        <p:column width="200" field="vBrand" headerText="Brand" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idbrand" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawBrand}" />
+                                </p:selectOneMenu>
+                            </f:facet>                              
+                            <h:outputText value="#{item.vBrand}"/>
+                        </p:column>
+                        <p:column width="300" field="vDeal" filterMatchMode="contains">  
+                            <f:facet name="header">
+                                <h:outputText value="Deal" />
+                            </f:facet>                             
+                            <h:outputText value="#{item.vDeal}"/>
+                        </p:column>
+                        <p:column width="60" filterBy="#{item.vDevice}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Device" />
+                            </f:facet>                            
+                            <h:outputText value="#{item.vDevice}"/>
+                        </p:column>
+                        <p:column width="60" style="text-wrap: wrap;" filterBy="#{item.dGrossMargin}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Gross Margin" />
+                            </f:facet>
+                            <h:outputText value="#{item.dGrossMargin}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" filterBy="#{item.iImpressions}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Imps"/>
+                            </f:facet>
+                            <h:outputText value="#{item.iImpressions}"/>
+                        </p:column>
+                        <p:column width="60" style="white-space: wrap;text-align: center" filterBy="#{item.dSalesRevenue}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Sales Renevue"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dSalesRevenue}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-align: right;text-wrap: wrap;" filterBy="#{item.dTechFee}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Tech Fees"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dTechFee}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-align: right;text-wrap: wrap;" filterBy="#{item.dMediaCost}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Media Cost"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dMediaCost}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-align: right;text-wrap: wrap;" filterBy="#{item.dTotalCost}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Total Cost"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dTotalCost}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-align: center" filterBy="#{item.dCPM}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="CPM"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dCPM}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-wrap: wrap;" filterBy="#{item.dMlFee}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="ML Fee"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dMlFee}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-align: center;text-wrap: wrap;" filterBy="#{item.dMarginFee}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Margin Fee"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dMarginFee}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="text-wrap: wrap;" filterBy="#{item.dDspFee}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="DSP Fee"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dDspFee}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="white-space: wrap;" filterBy="#{item.dGrossRevenue}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Gross Revenue"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dGrossRevenue}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" style="white-space: wrap;" filterBy="#{item.dNetRevenue}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Net Revenue"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dNetRevenue}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="100"  style="text-align: center" headerText="Client" field="vClient" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idclient" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawClient}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vClient}"/>
+                        </p:column>
+                        <p:column width="80"  style="text-align: center" headerText="Channel" field="vChannel" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idchanel" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawChannel}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vChannel}"/>
+                        </p:column>
+                        <p:column width="100" style="text-align: center" field="vDsp" filterMatchMode="exact" headerText="DSP">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="iddsp" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawDsp}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vDsp}"/>
+                        </p:column>
+                        <p:column width="100" style="text-align: center" field="vAgency" filterMatchMode="exact" headerText="Agency">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idagency" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawAgency}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vAgency}"/>
+                        </p:column>
+                        <p:column width="50"  style="text-align: center" filterBy="#{item.iYear}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Year"/>
+                            </f:facet>
+                            <h:outputText value="#{item.iYear}"/>
+                        </p:column>
+                        <p:column width="50"  style="text-align: center" filterBy="#{item.iMonth}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Month"/>
+                            </f:facet>
+                            <h:outputText value="#{item.iMonth}"/>
+                        </p:column>
+                        <p:column width="50"  style="text-align: center" filterBy="#{item.iDay}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="Day"/>
+                            </f:facet>
+                            <h:outputText value="#{item.iDay}" title="#{item.VFileName}"/>
+                        </p:column>   
+                        <p:column width="100"  style="text-align: center" field="vSeat" filterMatchMode="exact" headerText="Seat">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idseat" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawSeat}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vSeat}"/>
+                        </p:column>   
+                        <p:column width="100"  style="text-align: center" headerText="Exchange" field="vExchange" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idexange" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawSSPDataController.rawExchange}" />
+                                </p:selectOneMenu>
+                            </f:facet>    
+                            <h:outputText value="#{item.vExchange}"/>
+                        </p:column>   
+                        <p:column width="50"  style="text-align: center; white-space: wrap;" filterBy="#{item.dMargin}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="SSP Margin"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dMargin}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
+                        </p:column>   
+                        <p:column width="50"  style="text-align: center; white-space: wrap;" filterBy="#{item.dNetMargin}" filterMatchMode="contains" filterStyle="display:none">
+                            <f:facet name="header">
+                                <h:outputText value="NET SSP Margin"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dNetMargin}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
+                        </p:column>   
+                    </p:dataTable>
+                    <p:contextMenu for="datalist">
+                        <p:menuitem value="EditTag" icon="pi pi-file-edit" actionListener="#{tblRawSSPDataController.prepareEdit()}" update=":RawSSPEditForm" oncomplete="PF('RawSSPEditDialog').show()"/>
+                        <p:menuitem value="Remove item" icon="pi pi pi-trash" actionListener="#{tblRawSSPDataController.removeSelected()}" update="datalist"/>                        
+                    </p:contextMenu>      
+                    <p:dialog header="Extract data from files" widgetVar="dlg2" showEffect="fade" modal="true" style="min-height: 120px;min-width: 450px;">
+                        <div style="overflow-y: hidden; height: 300px;" id="divAvailableHosts">
+                            <p:fileUpload id="idFile" listener="#{tblRawSSPDataController.handleFileUpload}" 
+                                      mode="advanced" sequential="true"
+                                      update="datalist, messages" sizeLimit="5000000" 
+                                      multiple="true" allowTypes="/(\.|\/)(csv|xlsx)$/"
+                                      accept=".csv,.xlsx" 
+                                      invalidSizeMessage="Maximum file size allowed is 1MB"
+                                      invalidFileMessage="only xlsx or csv is allowed" 
+                                      >                                    
+                            </p:fileUpload>
+                        </div>    
+                    </p:dialog>                    
+                </p:panel>
+            </h:form>
+            <ui:include src="EditRawSSPData.xhtml"/>
+        </ui:define>
+    </ui:composition>
+
+</html>

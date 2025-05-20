@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    
+    <ui:composition template="/template.xhtml">
+
+        <ui:define name="title"><h:outputText value="RawData"/></ui:define>
+
+        <ui:define name="content">       
+                <style>
+                    body .ui-inputfield {
+                        width: 100%;
+                    }
+                </style>          
+            <h:form id="TblRawDataListForm" enctype="multipart/form-data">
+                <p:growl id="messages"/>
+                <p:panel style="width: 100%;" id="idPanelCabecera">                      
+                    <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 3rem"></i>
+                    </p:blockUI>                    
+                    <p:dataTable id="datalist" value="#{tblRawDataController.items}"
+                                 var="item" widgetVar="WdataList" selectionMode="single"
+                                 selection="#{tblRawDataController.selected}" rowKey="#{item.id}" 
+                                 filteredValue="#{tblRawDataController.filteredItems}"
+                                 globalFilterFunction="#{tblRawDataController.globalFilterFunction}"
+                                 emptyMessage="No data found with given criteria"   
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                                 rowsPerPageTemplate="10,20,30,{ShowAll|'All'}" 
+                                 scrollable="true" resizableColumns="true" paginator="true" 
+                                 scrollRows="10" rows="10" stripedRows="true" paginatorPosition="top"   
+                                 >
+                        <f:facet name="header">
+                            <h:outputText value="DSP Daily DATA" style="font-size: larger"/>
+                        </f:facet>
+                        <f:facet name="paginatorTopLeft">                    
+                                <p:datePicker id="disabledDD" value="#{tblRawDataController.DDateSelected}"
+                                      readonlyInput="true" maxdate="#{tblRawDataController.maxDate}" size="10">                                
+                                    <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByDate()}" 
+                                            update="TblRawDataListForm, exchanges, partners, campaigns"
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"/>                                   
+                                </p:datePicker>   
+                            
+                                <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
+                                                 disabled="#{empty tblRawDataController.DDateSelected}" 
+                                                 icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 10px;"/>                                                                                                                                                
+                                <p:commandButton id="idunlock" title="Reprocess data"
+                                                 actionListener="#{tblRawDataController.complexLimpiar()}"
+                                                 disabled="#{empty tblRawDataController.items}" style="margin-left: 2px;"
+                                                 icon="pi pi-trash" update="TblRawDataListForm:datalist, btnFilesUpload">
+                                    <p:confirm header="Confirmation" message="Are you sure you want to upload new data?" icon="pi pi-sync"/>                                                                                
+                                </p:commandButton>   
+                                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                                    <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+                                </p:confirmDialog>                                                              
+                                
+                                <p:commandButton id="btnExpor" icon="pi pi-file-excel" style="margin-left: 2px;" ajax="false" title="Export as excel file" disabled="#{( empty tblRawDataController.items)}">
+                                    <p:dataExporter type="xls" target="TblRawDataListForm:datalist" fileName="RawData_DSP_#{tblRawDataController.todayAsString}" exportHeader="true" />
+                                </p:commandButton>                                                                                                      
+
+                                <p:commandButton id="excelButton" icon="pi pi-sync" ajax="false" title="Clear" style="margin-left: 2px;" type="button" onclick="location.reload();"/>                                                                     
+                                
+                                <p:commandButton title="Move to Historical" id="btnTransfer" 
+                                                 rendered="#{tblRawDataController.lbDataTransfer}" update=":TblRawDataListForm:messages"
+                                                 actionListener="#{tblRawDataController.transferToHistorical()}"
+                                                 icon="pi pi-window-maximize" style="margin-left: 2px; background: #0097A7;"
+                                                 onstart="PF('buiDatatable').show()" oncomplete="PF('buiDatatable').hide()">
+                                    <p:confirm header="Confirmation" message="Are you sure you want to transfer all month's data to Historical?" icon="pi pi-window-maximize"/>
+                                </p:commandButton>                        
+                        </f:facet>  
+                        <f:facet name="paginatorTopRight">  
+                             
+                                <p:inputText id="globalFilter" onkeyup="PF('WdataList').filter()" style="width:150px;margin-right:5px;"
+                                             placeholder="Search all fields" />                                
+                        </f:facet>                         
+                        <p:column field="vPartner" width="80" style="text-align: center" headerText="Partner" filterMatchMode="exact">  
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="partners" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawPartners}" />
+                                </p:selectOneMenu>
+                            </f:facet>                            
+                            <h:outputText value="#{item.vPartner}"/>
+                        </p:column>
+                        <p:column field="vCampaign" width="200" headerText="Campaign" filterMatchMode="exact">                      
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="campaigns" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawCampaign}" />
+                                </p:selectOneMenu>
+                            </f:facet>                              
+                            <h:outputText value="#{item.vCampaign}"/>
+                        </p:column>
+                        <p:column width="300" field="vInsertionOrder" headerText="Insertion Order" filterMatchMode="exact">   
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="insertionOrders" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawInsertionOrders}" />
+                                </p:selectOneMenu>
+                            </f:facet>                            
+                            <h:outputText value="#{item.vInsertionOrder}"/>
+                        </p:column>
+                        <p:column width="300" filterBy="#{item.vLineItem}" headerText="Line Item" filterMatchMode="contains">                           
+                            <h:outputText value="#{item.vLineItem}"/>
+                        </p:column>
+                        <p:column field="vExchange" width="200" headerText="Exchange" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="exchanges" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawExchanges}" />
+                                </p:selectOneMenu>
+                            </f:facet>                                
+                            <h:outputText value="#{item.vExchange}"/>
+                        </p:column>
+                        <p:column width="300" filterBy="#{item.vDealName}" headerText="vDealName" filterMatchMode="contains">
+                            <h:outputText value="#{item.vDealName}"/>
+                        </p:column>
+                        <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Impressions">
+                            <h:outputText value="#{item.iImpressions}"/>
+                        </p:column>
+                        <p:column width="50" style="white-space: nowrap; text-align: center" headerText="Clicks">
+                            <h:outputText value="#{item.iClicks}"/>
+                        </p:column>
+                        <p:column width="90" style="text-align: right; text-wrap: wrap;" headerText="Media Spend">
+                            <h:outputText value="#{item.dMediaCosts}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="90" style="text-align: right; white-space: wrap;" headerText="T.Media Cost">
+                            <h:outputText value="#{item.dTotalMediaCosts}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="90" style="text-align: center" headerText="DSP" field="vDSP" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="iddsps" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawDsp}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vDSP}"/>
+                        </p:column>
+                        <p:column width="90" field="vClient" headerText="Client" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idclients" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawClient}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vClient}"/>
+                        </p:column>
+                        <p:column width="90" style="text-align: center" headerText="Agency" field="vAgency" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="agencies" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawAgency}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vAgency}"/>
+                        </p:column>
+                        <p:column width="90" field="vChannel" headerText="Channel" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="chanels" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawChannel}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vChannel}"/>
+                        </p:column>
+                        <p:column width="50" style="white-space: nowrap;" headerText="Alias">
+                            <h:outputText value="#{item.vAlias}"/>
+                        </p:column>
+                        <p:column width="90" field="vVendor" headerText="Vendor" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="vendors" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawVendor}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vVendor}"/>                            
+                        </p:column>
+                        <p:column width="70" style="text-align: center; white-space: wrap;" headerText="Vendor Source">
+                            <h:outputText value="#{item.vVendorSource}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="CPM">
+                            <h:outputText value="#{item.dCPM}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="CTR">
+                            <h:outputText value="#{item.dCTR}"><f:convertNumber type="percent" pattern="#0.000%" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="CPC">
+                            <h:outputText value="#{item.dCPC}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="Year">
+                            <h:outputText value="#{item.iAnio}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="Month">
+                            <h:outputText value="#{item.iMes}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: center" headerText="Day">
+                            <h:outputText value="#{item.iDia}" title="#{item.VFileName}"/>
+                        </p:column>   
+                    </p:dataTable>
+                    <p:contextMenu for="datalist">
+                        <p:menuitem value="Edit Tag" icon="pi pi-file-edit" actionListener="#{tblRawDataController.prepareEdit()}" update=":RawEditForm" oncomplete="PF('RawEditDialog').show()"/>
+                        <p:menuitem value="Remove item" icon="pi pi pi-trash" actionListener="#{tblRawDataController.removeSelected()}" update="datalist"/>                        
+                    </p:contextMenu>       
+                    <p:dialog header="Extract data from files" widgetVar="dlg2" showEffect="fade" modal="true" style="min-height: 120px;min-width: 450px;">
+                        <div style="overflow-y: hidden; height: 300px;" id="divAvailableHosts">
+
+                            <p:fileUpload id="idFile" listener="#{tblRawDataController.handleFileUpload}" 
+                                      mode="advanced" sequential="true"
+                                      update="TblRawDataListForm:datalist, messages" sizeLimit="5000000" 
+                                      multiple="true" allowTypes="/(\.|\/)(csv|xlsx)$/"
+                                      accept=".csv,.xlsx" 
+                                      invalidSizeMessage="Maximum file size allowed is 1MB"
+                                      invalidFileMessage="only xlsx or csv is allowed" 
+                                      >                                    
+                            </p:fileUpload>
+                                                        
+                        </div>    
+                    </p:dialog>                                        
+                </p:panel>
+            </h:form>
+            <ui:include src="EditRawData.xhtml"/>
+        </ui:define>
+        
+    </ui:composition>
+</html>

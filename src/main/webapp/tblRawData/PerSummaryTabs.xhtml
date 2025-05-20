@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition>
+        <p:dialog header="Summary Data" id="popUpSummary" widgetVar="summaryDialogTabs" modal="true" showEffect="fade" style="min-width: 840px; max-width: 1024px"
+                              hideEffect="fade" resizable="false" >   
+            <h:form id="TblRawDataSummForm">  
+                <p:remoteCommand name="recallView" action="#{tblRawDataController.clearMultiViewState()}" update=":TblRawDataSummForm:tabViewSummary"/>
+                <p:tabView id="tabViewSummary">
+                    <p:ajax event="tabChange" listener="#{tblRawDataController.onTabPerfChange}" update="dataSummary, dataSummaryAd, dataSummaryCampaign"/>
+                    <p:tab title="Campaign">
+                        <p:dataTable id="dataSummaryCampaign" value="#{tblRawDataController.itemsPerfSummary}"
+                                     var="summaryitemC" widgetVar="summaryWdataList" scrollRows="3" editable="true"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                 rowKey="#{summaryitemC.id}" scrollable="true" resizableColumns="true" stripedRows="true">
+                            
+                                <p:ajax event="rowEdit" listener="#{tblRawDataController.onRowEditPerfCampaign}" 
+                                        update="dataSummaryCampaign, @this"
+                                        oncomplete="recallView();" 
+                                />
+                                
+                                <p:headerRow field="vAdvertiser" expandable="false" expanded="true">
+                                    <p:column colspan="7">
+                                        <div class="inline-flex align-items-center" style="vertical-align: middle">
+                                            <h:outputText value="#{summaryitemC.vAdvertiser}" />
+                                        </div>
+                                    </p:column>
+                                </p:headerRow>          
+                                <p:column headerText="Campaign">                         
+                                    <h:outputText value="#{summaryitemC.vCampaign}"/>
+                                </p:column>     
+                                <p:column width="90" headerText="CPM Goal" style="text-align: right; background: rgb(218 239 221) !important;}">                     
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{summaryitemC.dCPMGoal}">
+                                                <f:convertNumber type="currency" currencySymbol="$"/>
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputNumber id="inputcpm" value="#{summaryitemC.dCPMGoal}" style="width:100% !important;" label="CPM Goal" symbol="$"/>
+                                        </f:facet>
+                                    </p:cellEditor>                            
+                                </p:column>
+                                <p:column width="90" headerText="CTR Goal" style="text-align: right; background: rgb(218 239 221) !important;}">                     
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{summaryitemC.dCTRGoal}">
+                                                <f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/>
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputNumber id="inputctr" value="#{summaryitemC.dCTRGoal}" style="width:100% !important;" label="CTR Goal" decimalPlaces="5" decimalSeparator="." minValue="0.00000" maxValue="0.99999" symbol="%"/>
+                                        </f:facet>
+                                    </p:cellEditor>                            
+                                </p:column>                                
+                                <p:column width="60" headerText="Edit" style="text-align: center; background: rgba(0, 0, 0, 0.03) !important;}">                     
+                                    <p:rowEditor editTitle="Edit Row" cancelTitle="Cancel Edit" saveTitle="Save Row"/>
+                                </p:column>                                                                                                                      
+                                <p:column width="80" headerText="CPM (avg)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dRevenueCPM}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:column width="80" headerText="CTR" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dClickRate}"><f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/></h:outputText>
+                                </p:column>                               
+                                <p:column width="80" headerText="Impressions (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.iImpressions}"/>
+                                </p:column>                            
+                                <p:column width="80" headerText="Clicks (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.iClicks}"/>
+                                </p:column>                            
+                                <p:summaryRow>
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>  
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>  
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>  
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>  
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column> 
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>                                      
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalPerfImpGrouped(summaryitemC.vClient)}"/>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalPerfCliGrouped(summaryitemC.vClient)}"/>
+                                    </p:column>                                  
+                                </p:summaryRow>        
+                                <p:columnGroup type="footer">
+                                    <p:row>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>   
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>   
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>   
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>   
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>                                         
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="Totals"/>
+                                            </f:facet>
+                                        </p:column>                                         
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfImpByAgency()}"/>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfCliByAgency()}"/>
+                                            </f:facet>
+                                        </p:column>                                         
+                                    </p:row>                                    
+                                </p:columnGroup>
+                        </p:dataTable>                                 
+                    </p:tab>
+
+                    <p:tab title="InsertionOrder">
+                        <p:dataTable id="dataSummary" value="#{tblRawDataController.itemsPerfSummary}"
+                                     var="summaryitem" widgetVar="summaryWdataList" scrollRows="3"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                 rowKey="#{summaryitemC.vInsertionOrder}" scrollable="true" resizableColumns="true">
+
+                                <p:headerRow field="vClient" expandable="false" expanded="true">
+                                    <p:column colspan="5">
+                                        <div class="inline-flex align-items-center" style="vertical-align: middle">
+                                            <h:outputText value="#{summaryitem.vClient}" />
+                                        </div>
+                                    </p:column>
+                                </p:headerRow>          
+                                <p:column headerText="Campaign">                         
+                                    <h:outputText value="#{summaryitem.vCampaign}"/>
+                                </p:column>     
+                                <p:column headerText="Insertion Order">                         
+                                    <h:outputText value="#{summaryitem.vCampaign}"/>
+                                </p:column>                                                           
+                                <p:column width="80" headerText="CPM (avg)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.dRevenueCPM}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:column width="80" headerText="CTR" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.dClickRate}"><f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/></h:outputText>
+                                </p:column>  
+                                <p:column width="80" headerText="Impressions (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.iImpressions}"/>
+                                </p:column>                            
+                                <p:column width="80" headerText="Clicks (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.iClicks}"/>
+                                </p:column>                                                                                        
+                                <p:summaryRow>
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>       
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>
+                                    <p:column style="text-align:right">
+                                        <h:outputText value=" "/>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalPerfImpGrouped(summaryitem.vClient)}"/>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalPerfCliGrouped(summaryitem.vClient)}"/>
+                                    </p:column>                                       
+                                </p:summaryRow>        
+                                <p:columnGroup type="footer">
+                                    <p:row>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>                                         
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="Totals"/>
+                                            </f:facet>
+                                        </p:column>                                                                         
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfImpByAgency()}"/>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfCliByAgency()}"/>
+                                            </f:facet>
+                                        </p:column>                                        
+                                    </p:row>                                    
+                                </p:columnGroup>
+                        </p:dataTable>                        
+                                                                                 
+                    </p:tab>         
+
+                    <p:tab title="Advertiser">
+                        
+                        <p:dataTable id="dataSummaryAd" value="#{tblRawDataController.itemsPerfSummary}"
+                                     var="summaryitemAd" widgetVar="summaryWdataList" scrollRows="3"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                 rowKey="#{summaryitemC.vCampaign}" scrollable="true" resizableColumns="true">
+                                <p:column headerText="Advertiser">                         
+                                    <h:outputText value="#{summaryitemAd.vClient}"/>
+                                </p:column>     
+                                <p:column width="80" headerText="CPM (avg)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.dRevenueCPM}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:column width="80" headerText="CTR" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.dClickRate}"><f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/></h:outputText>
+                                </p:column>                              
+                                <p:column width="80" headerText="Impressions (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.iImpressions}"/>
+                                </p:column>                            
+                                <p:column width="80" headerText="Clicks (sum)" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.iClicks}"/>
+                                </p:column>                                                             
+                                <p:columnGroup type="footer">
+                                    <p:row>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value=" "/>
+                                            </f:facet>
+                                        </p:column>                                        
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="Totals"/>
+                                            </f:facet>
+                                        </p:column>                                        
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfImpByAgency()}"/>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalPerfCliByAgency()}"/>
+                                            </f:facet>
+                                        </p:column> 
+                                    </p:row>                                    
+                                </p:columnGroup>
+                        </p:dataTable>                        
+                                                     
+                    </p:tab>     
+
+                </p:tabView> 
+                
+                <p:commandButton value="Close" onclick="summaryDialog.hide()" style="float: right"/>
+            </h:form>
+        </p:dialog>                                                                                              
+    </ui:composition>
+</html>

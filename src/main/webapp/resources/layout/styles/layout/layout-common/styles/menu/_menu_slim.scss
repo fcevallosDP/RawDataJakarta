@@ -1,0 +1,86 @@
+@media (min-width: $mobileBreakpoint + 1) {
+    .layout-menu-slim {
+        .layout-menu-wrapper {
+            width: 4.5rem;
+
+            .layout-menu-container {
+                .layout-menu {
+                    display: flex;
+                    flex-direction: column;
+                    padding-top: 1rem;
+                    overflow-y: visible;
+                    flex-grow: 1;
+
+                    > li {
+                        position: relative;
+
+                        > a {
+                            display: flex;
+                            justify-content: center;
+                            position: relative;
+
+                            i {
+                                font-size: 1.5rem;
+                            }
+
+                            .layout-submenu-toggler,
+                            .layout-menuitem-text {
+                                display: none;
+                            }
+
+                            .layout-menuitem-badge {
+                                position: absolute;
+                                top: 50%;
+                                right: 1rem;
+                                margin-top: -1.214rem;
+                            }
+                        }
+
+                        &.layout-root-menuitem {
+                            > div {
+                                display: none;
+                            }
+                        }
+
+                        > ul {
+                            display: none;
+                            position: absolute;
+                            top: 0;
+                            left: 4.5rem;
+                            z-index: 100;
+                            padding: .5rem;
+                            overflow: auto;
+                            max-height: 32rem;
+                            min-width: 16.5rem;
+                            border-radius: 2px;
+                        }
+
+                        &.active-menuitem {
+                            > ul {
+                                display: block;
+                            }
+                        }
+                    }
+                }
+
+                .layout-inline-menu {
+                    .layout-inline-menu-action-panel {
+                        padding: 0;
+                    }
+                }
+            }
+        }
+        &.layout-wrapper {
+            .layout-main {
+                margin-left: 4.5rem;
+            }
+        }
+    }
+
+    body:has(.layout-menu-slim .layout-root-menuitem.active-menuitem) {
+        .layout-menu-tooltip {
+            visibility: hidden;
+            pointer-events: none;
+        }
+    }
+}

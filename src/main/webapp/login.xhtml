@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    </f:facet>
+
+    <title>Datapoint Intranet</title>
+
+</h:head>
+
+<h:body styleClass="pages-body login-page flex flex-column">
+    <div class="topbar flex justify-content-center">
+        <p:graphicImage name="images/datapoint-logo-black-background.svg" library="layout" />
+    </div>
+
+    <div class="align-self-center mt-auto mb-auto div-Login p-4">
+        <div class="pages-panel card flex flex-column">
+            <h:form id="loginForm" prependId="false">
+                <p:messages id="msg" closable="true"/>
+
+                <div class="pages-detail mb-5 text-center">
+                    <h2>Welcome</h2>
+                    <p>Please sign in to Datapoint Intranet</p>
+                </div>
+
+                <div class="input-panel flex flex-column px-3">
+                    <div class="ui-inputgroup mb-3">
+                        <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                        <span class="ui-float-label flex align-items-stretch w-full">
+                            <p:inputText id="username" value="#{loginBean.username}" required="true" />
+                            <p:outputLabel for="username" value="Username"/>
+                        </span>
+                    </div>
+
+                    <div class="ui-inputgroup mb-5">
+                        <span class="ui-inputgroup-addon"><i class="pi pi-lock"></i></span>
+                        <span class="ui-float-label flex align-items-stretch w-full">
+                            <p:password id="password" value="#{loginBean.password}" required="true" />
+                            <p:outputLabel for="password" value="Password"/>
+                        </span>
+                    </div>
+                </div>
+
+                <p:commandButton value="LOGIN"
+                                 action="#{loginBean.login}"
+                                 styleClass="login-button mb-3"
+                                 update=":loginForm msg" ajax="true" />
+            </h:form>
+        </div>
+    </div>
+
+    <!-- PrimeFlex y estilos -->
+    <h:outputStylesheet name="primeflex/primeflex.min.css" library="layout" />
+    <h:outputStylesheet name="styles/#{app.layout}.css" library="layout" />
+    <h:outputStylesheet name="styles/demo.css" library="demo" />
+    <h:outputStylesheet name="styles/initialCss.css" library="layout" />
+</h:body>
+</html>

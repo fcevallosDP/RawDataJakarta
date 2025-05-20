@@ -1,0 +1,187 @@
+$mobileBreakpoint: 991px;
+
+@mixin reset-list {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    text-decoration: none;
+    list-style-type: none;
+}
+
+.pages-body {
+    height: 100vh;
+
+    .topbar {
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+        background-color: #1565C0;
+        z-index: 100;
+
+        .topbar-left {
+            img {
+                height: 2rem;
+            }
+        }
+
+        .ui-button.ui-button-flat.ui-button-plain {
+            color: #ffffff;
+        }
+    }
+
+    .pages-panel {
+        text-align: center;
+        z-index: 200;
+
+        &.card {
+            img {
+                width: 100%;
+            }
+
+            border: 1.5px solid var(--divider-color);
+            border-radius: 6px;
+
+            >.card {
+                background-color: var(--content-alt-bgcolor)
+            }
+        }
+
+        .pages-header {
+            margin-top: -3rem;
+            color: var(--primary-color-text);
+            border: 1.5px solid var(--divider-color);
+            border-radius: 4px;
+            margin-left: auto;
+            margin-right: auto;
+
+            h2 {
+                margin: 0;
+            }
+        }
+
+        .pages-detail {
+            color: var(--text-secondary-color);
+        }
+    }
+}
+
+.order-badge {
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.order-delivered {
+        background: #C8E6C9;
+        color: #256029;
+    }
+    
+    &.order-cancelled {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+    
+    &.order-pending {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+    
+    &.order-returned {
+        background: #ECCFFF;
+        color: #694382;
+    }
+}
+
+.product-badge {
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-instock {
+        background: #C8E6C9;
+        color: #256029;
+    }
+    
+    &.status-outofstock {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+    
+    &.status-lowstock {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+}
+
+.customer-badge {
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+
+    &.status-qualified {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-unqualified {
+        background: #FFCDD2;
+        color: #C63737;
+    }
+
+    &.status-negotiation {
+        background: #FEEDAF;
+        color: #8A5340;
+    }
+
+    &.status-new {
+        background: #B3E5FC;
+        color: #23547B;
+    }
+
+    &.status-renewal {
+        background: #ECCFFF;
+        color: #694382;
+    }
+
+    &.status-proposal {
+        background: #FFD8B2;
+        color: #805B36;
+    }
+}
+
+.filter-container {
+    .ui-inputtext {
+        width: 400px;
+    }
+}
+
+.ui-selection-column {
+    width: 2rem;
+}
+
+@media (max-width: 640px) {
+    .filter-container {
+        width: 100%;
+        margin-top: .5rem;
+    }
+    
+    .filter-container .ui-inputtext {
+        width: 100%;
+    }
+
+    .ui-selection-column {
+        width: auto;
+        text-align: center;
+        
+        .ui-column-title {
+            display: none !important;
+        }
+    }
+}

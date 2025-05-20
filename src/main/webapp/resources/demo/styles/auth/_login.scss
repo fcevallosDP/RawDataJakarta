@@ -1,0 +1,24 @@
+.pages-body {
+    &.login-page {
+        background: url("\#{resource['demo:images/auth/login-bg.jpg']}");
+        background-size: cover;
+
+        .pages-panel {
+            .pages-header {
+                background: #0097A7;
+            }
+
+            .input-panel {
+                width: 100%;
+
+                .ui-inputtext {
+                    width: 100%
+                }
+            }
+
+            .login-button > * {
+                width: 100%;
+            }
+        }
+    }
+}

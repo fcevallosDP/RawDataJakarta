@@ -1,0 +1,38 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+        <h:form id="layoutTopbarForm">
+            <div class="layout-topbar shadow-4">                
+                <!-- Logo izquierdo -->
+                <div class="layout-topbar-left topbar-left">
+                    <a href="/RawData/index.xhtml" class="layout-topbar-logo">
+                        <p:graphicImage id="app-logo" name="datapoint-logo-black-background.svg" library="layout" style="height: 3.5rem" />
+                    </a>
+                </div>            
+                <!-- Menú de usuario derecho -->
+                <div class="layout-topbar-right topbar-right">               
+                    <div class="layout-topbar-actions-right">
+                        <ul class="layout-topbar-items">                                              
+                            <li class="layout-topbar-item">  
+                                <p:menubar style="border: none;" styleClass="rightMenuTemplate">                            
+                                    <p:submenu label="#{loginBean.getLoggedInUser().getFullName()}" icon="pi pi-user" >
+                                        <p:menuitem value="Home" icon="pi pi-home"/>
+                                        <p:separator/>                            
+                                        <p:menuitem value="Reset Password" update=":SelMUsuEditPassForm" onclick="PF('SelMUsuEditPassDialog').show()" oncomplete="PF('SelMUsuEditPassDialog').show()" icon="pi pi-pencil"/>
+                                        <p:separator/>                            
+                                        <p:menuitem actionListener="#{loginBean.logout()}" value="Close Session" ajax="false" icon="pi pi-power-off"/> 
+                                    </p:submenu>
+                                </p:menubar>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </h:form>    
+        <ui:include src="../resetPassword.xhtml"/>
+</ui:composition>

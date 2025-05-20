@@ -1,0 +1,21 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutBreadCrumbForm">
+        <div class="layout-breadcrumb-container flex justify-content-between align-items-center shadow-1">
+            <ui:insert name="breadcrumb"/>
+            <p:breadCrumb model="#{app.breadCrumbModel}" styleClass="layout-breadcrumb pl-4 py-2" />
+    
+            <div class="layout-breadcrumb-buttons flex align-items-center pr-3 gap-1">
+                <p:commandButton icon="pi pi-cloud-upload" styleClass="rounded-button ui-button-flat ui-button-plain" />
+                <p:commandButton icon="pi pi-bookmark" styleClass="rounded-button ui-button-flat ui-button-plain" />
+                <p:commandButton icon="pi pi-power-off" styleClass="rounded-button ui-button-flat ui-button-plain" />
+            </div>
+        </div>
+    </h:form>
+
+</ui:composition>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition>
+        <p:dialog id="popUpBarGraphs" widgetVar="barsDialog" style="min-width: 620px; max-width: 1280px; min-height: 400px; max-height: 840px; overflow-y: auto;"
+                  modal="true" showEffect="fade" closable="false" closeOnEscape="false" hideEffect="fade">   
+            <h:form id="TblDataPerfListForm" style="overflow-y: auto;">  
+                
+                <p:dataGrid var="barList" value="#{tblRawDataController.barCampaignItems}" columns="3" layout="grid"
+                            paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                            currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} Campaigns"
+                            rows="6" paginator="true" id="idbarList" rowIndexVar="rowIndex" paginatorPosition="top"
+                                    rowsPerPageTemplate="6,12,{ShowAll|'All'}">
+                    <p:barChart id="barChart#{rowIndex+1}" model="#{barList}" style="height:250px; width:360px; margin-bottom:30px;margin-left:20px;" />                    
+                
+                    <f:facet name="paginatorTopRight">
+                        
+                            <p:commandButton value="Close" onclick="barDialog.hide()" style="float: right"/>
+                        
+                    </f:facet>
+                </p:dataGrid>              
+            </h:form>
+        </p:dialog>                                                                                              
+    </ui:composition>
+</html>

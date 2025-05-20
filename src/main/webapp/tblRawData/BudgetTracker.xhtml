@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="/template.xhtml">
+        
+        <ui:define name="title"><h:outputText value="RawData"/></ui:define>
+        
+        <ui:define name="content">           
+
+            <h:form id="TblRawDataListForm">             
+                <p:remoteCommand name="callButton2" action="#{tblRawDataController.getBudgetTrackerByParams()}" update=":TblRawDataListForm:datalist"/>
+                <p:growl id="messages"/>
+                <p:panel style="width: 100%;" id="idPanelCabecera">                      
+                    <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 3rem"></i>
+                    </p:blockUI>                    
+                    <p:dataTable id="datalist" value="#{tblRawDataController.budgetTrackerItems}"
+                                 var="item" widgetVar="WdataList"                                                         
+                                 emptyMessage="No data found with given criteria"
+                                 rowKey="#{item.id}" paginator="true" paginatorPosition="top"
+                                 rowsPerPageTemplate="{ShowAll|'All'}, 40, 30, 20, 10" editable="true"
+                                 style="width:100% !important; overflow-x: auto; height: 100% !important;" 
+                                 styleClass="ui-datatable-sm ui-datatable-gridlines" 
+                                 rowStyleClass="#{item.iRemainingDays eq 0 ? 'trCompleted' : null}"
+                                 scrollable="true" resizableColumns="true" stripedRows="true" 
+                                 >
+                        <p:ajax event="rowEdit" listener="#{tblRawDataController.onRowEditBudgetTracker}" update="datalist, @this ,:TblRawDataListForm:messages" oncomplete="callButton2();" />                              
+                                                
+                        <f:facet name="paginatorTopLeft">
+                            <p:outputLabel for="monthoption" value="Month"/>
+                            <p:datePicker id="monthoption" value="#{tblRawDataController.DMonthSelected}"
+                                  readonlyInput="true" view="month" pattern="MMM/yyyy" 
+                                  yearNavigator="true" yearRange="2024:2026" size="10">                               
+                                <p:ajax event="change" listener="#{tblRawDataController.getPerfCalendarByMonth()}"/>                                   
+                            </p:datePicker>  
+                            <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
+                            <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">
+                                <f:selectItems value="#{tblRawDataController.itemsVPartners}" itemLabel="#{itemPartner}" itemValue="#{itemPartner}"/>
+                                <p:ajax update="barButton" process="@this" partialSubmit="true"/>
+                            </p:selectOneMenu> 
+                            
+                            <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" 
+                                             title="SEARCH" action="#{tblRawDataController.getBudgetTrackerByParams()}"
+                                             onstart="PF('buiDatatable').show()" actionListener="#{tblRawDataController.setBudgetSelected(null)}"
+                                             oncomplete="PF('buiDatatable').hide()"                                                
+                                             update="datalist, btnTransfer"/>                       
+
+                            <p:commandButton style="margin-left: 2px;" id="summaryButton" title="Summary Data" icon="pi pi-list"
+                                             onsuccess="PF('summaryDialog').show()" oncomplete="#{tblRawDataController.clearMultiViewState()}"       
+                                             actionListener="#{tblRawDataController.getDataBudgetTrackerSumary()}"
+                                             update=":TblRawDataSummForm:tabViewSummary"
+                                             
+                                             />                                     
+                            
+                            <p:commandButton style="margin-left: 2px;" id="barButton" title="Chart" 
+                                             oncomplete="PF('barDialog').show();"
+                                             icon="pi pi-chart-bar"
+                                             actionListener="#{tblRawDataController.getDataBudgetTrackerGraphs()}"
+                                             update=":TblRawDataTabForm"                                         
+                                             />                           
+                            
+                            <p:commandButton title="Move to Historical" id="btnTransfer" update="datalist, :TblRawDataListForm:messages"
+                                             actionListener="#{tblRawDataController.transferBudgetToHistorical()}"
+                                             icon="pi pi-window-maximize" style="margin-left: 2px; background: #0097A7;"
+                                             onstart="PF('buiDatatable').show()"
+                                             oncomplete="PF('buiDatatable').hide()"      
+                                             disabled="true"
+                                             >
+                                    <p:confirm header="Confirmation" message="Are you sure you want to transfer all month's data to Historical?" icon="pi pi-window-maximize"/>
+                            </p:commandButton> 
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                                <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+                            </p:confirmDialog> 
+                            <p:commandButton style="margin-left: 2px;" icon="pi pi-sync" ajax="false" title="Clear" type="button" onclick="PF('WdataList').clearFilters();"/>                                                    
+                        </f:facet>    
+                        <f:facet name="paginatorTopRight">
+                            <div class="ui-datatable-header ui-widget-header ui-corner-top title-rightClass">
+                                <h:outputText value="BUDGET TRACKER" style="font-size: large;"/>
+                            </div>
+                        </f:facet>
+                        <p:headerRow field="vCampaign" expandable="true" expanded="#{item.vCampaign eq tblRawDataController.vInitialCampaign}">
+                            
+                            <div class="inline-flex align-items-center rowgroup-contentClass">
+                                <p:column colspan="26">                                        
+                                    <h:outputText value="#{item.vCampaign}" style="font-size: 1.1rem !important;"/>
+                                    <p:commandButton id="btnCampaign" icon="pi pi-pencil" 
+                                            oncomplete="PF('campaignDialog').show()"
+                                            styleClass="rounded-button ui-button-success ui-button-flat" 
+                                            action="#{tblRawDataController.viewCampaign()}" 
+                                            update=":TblRawDataRenForm:vCampaign">
+
+                                        <f:setPropertyActionListener value="#{item}" target="#{tblRawDataController.budgetSelected}"/>
+                                
+                                    </p:commandButton>                                                                                                            
+                                </p:column>        
+                            </div> 
+                            
+                        </p:headerRow>                        
+                        <p:column width="400" headerText="Insertion Order">                         
+                            <p:commandButton id="btnLineItems" icon="pi pi-search" oncomplete="PF('productDialog').show()" style="font-weight: bolder"
+                                             styleClass="rounded-button ui-button-success ui-button-flat" 
+                                             action="#{tblRawDataController.getSpendYesterday()}" 
+                                             update=":TblRawDataLineForm:datalineItem">
+
+                                    <f:setPropertyActionListener value="#{item}" target="#{tblRawDataController.budgetSelected}"/>
+                                
+                            </p:commandButton>
+                            <h:outputText value="#{item.vInsertionOrder}" style="font-size: 0.8rem;"/>                                                                                                                  
+                        </p:column>
+                        <p:column width="70" headerText="Channel" style="text-align: center;" >                         
+                            <h:outputText value="#{item.vChannel}" style="font-size: 0.8rem;"/>
+                        </p:column>
+                        <p:column width="90" headerText="Budget" style="text-align: right; background: rgb(218 239 221) !important;}">                     
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.dBudget}">
+                                        <f:convertNumber type="currency" currencySymbol="$"/>
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputNumber value="#{item.dBudget}" style="width:100% !important;" label="Budget" symbol="$"/>
+                                </f:facet>
+                            </p:cellEditor>                            
+                        </p:column>
+                        <p:column width="90" headerText="Start" style="text-align: center;#{item.iRemainingDays eq 0 ? null : 'background: rgba(0, 0, 0, 0.03) !important;'}">                     
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.startDate}"><f:convertDateTime pattern="MM/dd/yyyy" /></h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:datePicker id="dStart" value="#{item.startDate}" style="width:100% !important;" label="Start date" maxdate="#{item.endDate}" size="10"/>                                                                                                                                           
+                                </f:facet>
+                            </p:cellEditor>                            
+                        </p:column>
+                        <p:column width="90" headerText="End" style="text-align: center; background: rgba(0, 0, 0, 0.03) !important;}">                     
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.endDate}"><f:convertDateTime pattern="MM/dd/yyyy" /></h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:datePicker id="dEnd" value="#{item.endDate}" style="width:100% !important;" label="End date" size="10"/>                                                
+                                </f:facet>
+                            </p:cellEditor>                            
+                        </p:column>
+                        <p:column width="60" headerText="Edit" style="text-align: center; background: rgba(0, 0, 0, 0.03) !important;}">                     
+                            <p:rowEditor editTitle="Edit Row" cancelTitle="Cancel Edit" saveTitle="Save Row"/>
+                        </p:column>                                                                                      
+                        <p:column width="60" headerText="Daily Projected Spend" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dProjDailySpend}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Total Projected Spend" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dTotalMTDProjSpend}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Projected Spend %" style="text-align: right; white-space: wrap;background: rgb(239 231 180) !important;">                     
+                            <h:outputText value="#{item.dProjBudgPerc}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="80" headerText="MTD Spend" style="text-align: right">                     
+                            <h:outputText value="#{item.dMediaSpend}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>                            
+                        <p:column width="60" headerText="Balance" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dBalance}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Daily Target" style="text-align: right; white-space: wrap; background: rgb(218 239 221) !important;">                     
+                            <h:outputText value="#{item.dDailyTarget}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Yesterday Spend" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dYesterdaySpend}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>                        
+                        <p:column width="60" headerText="Yesterday CTR" style="text-align: right; white-space: wrap; #{item.bUnderYestCTR ? 'background: #df8787 !important;' : null}" >                     
+                            <h:outputText value="#{item.dYestCTR}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>                        
+                        <p:column width="60" headerText="MTD CTR" style="text-align: right; white-space: wrap; #{item.bUnderMTDCTR ? 'background: #df8787 !important;' : null}" >                     
+                            <h:outputText value="#{item.dMtdCTR}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>                           
+                        <p:column width="60" headerText="Flight Days" style="text-align: center; white-space: wrap;">                     
+                            <h:outputText value="#{item.iFlightDays}"/>
+                        </p:column>
+                        <p:column width="60" headerText="Flight Remaining" style="text-align: center; white-space: wrap;">                     
+                            <h:outputText value="#{item.iRemainingDays}"/>
+                        </p:column>
+                        <p:column width="60" headerText="Day" style="text-align: center; white-space: wrap;">                     
+                            <h:outputText value="#{item.iDay}"/>
+                        </p:column>
+                        <p:column width="60" headerText="Budget Pacing" style="text-align: right; white-space: wrap; #{item.bUnderPacing ? 'background: #7c9ed3 !important;' : (item.bOverPacing ? 'background: #df8787 !important;' : 'background: rgb(239 231 180) !important;')}">                     
+                            <h:outputText value="#{item.dBudgetPacing}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="DIF %" style="text-align: right; white-space: wrap; #{item.bUnderPacing ? 'background: #7c9ed3 !important;' : (item.bOverPacing ? 'background: #df8787 !important;' : null)}">                     
+                            <h:outputText value="#{item.dDifBudgetPacPerc}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="DIF $" style="text-align: right; white-space: wrap; #{item.bUnderPacing ? 'background: #7c9ed3 !important;' : (item.bOverPacing ? 'background: #df8787 !important;' : null)}">                     
+                            <h:outputText value="#{item.dDifSpendProjectSpend}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Projected Pacing" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dProjPacing}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Daily Remaining" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dDailyRemaining}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Adjusted" style="text-align: right; white-space: wrap;">                     
+                            <h:outputText value="#{item.dAdjusted}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Updated" style="text-align: center;">                     
+                            <h:outputText value="#{item.modifiedDate}" style="font-size: 0.8rem;"><f:convertDateTime pattern="MM/dd/yyyy" /></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Updated By" style="text-align: center; white-space: wrap;">                     
+                            <h:outputText value="#{item.vUser}" style="font-size: 0.8rem;"/>
+                        </p:column>
+                        <p:summaryRow>
+                            <p:column colspan="3" style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalBudget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>
+                            <p:column colspan="6" style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalProjSpendPerct(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                            
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalMediaSpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>   
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalBalance(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>      
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalDailyTarget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                                
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalYesterdaySpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column> 
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalYesterdayCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column> 
+                            <p:column style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalMTDCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>  
+                            <p:column colspan="4" style="text-align:right">
+                                <h:outputText value="#{tblRawDataController.getTotalBudgetPacing(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                            
+                            <p:column colspan="8" style="text-align:right">
+
+                            </p:column>                            
+                        </p:summaryRow>                                       
+                    </p:dataTable>            
+                </p:panel>
+            </h:form>            
+            <ui:include src="BUSummary.xhtml"/>
+            <ui:include src="BULines.xhtml"/>
+            <ui:include src="BUTabs.xhtml"/>     
+            <ui:include src="BUReIO.xhtml"/>
+            <ui:include src="BUReCampaign.xhtml"/>
+        </ui:define>        
+    </ui:composition>
+</html>

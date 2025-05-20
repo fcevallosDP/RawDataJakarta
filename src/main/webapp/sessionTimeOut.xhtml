@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+   <h:head>
+        <title>RawData Session Expired</title>   
+        <h:outputStylesheet name="css/layout.css"/>
+        <h:outputStylesheet name="css/primeflex.css"/>
+        <h:outputStylesheet name="css/primeflex.min.css"/>        
+        <h:outputStylesheet name="css/semantic/semantic.min.css"/>
+        <h:outputStylesheet name="css/template.css"/>
+        <h:outputStylesheet name="css/themes/arya-blue.css"/>
+        <h:outputStylesheet name="css/themes/saga-blue.css"/>
+        <h:outputStylesheet name="css/themes/vela-blue.css"/>        
+        <h:outputStylesheet name="css/jsfcrud.css"/>       
+        <h:outputScript library="js" name="jsfcrud.js"/>
+    </h:head>
+    <h:body id="CuerpoExpired">
+        <p:idleMonitor onactive="sessionTimeOutDialog.show();" timeout="1000" />
+        <p:dialog header="#{msg['error.sessionTimeOut.header']}" widgetVar="sessionTimeOutDialog" 
+         modal="true" closable="false" width="400" visible="false">
+             <h:outputText value="#{msg['error.sessionTimeOut.text']}" />
+             <input id="confirmBackToLogin" type="button" value="#{msg['error.sessionTimeOut.button']}"
+                onclick="window.location='#{facesContext.externalContext.requestContextPath}/login.xhtml';" />
+        </p:dialog>
+    </h:body>	
+</html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="RawEditDlg" widgetVar="RawEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.EditTblCatalogTitle}">
+            <h:form id="RawEditForm" style="min-width: 350px;">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{tblRawDataController.editCatalog != null}">                                                
+                        <p:outputLabel value="Category" for="@next" />
+                        <p:selectOneMenu id="optionType" value="#{tblRawDataController.editCatalog.vType}">
+                            <f:selectItems value="#{tblRawDataController.itemsTypes}" var="types"
+                                           itemLabel="#{types.VType}" itemValue="#{types.VType}"/>                            
+                        </p:selectOneMenu>                        
+                        <p:outputLabel value="Value" for="VValue" />
+                        <p:inputText id="VValue" value="#{tblRawDataController.editCatalog.vValue}" maxlength="50" title="Value" style="min-width:150px;"/>
+                        
+                        <p:outputLabel value="Pattern" for="VPattern" />
+                        <p:inputText id="VPattern" value="#{tblRawDataController.editCatalog.vPattern}" maxlength="50" title="Pattern" style="min-width:150px;"/>
+                                                
+                    </p:panelGrid>
+                    <p:fieldset legend="Search fields">
+                        <p class="m-0">
+                            <p:selectManyCheckbox id="lineDirection" value="#{tblRawDataController.selectedrawColumns}" layout="responsive" columns="8">
+                                <f:selectItems value="#{tblRawDataController.rawColumns}" var="colum" itemLabel="#{colum}" itemValue="#{colum}"/>
+                            </p:selectManyCheckbox>                        
+                        </p>
+                    </p:fieldset>                       
+                    <p:commandButton actionListener="#{tblRawDataController.updateEdit}" value="Refactor" update="display,:TblRawDataListForm:datalist" oncomplete="handleSubmit(args, 'RawEditDialog');"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

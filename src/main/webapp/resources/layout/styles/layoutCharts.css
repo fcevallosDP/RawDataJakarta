@@ -1,0 +1,40 @@
+                 
+#popUpBarSummary {
+  width: 80vw;   
+  height: 90vh;  
+  background-color: lightblue;
+  overflow-y: auto;
+}              
+body .ui-inputfield {
+    width: 100%;
+}
+.ui-grouped-column{
+    border-color: #e4e4e4 !important;
+    border-width: 1px !important;                    
+}
+.ui-filter-column .ui-column-customfilter .custom-filter {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+.ui-datatable thead th {
+    text-align: center !important;
+    font-size: 0.9rem !important;
+}
+
+.ui-datatable tbody td {
+    font-size: 0.8rem !important;
+}                    
+.tdReadOnly{
+    background: rgba(0, 0, 0, 0.03);
+}   
+.trCompleted{
+    background: rgb(96 125 139 / 30%) !important;
+    color: #000 !important;
+}
+.tdGreen{
+    background: rgb(96 125 139 / 34%) !important;
+} 
+
+body .ui-tabs .ui-tabs-nav li.ui-tabs-header{
+    display: block;
+}

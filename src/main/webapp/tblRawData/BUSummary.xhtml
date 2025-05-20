@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition>
+        <p:dialog header="Summary Data" id="popUpSummary" widgetVar="summaryDialog" modal="true" showEffect="fade" style="min-width: 840px; max-width: 1024px"
+                              hideEffect="fade" resizable="false">   
+            <h:form id="TblRawDataSummForm">                
+                <p:tabView id="tabViewSummary">
+                    <p:ajax event="tabChange" listener="#{tblRawDataController.onTabChange}" update="dataSummary, dataSummaryAd, dataSummaryCampaign"/>
+
+                    <p:tab title="Campaign">
+                        <p:dataTable id="dataSummaryCampaign" value="#{tblRawDataController.budgetTrackerSummary}"
+                                     var="summaryitemC" widgetVar="summaryWdataList" scrollRows="3"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                 rowKey="#{summaryitemC.vCampaign}" scrollable="true" resizableColumns="true">
+
+                                <p:headerRow field="vChannel" expandable="false" expanded="true">
+                                    <p:column colspan="4">
+                                        <div class="inline-flex align-items-center" style="vertical-align: middle">
+                                            <h:outputText value="#{summaryitemC.vChannel}" />
+                                        </div>
+                                    </p:column>
+                                </p:headerRow>          
+
+                                <p:column headerText="Campaign">                         
+                                    <h:outputText value="#{summaryitemC.vCampaign}"/>
+                                </p:column>     
+
+                                <p:column width="80" headerText="Budget" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dBudget}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Spend" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dMediaSpend}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Pacing" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dPacingPercent}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                                                        
+                            
+                                <p:column width="80" headerText="Balance" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemC.dBalance}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:summaryRow>
+                                    <p:column colspan="2" style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalBudgetGrouped(summaryitemC.vChannel)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalMediaSpendGrouped(summaryitemC.vChannel)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getPacingPercentGrouped(summaryitemC.vChannel)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalBalanceGrouped(summaryitemC.vChannel)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                </p:summaryRow>        
+                                <p:columnGroup type="footer">
+                                    <p:row>
+                                        <p:column style="text-align:right" footerText="Totals:"/>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.totalBudgetByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.totalMediaSpendByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.pacingPercentByAgency}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.totalBalanceByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column> 
+                                    </p:row>                                    
+                                </p:columnGroup>
+                        </p:dataTable>                                 
+                    </p:tab>
+
+                    <p:tab title="Channel">
+                        <p:dataTable id="dataSummary" value="#{tblRawDataController.budgetTrackerSummary}"
+                                        var="summaryitem" widgetVar="summaryWdataList" scrollRows="3"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                 rowKey="#{summaryitem.vChannel}" scrollable="true" resizableColumns="true">
+
+                                <p:headerRow field="vPartner" expandable="false" expanded="true">
+                                    <p:column colspan="4">
+                                        <div class="inline-flex align-items-center" style="vertical-align: middle">
+                                            <h:outputText value="#{summaryitem.vPartner}" />
+                                        </div>
+                                    </p:column>
+                                </p:headerRow>          
+
+                                <p:column headerText="Channel">                         
+                                    <h:outputText value="#{summaryitem.vChannel}"/>
+                                </p:column>     
+
+                                <p:column width="80" headerText="Budget" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.dBudget}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Spend" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.dMediaSpend}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Balance" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitem.dBalance}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:summaryRow>
+                                    <p:column colspan="2" style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalBudgetGroupedPartner(summaryitem.vPartner)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalMediaSpendGroupedPartner(summaryitem.vPartner)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                    <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalBalanceGroupedPartner(summaryitem.vPartner)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                    </p:column>                                    
+                                </p:summaryRow>                                        
+                        </p:dataTable>                                      
+                    </p:tab>         
+
+                    <p:tab title="Advertiser">
+                        <p:dataTable id="dataSummaryAd" value="#{tblRawDataController.budgetTrackerSummary}"
+                                        var="summaryitemAd" widgetVar="summaryWdataListAd" scrollRows="3"
+                                        emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                        style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                        rowKey="#{summaryitemAd.id}" scrollable="true" resizableColumns="true">
+
+                                <p:column headerText="Advertiser">                         
+                                    <h:outputText value="#{summaryitemAd.vClient}"/>
+                                </p:column>     
+
+                                <p:column width="80" headerText="Budget Pacing" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.dProjBudgPerc}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Pacing Today" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.dBudgetPacing}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                            
+
+                                <p:column width="80" headerText="Dif" style="text-align:right; white-space: wrap;">
+                                    <h:outputText value="#{summaryitemAd.dDifBudgetPacPerc}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                        </p:dataTable>                                
+                    </p:tab>     
+
+                </p:tabView> 
+                
+                <p:commandButton value="Close" onclick="summaryDialog.hide()" style="float: right"/>
+            </h:form>
+        </p:dialog>                                                                                              
+    </ui:composition>
+</html>

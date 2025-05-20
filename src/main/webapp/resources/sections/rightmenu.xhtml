@@ -1,0 +1,81 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutRightMenuForm">
+        <p:sidebar widgetVar="layoutRightMenuWidget" position="#{app.rtl ? 'left' : 'right'}" blockScroll="true" showCloseIcon="false" baseZIndex="1000" styleClass="layout-rightmenu w-20rem fs-small py-3 #{app.rtl ? 'pl-0 pr-3' : 'pl-3 pr-0'}">
+            <div class="online-members flex flex-column mt-3 #{app.rtl ? 'mr-3' : 'ml-3'}">
+                <h6 class="header">ONLINE MEMBERS</h6>
+                <div class="flex flex-row flex-wrap gap-2">
+                    <p:graphicImage name="images/avatar/avatar-1.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-2.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-3.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-4.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-5.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-6.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-7.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-8.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-9.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-10.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-11.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-12.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-13.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-14.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-15.png" library="demo" />
+                    <p:graphicImage name="images/avatar/avatar-16.png" library="demo" />
+                </div>
+                <span class="mt-3"><b>+19</b> Costumers</span>
+            </div>
+            <div class="latest-activity flex flex-column mt-6 #{app.rtl ? 'mr-3' : 'ml-3'}">
+                <h6 class="header">LATEST ACTIVITY</h6>
+                <div class="flex flex-row pt-2">
+                    <i class="pi pi-images align-self-start p-2 #{app.rtl ? 'ml-2' : 'mr-2'}"></i>
+                    <div class="flex flex-column">
+                        <span class="font-bold mb-1">New Sale</span>
+                        <span class="mb-2">Richard Jones has purchased a blue t-shirt for $79.</span>
+                        <span class="flex align-items-center">
+                            <p:graphicImage name="images/avatar/activity-1.png" library="demo" styleClass="#{app.rtl ? 'ml-2' : 'mr-2'}" />
+                            <small class="muted-text">Emmy Adams, 21.40</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-row pt-3">
+                    <i class="pi pi-images align-self-start p-2 #{app.rtl ? 'ml-2' : 'mr-2'}"></i>
+                    <div class="flex flex-column">
+                        <span class="font-bold mb-1">Withdrawal Initiated</span>
+                        <span class="mb-2">Your request for withdrawal of $2500 has been initiated.</span>
+                        <span class="flex align-items-center">
+                            <p:graphicImage name="images/avatar/activity-2.png" library="demo" styleClass="#{app.rtl ? 'ml-2' : 'mr-2'}" />
+                            <small class="muted-text">Emily Walter, 21.40</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-row pt-3">
+                    <i class="pi pi-images align-self-start p-2 #{app.rtl ? 'ml-2' : 'mr-2'}"></i>
+                    <div class="flex flex-column">
+                        <span class="font-bold mb-1">Question Received</span>
+                        <span class="mb-2">Jane Davis has posted a new question about your product.</span>
+                        <span class="flex align-items-center">
+                            <p:graphicImage name="images/avatar/activity-3.png" library="demo" styleClass="#{app.rtl ? 'ml-2' : 'mr-2'}" />
+                            <small class="muted-text">Jane Davis, 21.45</small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="next-events flex flex-column mt-6 #{app.rtl ? 'mr-3' : 'ml-3'}">
+                <h6 class="header">NEXT EVENTS</h6>
+                <ul>
+                    <li><i class="pi pi-eye #{app.rtl ? 'ml-3' : 'mr-3'}"></i>A/B Test</li>
+                    <li><i class="pi pi-video #{app.rtl ? 'ml-3' : 'mr-3'}"></i>Video Shoot</li>
+                    <li><i class="pi pi-sitemap #{app.rtl ? 'ml-3' : 'mr-3'}"></i>Board Meeting</li>
+                    <li><i class="pi pi-compass #{app.rtl ? 'ml-3' : 'mr-3'}"></i>Q4 Planning</li>
+                    <li><i class="pi pi-palette #{app.rtl ? 'ml-3' : 'mr-3'}"></i>Design Training</li>
+                </ul>
+            </div>
+        </p:sidebar>
+    </h:form>
+
+</ui:composition>

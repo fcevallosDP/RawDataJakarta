@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="TblRawDataCreateDlg" widgetVar="TblRawDataCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.CreateTblRawDataTitle}">
+            <h:form id="TblRawDataCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{tblRawDataController.selected != null}">
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_idraw}" for="idraw" />
+                        <p:inputText id="idraw" value="#{tblRawDataController.selected.idraw}" title="#{bundle.CreateTblRawDataTitle_idraw}" required="true" requiredMessage="#{bundle.CreateTblRawDataRequiredMessage_idraw}"/>
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DDate}" for="DDate" />
+                        <p:calendar id="DDate" pattern="MM/dd/yyyy" value="#{tblRawDataController.selected.DDate}" title="#{bundle.EditTblRawDataTitle_DDate}"  showOn="button"/>
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VPartner}" for="VPartner" />
+                        <p:inputText id="VPartner" value="#{tblRawDataController.selected.VPartner}" title="#{bundle.CreateTblRawDataTitle_VPartner}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VCampaign}" for="VCampaign" />
+                        <p:inputText id="VCampaign" value="#{tblRawDataController.selected.VCampaign}" title="#{bundle.CreateTblRawDataTitle_VCampaign}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VInsertionOrder}" for="VInsertionOrder" />
+                        <p:inputText id="VInsertionOrder" value="#{tblRawDataController.selected.VInsertionOrder}" title="#{bundle.CreateTblRawDataTitle_VInsertionOrder}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VLineItem}" for="VLineItem" />
+                        <p:inputText id="VLineItem" value="#{tblRawDataController.selected.VLineItem}" title="#{bundle.CreateTblRawDataTitle_VLineItem}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VExchange}" for="VExchange" />
+                        <p:inputText id="VExchange" value="#{tblRawDataController.selected.VExchange}" title="#{bundle.CreateTblRawDataTitle_VExchange}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VDealName}" for="VDealName" />
+                        <p:inputText id="VDealName" value="#{tblRawDataController.selected.VDealName}" title="#{bundle.CreateTblRawDataTitle_VDealName}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_IImpressions}" for="IImpressions" />
+                        <p:inputText id="IImpressions" value="#{tblRawDataController.selected.IImpressions}" title="#{bundle.CreateTblRawDataTitle_IImpressions}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_IClicks}" for="IClicks" />
+                        <p:inputText id="IClicks" value="#{tblRawDataController.selected.IClicks}" title="#{bundle.CreateTblRawDataTitle_IClicks}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DMediaCost}" for="DMediaCost" />
+                        <p:inputText id="DMediaCost" value="#{tblRawDataController.selected.DMediaCost}" title="#{bundle.CreateTblRawDataTitle_DMediaCost}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DTotalMediaCost}" for="DTotalMediaCost" />
+                        <p:inputText id="DTotalMediaCost" value="#{tblRawDataController.selected.DTotalMediaCost}" title="#{bundle.CreateTblRawDataTitle_DTotalMediaCost}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VDSP}" for="VDSP" />
+                        <p:inputText id="VDSP" value="#{tblRawDataController.selected.VDSP}" title="#{bundle.CreateTblRawDataTitle_VDSP}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VClient}" for="VClient" />
+                        <p:inputText id="VClient" value="#{tblRawDataController.selected.VClient}" title="#{bundle.CreateTblRawDataTitle_VClient}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VAgency}" for="VAgency" />
+                        <p:inputText id="VAgency" value="#{tblRawDataController.selected.VAgency}" title="#{bundle.CreateTblRawDataTitle_VAgency}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VChannel}" for="VChannel" />
+                        <p:inputText id="VChannel" value="#{tblRawDataController.selected.VChannel}" title="#{bundle.CreateTblRawDataTitle_VChannel}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VAlias}" for="VAlias" />
+                        <p:inputText id="VAlias" value="#{tblRawDataController.selected.VAlias}" title="#{bundle.CreateTblRawDataTitle_VAlias}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VVendor}" for="VVendor" />
+                        <p:inputText id="VVendor" value="#{tblRawDataController.selected.VVendor}" title="#{bundle.CreateTblRawDataTitle_VVendor}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VVendorSource}" for="VVendorSource" />
+                        <p:inputText id="VVendorSource" value="#{tblRawDataController.selected.VVendorSource}" title="#{bundle.CreateTblRawDataTitle_VVendorSource}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DCPM}" for="DCPM" />
+                        <p:inputText id="DCPM" value="#{tblRawDataController.selected.DCPM}" title="#{bundle.CreateTblRawDataTitle_DCPM}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DCTR}" for="DCTR" />
+                        <p:inputText id="DCTR" value="#{tblRawDataController.selected.DCTR}" title="#{bundle.CreateTblRawDataTitle_DCTR}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DCPC}" for="DCPC" />
+                        <p:inputText id="DCPC" value="#{tblRawDataController.selected.DCPC}" title="#{bundle.CreateTblRawDataTitle_DCPC}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_IAnio}" for="IAnio" />
+                        <p:inputText id="IAnio" value="#{tblRawDataController.selected.IAnio}" title="#{bundle.CreateTblRawDataTitle_IAnio}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_IMes}" for="IMes" />
+                        <p:inputText id="IMes" value="#{tblRawDataController.selected.IMes}" title="#{bundle.CreateTblRawDataTitle_IMes}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_IDia}" for="IDia" />
+                        <p:inputText id="IDia" value="#{tblRawDataController.selected.IDia}" title="#{bundle.CreateTblRawDataTitle_IDia}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_DSystemDate}" for="DSystemDate" />
+                        <p:calendar id="DSystemDate" pattern="MM/dd/yyyy HH:mm:ss" value="#{tblRawDataController.selected.DSystemDate}" title="#{bundle.EditTblRawDataTitle_DSystemDate}"  showOn="button"/>
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_VFileName}" for="VFileName" />
+                        <p:inputText id="VFileName" value="#{tblRawDataController.selected.VFileName}" title="#{bundle.CreateTblRawDataTitle_VFileName}" />
+                        <p:outputLabel value="#{bundle.CreateTblRawDataLabel_TEstado}" for="TEstado" />
+                        <p:selectBooleanCheckbox id="TEstado" value="#{tblRawDataController.selected.TEstado}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{tblRawDataController.create}" value="#{bundle.Save}" update="display,:TblRawDataListForm:datalist" oncomplete="handleSubmit(args,'TblRawDataCreateDialog');"/>
+                    <p:commandButton value="#{bundle.Cancel}" onclick="TblRawDataCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

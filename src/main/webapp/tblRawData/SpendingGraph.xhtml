@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+        <p:dialog header="Summary Data" widgetVar="summaryDialog" modal="true" resizable="false" appendTo="@(body)" style="min-width: 840px; max-width: 1024px">        
+                <h:panelGroup id="display">
+                    <p:dataTable id="dataSummaryAd" value="#{tblRawDataController.budgetTrackerSummary}"
+                                    var="summaryitemAd" widgetVar="summaryWdataListAd" scrollRows="3"
+                                    emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                    style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
+                                    rowKey="#{summaryitemAd.id}" scrollable="true" resizableColumns="true">
+
+                            <p:column headerText="Advertiser">                         
+                                <h:outputText value="#{summaryitemAd.vClient}"/>
+                            </p:column>     
+
+                            <p:column width="80" headerText="Budget Pacing" style="text-align:right; white-space: wrap;">
+                                <h:outputText value="#{summaryitemAd.dProjBudgPerc}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                            
+
+                            <p:column width="80" headerText="Pacing Today" style="text-align:right; white-space: wrap;">
+                                <h:outputText value="#{summaryitemAd.dBudgetPacing}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                            
+
+                            <p:column width="80" headerText="Dif" style="text-align:right; white-space: wrap;">
+                                <h:outputText value="#{summaryitemAd.dDifBudgetPacPerc}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                            </p:column>                            
+                    </p:dataTable>
+                    <p:barChart model="#{tblRawDataController.hbarModel}" style="width: 60%; min-height: 300px; max-height: 500px;"/>     
+                 </h:panelGroup>
+        </p:dialog>                     
+    </ui:composition>
+</html>

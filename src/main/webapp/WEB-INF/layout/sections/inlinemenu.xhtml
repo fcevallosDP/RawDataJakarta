@@ -1,0 +1,47 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <div class="layout-inline-menu">
+        <a class="layout-inline-menu-action flex flex-row align-items-center #{app.isHorizontalMenu() ? 'p-3 py-3' : 'p-3'}" style="min-width: #{app.isHorizontalMenu() ? '165px' : '0'}"
+            data-tooltip="Amy Elsner"
+            data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'slidedown', leaveToClass: 'hidden', leaveActiveClass: 'slideup', hideOnOutsideClick: #{app.isSlimMenu() or app.isHorizontalMenu()} }">
+            <p:graphicImage name="images/amyelsner.png" library="layout" style="width: 32px; height: 32px;" />
+            <span class="flex flex-column #{app.rtl ? 'mr-2' : 'ml-2'}">
+                <span class="font-bold">Amy Elsner</span>
+                <small>Webmaster</small>
+            </span>
+            <i class="layout-inline-menu-icon pi pi-angle-down #{app.rtl ? 'mr-auto' : 'ml-auto'}"></i>
+        </a>
+    
+        <ul class="layout-inline-menu-action-panel hidden">
+            <li class="layout-inline-menu-action-item">
+                <a class="flex flex-row align-items-center" tabindex="0" data-tooltip="Settings">
+                    <i class="pi pi-cog pi-fw"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="layout-inline-menu-action-item">
+                <a class="flex flex-row align-items-center" tabindex="0" data-tooltip="Terms of Usage">
+                    <i class="pi pi-file-o pi-fw"></i>
+                    <span>Terms of Usage</span>
+                </a>
+            </li>
+            <li class="layout-inline-menu-action-item">
+                <a class="flex flex-row align-items-center" tabindex="0" data-tooltip="Support">
+                    <i class="pi pi-compass pi-fw"></i>
+                    <span>Support</span>
+                </a>
+            </li>
+            <li class="layout-inline-menu-action-item">
+                <a class="flex flex-row align-items-center" tabindex="0" data-tooltip="Logout">
+                    <i class="pi pi-power-off pi-fw"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</ui:composition>

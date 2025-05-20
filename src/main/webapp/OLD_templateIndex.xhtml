@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="mobile-web-app-capable" content="yes"/>
+            <meta name="theme-color" content="bluegray"/>
+
+            <link href="#{resource['layout/images/favicon-32x32.png']}" rel="icon" type="image/png" sizes="32x32"/>
+            <link href="#{resource['layout/images/favicon-16x16.png']}" rel="icon" type="image/png" sizes="16x16"/>
+        </f:facet>
+    <title>Datapoint Intranet</title>
+
+    <!-- **JS** -->
+    <!-- OPTIONAL DEPENDENCIES -->
+    <!-- When enabled, ripple animation is activated. -->
+    <h:outputScript name="ripple/ripple.js" library="layout" rendered="#{app.ripple}" />
+
+    <!-- LAYOUT DEPENDENCIES -->
+    <!-- The menu widget dependencies are loaded by UltimaMenu. @see UltimaMenu.java -->
+    <h:outputScript name="js/layout.js" library="layout" />
+
+    <!-- APP DEPENDENCIES -->
+    <ui:insert name="head" />
+</h:head>
+
+<h:body styleClass="#{app.bodyClass}">
+        
+        <div class="wrapper">
+            <header class="page-header">                  
+                <style>
+                    body .ui-menu.ui-menubar { padding: 0rem; }
+                </style>
+                <h:form id="PrincipalForm">  
+                    <p:growl id="messages" life="800"/>
+                    <p:menubar>
+                        <p:menuitem id="logo">
+                            <p:graphicImage url="#{resource['smallLogo.png']}" style="height: 35px; padding: 0; z-index: -5"/>
+                        </p:menuitem>  
+                        <p:submenu label="#{LoginBean.loggedInUser.getFullName()}" icon="pi pi-user" class="ui-menuitem ui-menubar-options ui-widget ui-corner-all">
+                            <p:menuitem value="Home" outcome="/index.xhtml" icon="pi pi-home"/>
+                            <p:separator/>                            
+                            <p:menuitem value="Reset Password" update=":SelMUsuEditPassForm" onclick="PF('SelMUsuEditPassDialog').show()" oncomplete="PF('SelMUsuEditPassDialog').show()" icon="pi pi-pencil"/>
+                            <p:separator/>                            
+                            <p:menuitem actionListener="#{LoginBean.logout}" value="Close Session" ajax="false" icon="pi pi-power-off"/> 
+                        </p:submenu>                        
+                    </p:menubar> 
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+                            <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-sign-out" />
+                    </p:confirmDialog>   
+                    <p:poll listener="#{LoginBean.keepUserSessionAlive()}" interval="900000"/>  
+                    <p:idleMonitor timeout="900000">
+                       <p:ajax event="idle" listener="#{LoginBean.logout}" oncomplete="PF('idleDialog').show()" />
+                       <p:ajax event="active" update="@none"/>
+                   </p:idleMonitor>   
+                   <p:dialog
+                           header="Session Exceeded Idle Limit"
+                           widgetVar="idleDialog" closable="false"
+                           showEffect="fade" modal="true" style="min-height: 80px; min-width: 250px;">
+                           <h:outputText value="Session Terminated" style="font-size: larger"/>
+                           <p:commandButton id="idRelogin" 
+                                            type="button" actionListener="#{LoginBean.logout}"
+                                            icon="pi pi-sign-out" value="Login again" style="margin-left: .5rem;"/>
+                           <p:menu overlay="true" trigger="idRelogin" my="left top" at="left bottom">
+                               <p:menuitem value="Login again" outcome="/login.xhtml" icon="pi pi-sign-out" oncomplete="PF('idleDialog').hide()"/>
+                           </p:menu>
+                   </p:dialog>                
+                </h:form>    
+            
+            </header>            
+            
+            <main class="page-main">          
+              
+                <p:messages id="IdMssg" showDetail="true" closable="true" />
+                <p:growl id="growl" life="800" showDetail="true" />
+                <ui:include src="resetPassword.xhtml"/>
+                <ui:insert name="body"/>
+
+            </main>
+            <footer>
+                <h:outputText value="Datapoint - RawData ® - v.1.0 - 2024" style="z-index: 5; float: right;margin-right: 5px;font-size: 0.6rem"/>
+            </footer>            
+        </div>            
+    </h:body>
+</html>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+          <h:outputStylesheet name="css/monthly.css"/>
+          <style>
+                #popUpBarSummary {
+                    width: 80vw;   /* 80% of the viewport width */
+                    height: 90vh;  /* 50% of the viewport height */
+                    background-color: lightblue;
+                    overflow-y: auto;
+                }              
+          </style>
+    </h:head>
+    <ui:composition template="/template.xhtml">
+        
+        <ui:define name="title"><h:outputText value="RawData"/></ui:define>
+        
+        <ui:define name="content">                    
+            <h:form id="TblRawDataListForm">               
+                <style>
+                    body .ui-inputfield {
+                        width: 100%;
+                    }
+                    .ui-grouped-column{
+                        border-color: #e4e4e4 !important;
+                        border-width: 1px !important;                    
+                    }
+                    .ui-filter-column .ui-column-customfilter .custom-filter {
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .ui-datatable thead th {
+                        text-align: center !important;
+                        font-size: 0.9rem !important;
+                    }
+                    
+                    .ui-datatable tbody td {
+                        font-size: 0.8rem !important;
+                    }                    
+                    /*.ui-menu {
+                        background: #607D8B !important;
+                    }*/
+                    .tdReadOnly{
+                        background: rgba(0, 0, 0, 0.03);
+                    }   
+                    .trCompleted{
+                        background: rgb(96 125 139 / 30%) !important;
+                        color: #000 !important;
+                    }
+                    .tdGreen{
+                        background: rgb(96 125 139 / 34%) !important;
+                    }
+                    .layout-wrapper .layout-main .layout-content{
+                     /*overflow-y: hidden;   */
+                    }
+                </style>
+                <p:growl id="messages"/>
+                <p:panel style="width: 100%;" id="idPanelCabecera">                      
+                    <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 3rem"></i>
+                    </p:blockUI>                    
+                    <p:dataTable id="datalist" value="#{tblRawDataController.itemsPerf}"
+                                 var="item" widgetVar="WdataList" selectionMode="single"
+                                 selection="#{tblRawDataController.selectedPerf}" rowKey="#{item.id}" 
+                                 filteredValue="#{tblRawDataController.filteredItems}"
+                                 globalFilterFunction="#{tblRawDataController.globalFilterFunction}"
+                                 emptyMessage="No data found with given criteria"   
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                                 rowsPerPageTemplate="15,30,45,{ShowAll|'All'}" 
+                                 scrollable="true" resizableColumns="true" paginator="true" 
+                                 scrollRows="15" rows="15" stripedRows="true" paginatorPosition="top"   
+                                 >                                                
+                        <f:facet name="paginatorTopLeft">
+                            <p:outputLabel for="monthoption" value="Month"/>
+                            <p:datePicker id="monthoption" value="#{tblRawDataController.DMonthSelected}"
+                                  readonlyInput="true" view="month" pattern="MMM/yyyy" 
+                                  yearNavigator="true" yearRange="2025:2026" size="10">                               
+                                <p:ajax event="change" listener="#{tblRawDataController.getPerfCalendarByMonth()}"/>                                   
+                            </p:datePicker>                              
+                            <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
+                            <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">
+                                <f:selectItems value="#{tblRawDataController.itemsVPartners}" itemLabel="#{itemPartner}" itemValue="#{itemPartner}"/>
+                                <p:ajax update="barsButton" process="@this" partialSubmit="true"/>
+                            </p:selectOneMenu> 
+                            
+                            <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" 
+                                             title="SEARCH" action="#{tblRawDataController.getItemPerfByMonthYear()}"
+                                             onstart="PF('buiDatatable').show()"
+                                             oncomplete="PF('buiDatatable').hide()"                                                
+                                             update="datalist, btnFilesUpload, idcleardata"/>                       
+
+                            <p:commandButton style="margin-left: 2px;" id="summaryButton" title="Summary Data" 
+                                             icon="pi pi-list" oncomplete="PF('summaryDialog').show()"
+                                             actionListener="#{tblRawDataController.getDataPerGoals()}" 
+                                             update=":TblRawDataSummForm:dataSummaryCampaign"                                             
+                                             />                                                                             
+
+                            <p:commandButton style="margin-left: 2px;" id="barsButton" title="Charts" icon="pi pi-chart-bar" oncomplete="PF('barsDialog').show();"
+                                             actionListener="#{tblRawDataController.getDataBarListPerfGraphs()}"
+                                             update=":TblDataPerfListForm"                                         
+                                             />                  
+                                                        
+                            <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
+                                                 icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 2px;"/>
+                            <p:commandButton id="idcleardata" title="Clear Data"
+                                             actionListener="#{tblRawDataController.deletePerfData()}"
+                                             disabled="#{empty tblRawDataController.itemsPerf}" style="margin-left: 2px;"
+                                             icon="pi pi-trash" update="TblRawDataListForm:datalist, btnFilesUpload">
+                                <p:confirm header="Confirmation" message="Are you sure you want to delete the data?" icon="pi pi-sync"/>                                                                                
+                            </p:commandButton>                            
+                            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                                <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
+                            </p:confirmDialog> 
+                        </f:facet>    
+                        <f:facet name="paginatorTopRight">
+                            <div class="ui-datatable-header ui-widget-header ui-corner-top">
+                                <h:outputText value="PERFORMANCE" style="font-size: large"/>
+                            </div>
+                        </f:facet>                    
+                        <p:column field="iSemana" width="60" headerText="Week" style="text-align: center;" filterMatchMode="exact" sortable="false">                     
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idweeks" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItem itemLabel="W1" itemValue="1"/>
+                                    <f:selectItem itemLabel="W2" itemValue="2"/>
+                                    <f:selectItem itemLabel="W3" itemValue="3"/>
+                                    <f:selectItem itemLabel="W4" itemValue="4"/>
+                                    <f:selectItem itemLabel="W5" itemValue="5"/>
+                                </p:selectOneMenu>
+                            </f:facet>                                                          
+                            <h:outputText value="#{item.iSemana}"/>
+                        </p:column> 
+                        <p:column width="90" field="vClient" headerText="Advertiser" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="idclients" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawClient}" />
+                                </p:selectOneMenu>
+                            </f:facet>                             
+                            <h:outputText value="#{item.vClient}"/>
+                        </p:column>                        
+                        <p:column field="vCampaign" width="200" headerText="Campaign" filterMatchMode="exact">                      
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="campaigns" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawCampaign}" />
+                                </p:selectOneMenu>
+                            </f:facet>                              
+                            <h:outputText value="#{item.vCampaign}"/>
+                        </p:column>
+                        <p:column width="300" field="vInsertionOrder" headerText="Insertion Order" filterMatchMode="exact">   
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="insertionOrders" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawInsertionOrders}" />
+                                </p:selectOneMenu>
+                            </f:facet>                            
+                            <h:outputText value="#{item.vInsertionOrder}"/>
+                        </p:column>
+                        <p:column width="300" filterBy="#{item.vLineItem}" headerText="Line Item" filterMatchMode="contains">                           
+                            <h:outputText value="#{item.vLineItem}"/>
+                        </p:column>
+                        <p:column field="vDeviceType" width="200" headerText="Device Type" filterMatchMode="exact">
+                            <f:facet name="filter">
+                                <p:selectOneMenu id="exchanges" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                    <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{tblRawDataController.rawDeviceTypes}" />
+                                </p:selectOneMenu>
+                            </f:facet>                                
+                            <h:outputText value="#{item.vDeviceType}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: right" headerText="CPM">
+                            <h:outputText value="#{item.dRevenueCPM}"><f:convertNumber type="currency"  locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="50" style="text-align: right" headerText="CTR">
+                            <h:outputText value="#{item.dClickRate}"><f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/></h:outputText>                            
+                        </p:column>
+                        <p:column width="60" style="text-align: right" headerText="Impressions">
+                            <h:outputText value="#{item.iImpressions}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: right" headerText="Clicks">
+                            <h:outputText value="#{item.iClicks}"/>
+                        </p:column>
+                    </p:dataTable>            
+                </p:panel>
+                <p:dialog header="Extract data from file" widgetVar="dlg2" showEffect="fade" modal="true" style="min-height: 120px;min-width: 450px;">
+                    <div style="overflow-y: hidden; height: 300px;" id="divAvailableHosts">
+                        <p:outputLabel for="iweek" value="Data belongs to week"/>
+                        <p:selectOneMenu id="iweek" value="#{tblRawDataController.iWeek}" style="margin-left: 3px; width: 60px;">
+                            <f:selectItem itemLabel="1" itemValue="1"/>
+                            <f:selectItem itemLabel="2" itemValue="2"/>
+                            <f:selectItem itemLabel="3" itemValue="3"/>
+                            <f:selectItem itemLabel="4" itemValue="4"/>                               
+                            <f:selectItem itemLabel="5" itemValue="5"/>
+                            <p:ajax event="change" partialSubmit="true" process="@this"/>
+                        </p:selectOneMenu> 
+                        <p:fileUpload id="idFile" listener="#{tblRawDataController.handleFilePerfUploadWeeklyData}" 
+                                  mode="advanced" sequential="true"
+                                  update="TblRawDataListForm:datalist, messages" sizeLimit="5000000" 
+                                  allowTypes="/(\.|\/)(csv|xlsx)$/" accept=".csv,.xlsx"                                       
+                                  invalidSizeMessage="Maximum file size allowed is 1MB"
+                                  invalidFileMessage="only xlsx or csv is allowed" 
+                                  >                                    
+                        </p:fileUpload>
+
+                    </div>    
+                </p:dialog>                    
+            </h:form>                                                                    
+            <ui:include src="PerSummary.xhtml"/>
+            <ui:include src="PerfGraphs.xhtml"/>
+        </ui:define>
+        
+    </ui:composition>
+</html>

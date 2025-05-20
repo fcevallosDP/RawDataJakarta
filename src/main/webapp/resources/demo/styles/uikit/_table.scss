@@ -1,0 +1,24 @@
+.table-demo {
+    .ui-datatable .ui-column-filter {
+        display: none;
+    }
+
+    .customers-table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .ui-progressbar-value.ui-widget-header {
+        background: #607d8b;
+    }
+}
+
+@media (max-width: 640px) {
+    .table-demo {
+        .ui-progressbar {
+            margin-top: .5rem;
+        }
+    }
+}

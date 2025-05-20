@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="/template.xhtml">
+        
+        <ui:define name="title"><h:outputText value="RawData"/></ui:define>
+
+        <ui:define name="content">           
+            <h:form id="TblRawDataListForm">
+                <style>
+                    body .ui-inputfield {
+                        width: 100%;
+                    }
+                </style>
+                <p:growl id="messages"/>
+                <p:panel style="width: 100%;" id="idPanelCabecera">                      
+                    <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 3rem"></i>
+                    </p:blockUI>                    
+                    <p:dataTable id="datalist" value="#{tblRawDataController.pacingItems}"
+                                 var="item" widgetVar="WdataList"                                                           
+                                 emptyMessage="No data found with given criteria"   
+                                 rowKey="#{item.id}" paginator="true" paginatorPosition="top"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                                 rowsPerPageTemplate="15,30,45,{ShowAll|'All'}" stripedRows="true"                                
+                                 style="width:100% !important; height: 100% !important; overflow-x: auto;" scrollable="true" resizableColumns="true" 
+                                 scrollRows="15" rows="15"
+                                 >
+                                 
+                        <f:facet name="header">
+                            <h:outputText value="HISTORICAL PACING" style="font-size: larger"/>
+                        </f:facet>
+                                 
+                        <f:facet name="paginatorTopLeft">
+                            <p:outputLabel for="monthoption" value="Month"/>
+                            <p:selectOneMenu id="monthoption" value="#{tblRawDataController.IMonth}" style="margin-left: 5px;width: 100px;">
+                                <f:selectItem itemLabel="Jan" itemValue="1"/>
+                                <f:selectItem itemLabel="Feb" itemValue="2"/>
+                                <f:selectItem itemLabel="Mar" itemValue="3"/>
+                                <f:selectItem itemLabel="Apr" itemValue="4"/>
+                                <f:selectItem itemLabel="May" itemValue="5"/>
+                                <f:selectItem itemLabel="Jun" itemValue="6"/>
+                                <f:selectItem itemLabel="Jul" itemValue="7"/>
+                                <f:selectItem itemLabel="Aug" itemValue="8"/>
+                                <f:selectItem itemLabel="Sep" itemValue="9"/>
+                                <f:selectItem itemLabel="Oct" itemValue="10"/>
+                                <f:selectItem itemLabel="Nov" itemValue="11"/>
+                                <f:selectItem itemLabel="Dec" itemValue="12"/>
+                            </p:selectOneMenu>                                
+   
+                            <p:outputLabel for="yearoption" value="Year" style="margin-left: 5px;"/>
+                            <p:selectOneMenu id="yearoption" value="#{tblRawDataController.IYear}" style="margin-left: 5px;width: 80px;">
+                                <f:selectItem itemLabel="2021" itemValue="2021"/>
+                                <f:selectItem itemLabel="2022" itemValue="2022"/>
+                                <f:selectItem itemLabel="2023" itemValue="2023"/>
+                                <f:selectItem itemLabel="2024" itemValue="2024"/>
+                                <f:selectItem itemLabel="2025" itemValue="2025"/>
+                            </p:selectOneMenu>                                
+                            
+                            <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" title="SEARCH" 
+                                             actionListener="#{tblRawDataController.getHistoricalPacingByParams()}" 
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"                                             
+                                             update="datalist,excelButton"/>
+                                                                                        
+                            <p:commandButton id="btnExpor" style="margin-left: 2px;" icon="pi pi-file-excel" ajax="false" title="Export as excel file" disabled="#{( empty tblRawDataController.pacingItems)}">
+                                <p:dataExporter type="xls" target="TblRawDataListForm:datalist" fileName="HistoricalPacing_#{tblRawDataController.todayAsString}" exportHeader="true" />
+                            </p:commandButton>                                                                                                      
+
+                            <p:commandButton id="excelButton" icon="pi pi-sync" style="margin-left: 2px;" ajax="false" title="Clear" type="button" onclick="PF('WdataList').clearFilters();"/>                        
+
+                        </f:facet>                                                                      
+                        <p:column width="50" headerText="Year" style="text-align: center">
+                            <h:outputText value="#{item.iYear}"/>
+                        </p:column>
+                        <p:column width="50" headerText="Month" style="text-align: center">                           
+                            <h:outputText value="#{item.iMonth}"/>
+                        </p:column>
+                        <p:column width="100" headerText="Agency" style="text-align: center">                         
+                            <h:outputText value="#{item.vAgency}"/>
+                        </p:column>
+                        <p:column width="150" headerText="Client">                      
+                            <h:outputText value="#{item.vClient}"/>
+                        </p:column>
+                        <p:column width="100" headerText="Channel" style="text-align: center">                         
+                            <h:outputText value="#{item.vChannel}"/>
+                        </p:column>
+                        <p:column width="80" headerText="Budget" style="text-align: right">                     
+                            <h:outputText value="#{item.dBudget}"><f:convertNumber type="currency" currencySymbol="$"/></h:outputText>                         
+                        </p:column>                                
+                        <p:column width="60" headerText="PMP Budget" style="text-align: right">                     
+                            <h:outputText value="#{item.dPMPBudget}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Campaign Spend" style="text-align: right">
+                            <h:outputText value="#{item.dCampaignSpend}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>      
+                        <p:column width="60" headerText="PMP Spend" style="text-align: right">
+                            <h:outputText value="#{item.dPMPSpend}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>      
+                        <p:column width="60" headerText="Consume Rate" style="text-align: right">
+                            <h:outputText value="#{item.dConsumeRate}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="PMP Rate" style="text-align: right">
+                            <h:outputText value="#{item.dPMPRate}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
+                        </p:column>
+                        <p:column width="60" headerText="Success Rate" style="text-align: right">
+                            <h:outputText value="#{item.dSuccessRate}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
+                        </p:column>
+                    </p:dataTable>                    
+                </p:panel>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

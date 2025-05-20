@@ -1,0 +1,18 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutFooterForm">
+        <div class="layout-footer flex align-items-center justify-content-between flex-wrap gap-3 p-4 shadow-2">
+            <p:graphicImage id="footer-logo" name="images/footer-#{app.lightLayout ? 'ultima' : 'ultima-dark'}.svg" library="layout" />
+            <div class="flex gap-2">
+                <p:commandButton icon="pi pi-github" styleClass="layout-footer-action rounded-button ui-button-flat ui-button-plain" />
+                <p:commandButton icon="pi pi-facebook" styleClass="layout-footer-action rounded-button ui-button-flat ui-button-plain" />
+                <p:commandButton icon="pi pi-twitter" styleClass="layout-footer-action rounded-button ui-button-flat ui-button-plain" />
+            </div>
+        </div>
+    </h:form>
+</ui:composition>

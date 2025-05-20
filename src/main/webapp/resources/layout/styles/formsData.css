@@ -1,0 +1,22 @@
+.title-rightClass{
+    padding: 0.8rem 1.5rem !important;
+}
+
+body .ui-rowgroup-header .ui-datatable-headerrow .ui-widget-header > tr {
+    background: #ffffff;
+    color: rgba(0, 0, 0, 0.87);
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, background-size 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+}
+
+body .ui-datatable .ui-datatable-data > tr {
+    background: #fff;
+    color: #495057;
+    transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s, opacity .2s;
+    outline: 0 none;
+}
+
+.rowgroup-contentClass {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

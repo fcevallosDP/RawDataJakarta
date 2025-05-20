@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition>
+        <p:dialog header="Line Items" id="popUpLineItem" widgetVar="productDialog" modal="true" showEffect="fade" width="640px"
+                              hideEffect="fade" resizable="false">   
+            <h:form id="TblRawDataLineForm">                
+                <p:dataTable id="datalineItem" value="#{tblRawDataController.spendLineItems}"
+                             var="lineitem" widgetVar="LineWdataList" scrollRows="3"                                                        
+                             emptyMessage="No data found with given criteria" scrollHeight="320px"
+                             style="overflow-y: auto;" editMode="cell" editable="true"
+                             rowKey="#{lineitem.id}" scrollable="true" resizableColumns="true">
+                    
+                    <p:ajax event="cellEdit" listener="#{tblRawDataController.onCellEdit}" update="TblRawDataLineForm, :TblRawDataListForm:messages"/>
+
+                    <p:headerRow field="vInsertionOrder" expandable="false" expanded="true">
+                        <p:column colspan="2">                            
+
+                            <p:inputText id="inputIO" value="#{tblRawDataController.vIOSelected}" style="width:90%"/>
+                            <p:commandButton id="btnUpdateIO" icon="pi pi-pencil" title="Update"
+                                            styleClass="rounded-button ui-button-success ui-button-flat" 
+                                            actionListener="#{tblRawDataController.onRenameIO()}" oncomplete="callButton2();" 
+                                            update="datalineItem, :TblRawDataListForm:datalist, :TblRawDataListForm:messages"/>                            
+                                            
+                        </p:column>
+                    </p:headerRow> 
+
+                    <p:column headerText="Line Item">
+                        <h:outputText value="#{lineitem.vLineItem}"/>
+                    </p:column>                            
+                    <p:column width="80" headerText="Yesterday Spend" style="text-align:right; white-space: wrap;">
+                        <h:outputText value="#{lineitem.dSpendYesterday}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                    </p:column>
+                    <p:summaryRow>
+                        <p:column colspan="2" style="text-align:right">
+                            <h:outputText value="#{tblRawDataController.getTotalSpendLineItems()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>                                    
+                    </p:summaryRow>
+                </p:dataTable>  
+                <p:contextMenu for="datalineItem" widgetVar="cMenu">
+                    <p:menuitem value="Edit Cell" icon="pi pi-search"
+                                onclick="PF('LineWdataList').showCellEditor();return false;"/>
+                    <p:menuitem value="Hide Menu" icon="pi pi-times" onclick="PF('cMenu').hide()"/>
+                </p:contextMenu>
+                <p:commandButton value="Close" onclick="productDialog.hide()" style="float: right"/>
+            </h:form>
+        </p:dialog>                                                                                              
+    </ui:composition>
+</html>

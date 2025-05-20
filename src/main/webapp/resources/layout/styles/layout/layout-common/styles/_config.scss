@@ -1,0 +1,84 @@
+.layout-config {
+    transition: transform $transitionDuration;
+
+    .ui-sidebar-content,
+    .layout-config-panel {
+        height: 100%;
+    }
+
+    .layout-config-options {
+        height: 100%;
+        overflow-y: auto;
+
+        .layout-config-color-option {
+            width: 1.75rem;
+            height: 1.75rem;
+            display: block;
+            position: relative;
+
+            &.ui-state-disabled {
+                opacity: .1;
+            }
+
+            .color {
+                display: inline-block;
+                width: 100%;
+                height: 100%;
+                border-radius: 4px;
+                border: 1px solid $dividerColor;
+            }
+
+            .check {
+                position: absolute;
+                left: 0;
+                top: 0;
+                z-index: 1;
+                pointer-events: none;
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        .grid-radio {
+            td {
+                padding-top: 1rem;
+            }
+
+            tr:first-child {
+                td {
+                    padding-top: 0;
+                }
+            }
+        }
+    }
+
+    p {
+        color: var(--text-color-secondary);
+    }
+
+    .scale-icon {
+        color: var(--surface-d);
+
+        &.scale-active {
+            color: var(--primary-color);
+        }
+    }
+}
+
+.layout-config-button.ui-button.ui-button-icon-only {
+    z-index: 1001;
+    position: fixed;
+    top: 50%;
+    right: 0;
+    width: auto;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    font-size: 2rem;
+    width: 3.5rem;
+
+    .ui-icon {
+        font-size: 2rem;
+        margin-top: -1rem;
+        margin-left: -1rem;
+    }
+}

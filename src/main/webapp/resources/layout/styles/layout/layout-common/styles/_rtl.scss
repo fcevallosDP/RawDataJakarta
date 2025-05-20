@@ -1,0 +1,53 @@
+body {
+    @import './menu/_rtl_menu';
+    @import './topbar/_rtl_topbar';
+
+    .layout-wrapper {
+        &.layout-rtl {
+            overflow-x: hidden; // TODO: Remove this line on the next version
+
+            .layout-breadcrumb-container {
+                .ui-breadcrumb .ui-breadcrumb-items li:not(.ui-breadcrumb-chevron):before {
+                    transform: rotate(180deg);
+                }
+            }
+
+            .layout-config-button.ui-button {
+                right: auto;
+                left: 0;
+                border-top-right-radius: $borderRadius;
+                border-bottom-right-radius: $borderRadius;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+
+                .ui-button-icon {
+                    font-size: 2rem;
+                }
+            }
+
+            .widget-bestsellers > li .bestseller-item .item-button {
+                margin-left: 0;
+                margin-right: auto;
+            }
+
+            .widget-chat {
+                .write-message {
+                    .ui-inputgroup-addon:first-child {
+                        border-top-left-radius: 0;
+                        border-bottom-left-radius: 0;
+                        border-top-right-radius: 30px;
+                        border-bottom-right-radius: 30px;
+                        border-left-width: 0;
+                    }
+
+                    .ui-inputgroup-addon:last-child {
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                        border-top-left-radius: 30px;
+                        border-bottom-left-radius: 30px;
+                    }
+                }
+            }
+        }
+    }
+}

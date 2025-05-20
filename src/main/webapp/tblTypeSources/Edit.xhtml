@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition>
+
+        <p:dialog id="TblTypeSourcesEditDlg" widgetVar="TblTypeSourcesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle1.EditTblTypeSourcesTitle}">
+            <h:form id="TblTypeSourcesEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{tblTypeSourcesController.selected != null}">
+                        <p:outputLabel value="#{bundle1.EditTblTypeSourcesLabel_id}" for="id" />
+                        <p:inputText id="id" value="#{tblTypeSourcesController.selected.id}" title="#{bundle1.EditTblTypeSourcesTitle_id}" required="true" requiredMessage="#{bundle1.EditTblTypeSourcesRequiredMessage_id}"/>
+                        <p:outputLabel value="#{bundle1.EditTblTypeSourcesLabel_VSource}" for="VSource" />
+                        <p:inputText id="VSource" value="#{tblTypeSourcesController.selected.VSource}" title="#{bundle1.EditTblTypeSourcesTitle_VSource}" required="true" requiredMessage="#{bundle1.EditTblTypeSourcesRequiredMessage_VSource}"/>
+                        <p:outputLabel value="#{bundle1.EditTblTypeSourcesLabel_VType}" for="VType" />
+                        <p:inputText id="VType" value="#{tblTypeSourcesController.selected.VType}" title="#{bundle1.EditTblTypeSourcesTitle_VType}" />
+                        <p:outputLabel value="#{bundle1.EditTblTypeSourcesLabel_DSystemDate}" for="DSystemDate" />
+                        <p:calendar id="DSystemDate" pattern="MM/dd/yyyy HH:mm:ss" value="#{tblTypeSourcesController.selected.DSystemDate}" title="#{bundle1.EditTblTypeSourcesTitle_DSystemDate}"  showOn="button"/>
+                        <p:outputLabel value="#{bundle1.EditTblTypeSourcesLabel_IEstado}" for="IEstado" />
+                        <p:selectBooleanCheckbox id="IEstado" value="#{tblTypeSourcesController.selected.IEstado}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{tblTypeSourcesController.update}" value="#{bundle1.Save}" update="display,:TblTypeSourcesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'TblTypeSourcesEditDialog');"/>
+                    <p:commandButton value="#{bundle1.Cancel}" onclick="TblTypeSourcesEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

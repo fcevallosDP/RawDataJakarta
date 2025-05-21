@@ -43,6 +43,11 @@ import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
 import org.primefaces.model.charts.optionconfig.title.Title;
 import org.primefaces.util.LangUtils;
 import com.google.gson.Gson;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Named("tblRawDataController")
 @ViewScoped
@@ -117,8 +122,8 @@ public class TblRawDataController implements Serializable {
     private BarChartModel barModelAD = new BarChartModel();
     private List<BarChartModel> barCampaignItems = new ArrayList<>();
     
-    private List<String> labels;
-    private List<Integer> valores;
+    private final Map<String, List<String>> labelsMap = new HashMap<>();
+    private final Map<String, List<Number>> valoresMap = new HashMap<>();
 
     public List<BarChartModel> getBarCampaignItems() {
         return barCampaignItems;
@@ -327,206 +332,114 @@ public class TblRawDataController implements Serializable {
         todayAsString = df.format(JsfUtil.getFechaSistema().getTime());               
     }
 
-    public void createHorizontalBarModelChannel(){
-        hbarModelCH = new HorizontalBarChartModel();
-        ChartData data = new ChartData();
+    public void createHorizontalBarModelChannel(List<TblBudgetTracker> bTrackerSummaryCH){
+        if( bTrackerSummaryCH != null && !bTrackerSummaryCH.isEmpty()){
+            List<Number> values = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            lbChartExpandedCH = (bTrackerSummaryCH.size() > iShowQtyRows);
 
-        HorizontalBarChartDataSet hbarDataSet = new HorizontalBarChartDataSet();
-        hbarDataSet.setLabel("Budget Pacing");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
+            for (TblBudgetTracker itemTracker : bTrackerSummaryCH) {
+                Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                values.add(ldValor);
+                labels.add(itemTracker.getvChannel());
+            }        
 
-        for (TblBudgetTracker itemTracker : bTrackerSummaryCH) {
-            Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
-            values.add(ldValor);
-            bgColor.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getbUnderPacing()) ? "rgb(217,134,134)" :"rgb(54, 162, 235, 0.2)"));
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemTracker.getvChannel());
-        }        
-        
-        hbarDataSet.setData(values);
-        hbarDataSet.setBackgroundColor(bgColor);                 
-        hbarDataSet.setBorderColor(borderColor);
-        hbarDataSet.setBorderWidth(1); 
-        
-                
-        data.addChartDataSet(hbarDataSet); 
-        
-        data.setLabels(labels);
-        hbarModelCH.setData(data);
+            if(lbChartExpandedCH){
+                labelsMap.put("barChartCH", IntStream.rangeClosed(1, 20)
+                    .mapToObj(i -> "Etiqueta " + i)
+                    .collect(Collectors.toList()));
 
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Pacing Bar Chart");
-        options.setTitle(title);
-
-        hbarModelCH.setOptions(options);
+                valoresMap.put("barChartCH", IntStream.rangeClosed(1, 20)
+                    .map(i -> new Random().nextInt(100))
+                    .boxed()
+                    .collect(Collectors.toList()));             
+            }else{
+                labelsMap.put("barChartCH", labels);
+                valoresMap.put("barChartCH", values);              
+            }            
+        }
         
     }
-    public void createHorizontalBarModelInsertionOrder(){
-        hbarModelI = new HorizontalBarChartModel();
-        ChartData data = new ChartData();
+    public void createHorizontalBarModelInsertionOrder(List<TblBudgetTracker> bTrackerSummaryIO){
+        if( bTrackerSummaryIO != null && !bTrackerSummaryIO.isEmpty()){        
+            List<Number> values = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            lbChartExpandedIO = (bTrackerSummaryIO.size() > iShowQtyRows);
 
-        HorizontalBarChartDataSet hbarDataSet = new HorizontalBarChartDataSet();
-        hbarDataSet.setLabel("Budget Pacing");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
+            for (TblBudgetTracker itemTracker : bTrackerSummaryIO) {
+                Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                values.add(ldValor);            
+                labels.add(itemTracker.getvInsertionOrder());
+            }
 
-        for (TblBudgetTracker itemTracker : bTrackerSummaryIO) {
-            Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
-            values.add(ldValor);            
-            bgColor.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderpacingRed / 100.00)) ? "rgb(217,134,134)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderPacingOrange / 100.00)) ? "rgb(245, 207, 110)" : "rgb(54, 162, 235, 0.2)")));
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemTracker.getvInsertionOrder());
-        }//item.setbUnderPacing(item.getdDifBudgetPacPerc() < (-0.03));             
-        
-        hbarDataSet.setData(values);
-        hbarDataSet.setBackgroundColor(bgColor);                 
-        hbarDataSet.setBorderColor(borderColor);
-        hbarDataSet.setBorderWidth(1);                         
-        data.addChartDataSet(hbarDataSet);         
-        data.setLabels(labels);
-        hbarModelI.setData(data);
+            /*if(lbChartExpandedIO){
+                labelsMap.put("barChartIO", IntStream.rangeClosed(1, 20)
+                    .mapToObj(i -> "Etiqueta " + i)
+                    .collect(Collectors.toList()));
 
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Pacing Bar Chart");
-        options.setTitle(title);
-
-        hbarModelI.setOptions(options);       
+                valoresMap.put("barChartIO", IntStream.rangeClosed(1, 20)
+                    .map(i -> new Random().nextInt(100))
+                    .boxed()
+                    .collect(Collectors.toList()));             
+            }else{*/
+                labelsMap.put("barChartIO", labels);
+                valoresMap.put("barChartIO", values);              
+            //}
+        }
     }
-    public void createHorizontalBarModelCampaign(){
-        hbarModelC = new HorizontalBarChartModel();
-        ChartData data = new ChartData();
+    public void createHorizontalBarModelCampaign(List<TblBudgetTracker> bTrackerSummaryCA){
+        if( bTrackerSummaryCA != null && !bTrackerSummaryCA.isEmpty()){
+            List<Number> values = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            lbChartExpandedCA = (bTrackerSummaryCA.size() > iShowQtyRows);
 
-        HorizontalBarChartDataSet hbarDataSet = new HorizontalBarChartDataSet();
-        hbarDataSet.setLabel("Budget Pacing");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
+            for (TblBudgetTracker itemTracker : bTrackerSummaryCA) {
+                Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                values.add(ldValor);
+                labels.add(itemTracker.getvCampaign());
+            }        
 
-        for (TblBudgetTracker itemTracker : bTrackerSummaryCA) {
-            Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
-            values.add(ldValor);
-            bgColor.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderpacingRed / 100.00)) ? "rgb(217,134,134)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderPacingOrange / 100.00)) ? "rgb(245, 207, 110)" : "rgb(54, 162, 235, 0.2)")));
-//            bgColor.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getbUnderPacing()) ? "rgb(217,134,134)" :"rgb(54, 162, 235, 0.2)"));
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemTracker.getvCampaign());
+            if(lbChartExpandedCA){
+                labelsMap.put("barChartCP", IntStream.rangeClosed(1, 20)
+                    .mapToObj(i -> "Etiqueta " + i)
+                    .collect(Collectors.toList()));
+
+                valoresMap.put("barChartCP", IntStream.rangeClosed(1, 20)
+                    .map(i -> new Random().nextInt(100))
+                    .boxed()
+                    .collect(Collectors.toList()));             
+            }else{
+                labelsMap.put("barChartCP", labels);
+                valoresMap.put("barChartCP", values);              
+            }                    
         }        
-        
-        hbarDataSet.setData(values);
-        hbarDataSet.setBackgroundColor(bgColor);                 
-        hbarDataSet.setBorderColor(borderColor);
-        hbarDataSet.setBorderWidth(1); 
-        
-                
-        data.addChartDataSet(hbarDataSet); 
-        
-        data.setLabels(labels);
-        hbarModelC.setData(data);
-
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Pacing Bar Chart");
-        options.setTitle(title);
-
-        hbarModelC.setOptions(options);
-        
     }
-    public void createHorizontalBarModel(){
-        hbarModel = new HorizontalBarChartModel();
-        ChartData data = new ChartData();
+    public void createHorizontalBarModel(List<TblBudgetTracker> bTrackerSummaryAD){
+        if( bTrackerSummaryAD != null && !bTrackerSummaryAD.isEmpty()){
+            List<Number> values = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
+            lbChartExpandedAD = (bTrackerSummaryAD.size() > iShowQtyRows);
 
-        HorizontalBarChartDataSet hbarDataSet = new HorizontalBarChartDataSet();
-        hbarDataSet.setLabel("Budget Pacing");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
+            for (TblBudgetTracker itemTracker : bTrackerSummaryAD) {
+                Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
+                values.add(ldValor);
+                labels.add(itemTracker.getvClient());
+            }        
+            if(lbChartExpandedAD){
+                labelsMap.put("barChartAD", IntStream.rangeClosed(1, 20)
+                    .mapToObj(i -> "Etiqueta " + i)
+                    .collect(Collectors.toList()));
 
-        for (TblBudgetTracker itemTracker : bTrackerSummaryAD) {
-            Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
-            values.add(ldValor);
-            bgColor.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getbUnderPacing()) ? "rgb(217,134,134)" :"rgb(54, 162, 235, 0.2)"));
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemTracker.getvClient());
-        }        
-        
-        hbarDataSet.setData(values);
-        hbarDataSet.setBackgroundColor(bgColor);                 
-        hbarDataSet.setBorderColor(borderColor);
-        hbarDataSet.setBorderWidth(1); 
-        
-                
-        data.addChartDataSet(hbarDataSet); 
-        
-        data.setLabels(labels);
-        hbarModel.setData(data);
+                valoresMap.put("barChartAD", IntStream.rangeClosed(1, 20)
+                    .map(i -> new Random().nextInt(100))
+                    .boxed()
+                    .collect(Collectors.toList()));             
+            }else{
+                labelsMap.put("barChartAD", labels);
+                valoresMap.put("barChartAD", values);              
+            }                    
 
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Pacing Bar Chart");
-        options.setTitle(title);
-
-        hbarModel.setOptions(options);
-        
+        }
     }                       
     
     public HorizontalBarChartModel getHbarModelC() {
@@ -1338,34 +1251,20 @@ public class TblRawDataController implements Serializable {
         
     }
 
-    public String getLabelsJson() {
-        return new Gson().toJson(labels);
+    public String getLabelsJson(String id) {
+        return new Gson().toJson(labelsMap.getOrDefault(id, Collections.emptyList()));
     }
 
-    public String getValoresJson() {
-        return new Gson().toJson(valores);
-    }    
+    public String getValoresJson(String id) {
+        return new Gson().toJson(valoresMap.getOrDefault(id, Collections.emptyList()));
+    }
     
     public void getDataBudgetTrackerGraphs(){
-        // Simulación de extracción desde BD (aquí iría tu lógica real con JDBC o JPA)
-        labels = Arrays.asList("Ene", "Feb", "Mar", "Abr", "May");
-        valores = Arrays.asList(40, 55, 35, 80, 50);        
-        /*
-        DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";   
-        bTrackerSummaryIO = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder");
-        lbChartExpandedIO = (bTrackerSummaryIO != null && bTrackerSummaryIO.size() > iShowQtyRows);
-        bTrackerSummaryCA = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign");
-        lbChartExpandedCA = (bTrackerSummaryCA != null && bTrackerSummaryCA.size() > iShowQtyRows);
-        bTrackerSummaryCH = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel");
-        lbChartExpandedCH = (bTrackerSummaryCH != null && bTrackerSummaryCH.size() > iShowQtyRows);
-        bTrackerSummaryAD = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient");         
-        lbChartExpandedAD = (bTrackerSummaryAD != null && bTrackerSummaryAD.size() > iShowQtyRows);
-        
-        createHorizontalBarModelInsertionOrder();
-        createHorizontalBarModelCampaign();
-        createHorizontalBarModelChannel();
-        createHorizontalBarModel();                
-        */
+        DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
+        createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
+        createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
+        createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
+        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));                        
     }      
     
     public void getDataBudgetTrackerSumaryGraph(){
@@ -1373,7 +1272,7 @@ public class TblRawDataController implements Serializable {
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";
         budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient");
         if (budgetTrackerSummary != null && !budgetTrackerSummary.isEmpty()){
-            createHorizontalBarModel();
+            createHorizontalBarModel(budgetTrackerSummary);
         }
     }  
 
@@ -1382,7 +1281,7 @@ public class TblRawDataController implements Serializable {
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";
         budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign");
         if (budgetTrackerSummary != null && !budgetTrackerSummary.isEmpty()){
-            createHorizontalBarModelCampaign();
+            createHorizontalBarModelCampaign(budgetTrackerSummary);
         }
     }  
     

@@ -1,0 +1,35 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui">
+
+    <p:dialog id="dashboardDialog"
+              widgetVar="dashboardDialog"
+              modal="true"
+              resizable="false"
+              draggable="true"
+              positionType="absolute"
+              position="top"
+              style="top: 5vh; max-width: 80vw; max-height: 90vh; overflow-y: auto;">
+
+        <h:form id="dashboardForm">
+            <h:outputText value="Total charts: #{tblRawDataController.chartIds.size()}" style="color: red;" />
+
+            <p:dataGrid value="#{tblRawDataController.chartIds}" var="chartId" columns="2" layout="grid" style="overflow-y: auto;"> 
+
+                <div class="surface-card shadow-2 p-3 border-round">
+                    <ui:include src="/includes/chart-render.xhtml">
+                        <ui:param name="canvasId" value="#{chartId}" />
+                        <ui:param name="chartTitle" value="#{tblRawDataController.getChartTitle(chartId)}" />
+                        <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson(chartId)}" />
+                        <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson(chartId)}" />
+                    </ui:include>
+                </div>
+
+            </p:dataGrid>
+
+        </h:form>
+
+    </p:dialog>
+
+</ui:composition>

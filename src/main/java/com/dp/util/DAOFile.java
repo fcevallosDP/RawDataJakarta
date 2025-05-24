@@ -5625,6 +5625,8 @@ public class DAOFile implements Serializable  {
             if (lsSource.contains("DSP")){                
                 if (lsFileName.contains("DV360")){
                     save_Items(lsFileName, scrap_DV360_Format(itemFile, idDaily));
+                }else if (lsFileName.contains("HLK")){
+                    save_Items(lsFileName, scrap_DV360_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("Basis")){
                     save_Items(lsFileName, scrap_BASIS_Format(itemFile, idDaily));                          
                 }else if (lsFileName.contains("Domain-Detailed")){

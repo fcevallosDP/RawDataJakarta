@@ -42,6 +42,8 @@ import org.primefaces.model.charts.hbar.HorizontalBarChartDataSet;
 import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
 import org.primefaces.model.charts.optionconfig.title.Title;
 import org.primefaces.util.LangUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,13 +64,9 @@ public class TblRawDataController implements Serializable {
     private List<TblBudgetTracker> budgetTrackerItems = null;
     private List<TblBudgetTracker> budgetTrackerSummary = null;
     private List<TblBudgetTracker> bTrackerSummaryIO = null;
-    private boolean lbChartExpandedIO = false;
     private List<TblBudgetTracker> bTrackerSummaryCA = null;
-    private boolean lbChartExpandedCA = false;
     private List<TblBudgetTracker> bTrackerSummaryCH = null;
-    private boolean lbChartExpandedCH = false;
     private List<TblBudgetTracker> bTrackerSummaryAD = null;                
-    private boolean lbChartExpandedAD = false;
     private List<TblLineItems> spendLineItems = null;
     private TblBudgetTracker budgetSelected;
     private TblDV360SPD selected;
@@ -109,7 +107,6 @@ public class TblRawDataController implements Serializable {
     private Integer iYear;
     private Integer iMonth;
     private Integer iWeek;
-    private Integer iShowQtyRows;
     private Integer iUnderPacingOrange;
     private Integer iUnderpacingRed;
     public static Random numGen =new Random();
@@ -124,6 +121,7 @@ public class TblRawDataController implements Serializable {
     
     private final Map<String, List<String>> labelsMap = new HashMap<>();
     private final Map<String, List<Number>> valoresMap = new HashMap<>();
+    private final Map<String, String> chartTitles = new HashMap<>(); // nuevo mapa
 
     public List<BarChartModel> getBarCampaignItems() {
         return barCampaignItems;
@@ -169,18 +167,6 @@ public class TblRawDataController implements Serializable {
         this.rawDeviceTypes = rawDeviceTypes;
     }
 
-    public boolean isLbChartExpandedIO() {
-        return lbChartExpandedIO;
-    }
-
-    public void setLbChartExpandedIO(boolean lbChartExpandedIO) {
-        this.lbChartExpandedIO = lbChartExpandedIO;
-    }
-
-    public boolean isLbChartExpandedCA() {
-        return lbChartExpandedCA;
-    }
-
     public List<TblDV360SPD> getItemsPerfSummary() {
         return itemsPerfSummary;
     }
@@ -195,10 +181,6 @@ public class TblRawDataController implements Serializable {
 
     public void setSelectedPerf(TblDV360SPD selectedperf) {
         this.selectedPerf = selectedperf;
-    }
-
-    public void setLbChartExpandedCA(boolean lbChartExpandedCA) {
-        this.lbChartExpandedCA = lbChartExpandedCA;
     }
 
     public String getvIOSelected() {
@@ -234,22 +216,6 @@ public class TblRawDataController implements Serializable {
 
     public void setiUnderpacingRed(Integer iUnderpacingRed) {
         this.iUnderpacingRed = iUnderpacingRed;
-    }
-
-    public boolean isLbChartExpandedCH() {
-        return lbChartExpandedCH;
-    }
-
-    public void setLbChartExpandedCH(boolean lbChartExpandedCH) {
-        this.lbChartExpandedCH = lbChartExpandedCH;
-    }
-
-    public boolean isLbChartExpandedAD() {
-        return lbChartExpandedAD;
-    }
-
-    public void setLbChartExpandedAD(boolean lbChartExpandedAD) {
-        this.lbChartExpandedAD = lbChartExpandedAD;
     }
 
     public List<TblBudgetTracker> getbTrackerSummaryIO() {
@@ -304,11 +270,6 @@ public class TblRawDataController implements Serializable {
         this.hbarModelCH = hbarModelCH;
     }
 
-    protected void getiShowQtyRows() {   
-        DAOFile dbCon = new DAOFile();
-        iShowQtyRows = dbCon.getQtyParameter("%QTY%ROWS%IO%");                
-    }
-
     protected void getParamOrange() {   
         DAOFile dbCon = new DAOFile();
         iUnderPacingOrange = dbCon.getQtyParameter("%PCT%Underpacing%Orange%");                
@@ -321,7 +282,6 @@ public class TblRawDataController implements Serializable {
     
     public TblRawDataController() {
         internalLimpiar();
-        getiShowQtyRows();
         getParamOrange();
         getParamRed();
         getDateBounds();
@@ -336,27 +296,15 @@ public class TblRawDataController implements Serializable {
         if( bTrackerSummaryCH != null && !bTrackerSummaryCH.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
-            lbChartExpandedCH = (bTrackerSummaryCH.size() > iShowQtyRows);
-
+            
             for (TblBudgetTracker itemTracker : bTrackerSummaryCH) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);
                 labels.add(itemTracker.getvChannel());
             }        
 
-            if(lbChartExpandedCH){
-                labelsMap.put("barChartCH", IntStream.rangeClosed(1, 20)
-                    .mapToObj(i -> "Etiqueta " + i)
-                    .collect(Collectors.toList()));
-
-                valoresMap.put("barChartCH", IntStream.rangeClosed(1, 20)
-                    .map(i -> new Random().nextInt(100))
-                    .boxed()
-                    .collect(Collectors.toList()));             
-            }else{
-                labelsMap.put("barChartCH", labels);
-                valoresMap.put("barChartCH", values);              
-            }            
+            labelsMap.put("barChartCH", labels);
+            valoresMap.put("barChartCH", values);              
         }
         
     }
@@ -364,7 +312,6 @@ public class TblRawDataController implements Serializable {
         if( bTrackerSummaryIO != null && !bTrackerSummaryIO.isEmpty()){        
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
-            lbChartExpandedIO = (bTrackerSummaryIO.size() > iShowQtyRows);
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryIO) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
@@ -372,26 +319,15 @@ public class TblRawDataController implements Serializable {
                 labels.add(itemTracker.getvInsertionOrder());
             }
 
-            /*if(lbChartExpandedIO){
-                labelsMap.put("barChartIO", IntStream.rangeClosed(1, 20)
-                    .mapToObj(i -> "Etiqueta " + i)
-                    .collect(Collectors.toList()));
+            labelsMap.put("barChartIO", labels);
+            valoresMap.put("barChartIO", values);              
 
-                valoresMap.put("barChartIO", IntStream.rangeClosed(1, 20)
-                    .map(i -> new Random().nextInt(100))
-                    .boxed()
-                    .collect(Collectors.toList()));             
-            }else{*/
-                labelsMap.put("barChartIO", labels);
-                valoresMap.put("barChartIO", values);              
-            //}
         }
     }
     public void createHorizontalBarModelCampaign(List<TblBudgetTracker> bTrackerSummaryCA){
         if( bTrackerSummaryCA != null && !bTrackerSummaryCA.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
-            lbChartExpandedCA = (bTrackerSummaryCA.size() > iShowQtyRows);
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryCA) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
@@ -399,46 +335,23 @@ public class TblRawDataController implements Serializable {
                 labels.add(itemTracker.getvCampaign());
             }        
 
-            if(lbChartExpandedCA){
-                labelsMap.put("barChartCP", IntStream.rangeClosed(1, 20)
-                    .mapToObj(i -> "Etiqueta " + i)
-                    .collect(Collectors.toList()));
-
-                valoresMap.put("barChartCP", IntStream.rangeClosed(1, 20)
-                    .map(i -> new Random().nextInt(100))
-                    .boxed()
-                    .collect(Collectors.toList()));             
-            }else{
-                labelsMap.put("barChartCP", labels);
-                valoresMap.put("barChartCP", values);              
-            }                    
+            labelsMap.put("barChartCP", labels);
+            valoresMap.put("barChartCP", values);              
         }        
     }
     public void createHorizontalBarModel(List<TblBudgetTracker> bTrackerSummaryAD){
         if( bTrackerSummaryAD != null && !bTrackerSummaryAD.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
-            lbChartExpandedAD = (bTrackerSummaryAD.size() > iShowQtyRows);
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryAD) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);
                 labels.add(itemTracker.getvClient());
             }        
-            if(lbChartExpandedAD){
-                labelsMap.put("barChartAD", IntStream.rangeClosed(1, 20)
-                    .mapToObj(i -> "Etiqueta " + i)
-                    .collect(Collectors.toList()));
-
-                valoresMap.put("barChartAD", IntStream.rangeClosed(1, 20)
-                    .map(i -> new Random().nextInt(100))
-                    .boxed()
-                    .collect(Collectors.toList()));             
-            }else{
-                labelsMap.put("barChartAD", labels);
-                valoresMap.put("barChartAD", values);              
-            }                    
-
+            
+            labelsMap.put("barChartAD", labels);
+            valoresMap.put("barChartAD", values);              
         }
     }                       
     
@@ -898,8 +811,7 @@ public class TblRawDataController implements Serializable {
             JsfUtil.addErrorMessage("Something went wrong! Try again");
         }
     }
-    
-    
+        
     public List<TblDV360SPD> getMonthlyItems() {
         if ((monthlyItems == null || monthlyItems.isEmpty()) && dMonthSelected != null) {
             LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
@@ -949,9 +861,7 @@ public class TblRawDataController implements Serializable {
         DAOFile dbCon = new DAOFile();
         itemsPerfSummary = dbCon.getPerfDataGoals(iYear, iMonth, vPartnerSelected);
     }      
-    
-
-    
+        
     public void getDataBudgetTrackerSumary(){
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();
@@ -988,35 +898,42 @@ public class TblRawDataController implements Serializable {
         createBarModelInsertionOrder(dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));        
         createBarModelAd(dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, "vAdvertiser"));                
     }       
-    
-    public void getDataBarListPerfGraphs(){
-        barCampaignItems = new ArrayList<>();
-        DAOFile dbCon = new DAOFile(); //vAdvertiser, vCampaign, vInsertionOrder
+  
+    public void getDataBarListPerfGraphs() {
+        labelsMap.clear();
+        valoresMap.clear();
+        chartTitles.clear(); // importante
+
+        DAOFile dbCon = new DAOFile();
         List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
-        if(items != null){
-            List<String> labels = new ArrayList<>();
-            labels.add("W1");
-            labels.add("W2");
-            labels.add("W3");
-            labels.add("W4");
-            labels.add("W5");
-            labels.add("AVG");
-            labels.add("Goal");
-            for (TblDV360SPD itemPerf : items) {
-                if(itemPerf != null){
-                    List<Number> dataPoints = new ArrayList<>();                
-                    dataPoints.add(itemPerf.getdCPM_W1());
-                    dataPoints.add(itemPerf.getdCPM_W2());
-                    dataPoints.add(itemPerf.getdCPM_W3());
-                    dataPoints.add(itemPerf.getdCPM_W4());
-                    dataPoints.add(itemPerf.getdCPM_W5());
-                    dataPoints.add(itemPerf.getdAVG_W());
-                    dataPoints.add((itemPerf.getdCPMGoal() > 0) ? itemPerf.getdCPMGoal() : itemPerf.getdCTRGoal());
-                    barCampaignItems.add(createChart(itemPerf.getvCampaign(), dataPoints, labels));                    
+
+        if (items != null) {
+            List<String> labels = List.of("W1", "W2", "W3", "W4", "W5", "AVG", "Goal");
+            int count = 1;
+
+            for (TblDV360SPD item : items) {
+                if (item != null) {
+                    String chartId = "chart" + count++; // numérico incremental
+                    List<Number> dataPoints = List.of(
+                        item.getdCPM_W1(),
+                        item.getdCPM_W2(),
+                        item.getdCPM_W3(),
+                        item.getdCPM_W4(),
+                        item.getdCPM_W5(),
+                        item.getdAVG_W(),
+                        item.getdCPMGoal() > 0 ? item.getdCPMGoal() : item.getdCTRGoal()
+                    );
+
+                    labelsMap.put(chartId, labels);
+                    valoresMap.put(chartId, dataPoints);
+                    chartTitles.put(chartId, item.getvCampaign());
                 }
             }
         }
-    }               
+        //System.out.println("CHART TITLES KEYS: " + chartTitles.keySet());
+    }
+
+
 
     public void createBarListCampaign(List<TblDV360SPD> items ){
         //barModelCA = new BarChartModel();
@@ -1250,7 +1167,32 @@ public class TblRawDataController implements Serializable {
         barModelAD.setOptions(options);
         
     }
+/*
+    public String getLabelsJson(String chartId) {
+        try {
+            return new ObjectMapper().writeValueAsString(labelsMap.getOrDefault(chartId, Collections.emptyList()));
+        } catch (JsonProcessingException e) {
+            return "[]";
+        }
+    }
 
+    public String getValoresJson(String chartId) {
+        try {
+            return new ObjectMapper().writeValueAsString(valoresMap.getOrDefault(chartId, Collections.emptyList()));
+        } catch (JsonProcessingException e) {
+            return "[]";
+        }
+    }
+
+    public String getChartTitle(String chartId) {
+        return chartTitles.getOrDefault(chartId, chartId);
+    }
+    
+    */
+    public List<String> getChartIds() {
+        return new ArrayList<>(labelsMap.keySet());
+    }
+    /*
     public String getLabelsJson(String id) {
         return new Gson().toJson(labelsMap.getOrDefault(id, Collections.emptyList()));
     }
@@ -1258,8 +1200,37 @@ public class TblRawDataController implements Serializable {
     public String getValoresJson(String id) {
         return new Gson().toJson(valoresMap.getOrDefault(id, Collections.emptyList()));
     }
+    */
+
+    public String getChartInitCalls() {
+        return chartTitles.keySet().stream()
+        .map(id -> "window.chartInitFns = window.chartInitFns || [];\n" +
+                   "window.chartInitFns.push(drawChart_" + id + ");")
+        .collect(Collectors.joining("\n"));
+    }
+    
+    public String getLabelsJson(String chartId) {
+        List<String> labels = labelsMap.getOrDefault(chartId, Collections.emptyList());
+        return labels.isEmpty() ? "[]" : labels.stream()
+                .map(label -> "\"" + label + "\"")
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    public String getValoresJson(String chartId) {
+        List<Number> valores = valoresMap.getOrDefault(chartId, Collections.emptyList());
+        return valores.isEmpty() ? "[]" : valores.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(",", "[", "]"));
+    }
+    
+    public String getChartTitle(String chartId) {
+        return chartTitles.getOrDefault(chartId, chartId);
+    }
     
     public void getDataBudgetTrackerGraphs(){
+        labelsMap.clear();
+        valoresMap.clear();
+        chartTitles.clear();
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
         createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
         createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
@@ -1837,11 +1808,7 @@ public class TblRawDataController implements Serializable {
         monthlyItems = null;
         pacingItems = null;
         budgetTrackerItems = null;
-        budgetTrackerSummary = null;
-        lbChartExpandedIO = false;
-        lbChartExpandedCA = false;
-        lbChartExpandedCH = false;
-        lbChartExpandedAD = false;        
+        budgetTrackerSummary = null;  
         bTrackerSummaryIO = null;
         bTrackerSummaryCA = null;
         bTrackerSummaryCH = null;
@@ -1859,10 +1826,6 @@ public class TblRawDataController implements Serializable {
     public void internalLimpiar(){      
         setLbDataFound(true);
         lbDataTransfer = false;
-        lbChartExpandedIO = false;
-        lbChartExpandedCA = false;
-        lbChartExpandedCH = false;
-        lbChartExpandedAD = false;
         vPartnerSelected = "";
         vCampaignSelected = "";
         vIOSelected = "";

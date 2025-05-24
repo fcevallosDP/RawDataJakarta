@@ -17,7 +17,9 @@
         <title>Datapoint Intranet</title>
         <h:outputScript name="ripple/ripple.js" library="layout" rendered="#{app.ripple}" />
         <h:outputScript name="js/layout.js" library="layout" />
+
         <ui:insert name="head" />
+        
     </h:head>
     
     <h:body styleClass="#{app.bodyClass}">
@@ -43,6 +45,27 @@
         <h:outputStylesheet name="styles/app.css" library="layout" />
         <h:outputStylesheet name="styles/apptiny.css" library="layout" />
         <h:outputStylesheet name="styles/formsData.css" library="layout" />
-        <h:outputStylesheet name="styles/layoutCharts.css" library="layout" />
+        <h:outputStylesheet name="styles/layoutCharts.css" library="layout" />   
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>  
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+        <h:outputScript>
+            //<![CDATA[
+            function renderVisibleCharts() {
+                console.log("⚡ Ejecutando renderVisibleCharts()");
+                if (Array.isArray(window.chartInitFns)) {
+                    window.chartInitFns.forEach(fn => {
+                        try {
+                            fn();
+                        } catch (e) {
+                            console.error("❌ Error ejecutando función:", e);
+                        }
+                    });
+                }
+            }
+            //]]>
+        </h:outputScript>        
+
     </h:body>
 </html>

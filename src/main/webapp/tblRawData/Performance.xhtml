@@ -5,60 +5,14 @@
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
-    <h:head>
-          <h:outputStylesheet name="css/monthly.css"/>
-          <style>
-                #popUpBarSummary {
-                    width: 80vw;   /* 80% of the viewport width */
-                    height: 90vh;  /* 50% of the viewport height */
-                    background-color: lightblue;
-                    overflow-y: auto;
-                }              
-          </style>
-    </h:head>
+
     <ui:composition template="/template.xhtml">
         
         <ui:define name="title"><h:outputText value="RawData"/></ui:define>
         
-        <ui:define name="content">                    
+        <ui:define name="content">  
+            
             <h:form id="TblRawDataListForm">               
-                <style>
-                    body .ui-inputfield {
-                        width: 100%;
-                    }
-                    .ui-grouped-column{
-                        border-color: #e4e4e4 !important;
-                        border-width: 1px !important;                    
-                    }
-                    .ui-filter-column .ui-column-customfilter .custom-filter {
-                        width: 100% !important;
-                        box-sizing: border-box !important;
-                    }
-                    .ui-datatable thead th {
-                        text-align: center !important;
-                        font-size: 0.9rem !important;
-                    }
-                    
-                    .ui-datatable tbody td {
-                        font-size: 0.8rem !important;
-                    }                    
-                    /*.ui-menu {
-                        background: #607D8B !important;
-                    }*/
-                    .tdReadOnly{
-                        background: rgba(0, 0, 0, 0.03);
-                    }   
-                    .trCompleted{
-                        background: rgb(96 125 139 / 30%) !important;
-                        color: #000 !important;
-                    }
-                    .tdGreen{
-                        background: rgb(96 125 139 / 34%) !important;
-                    }
-                    .layout-wrapper .layout-main .layout-content{
-                     /*overflow-y: hidden;   */
-                    }
-                </style>
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      
                     <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
@@ -101,9 +55,10 @@
                                              update=":TblRawDataSummForm:dataSummaryCampaign"                                             
                                              />                                                                             
 
-                            <p:commandButton style="margin-left: 2px;" id="barsButton" title="Charts" icon="pi pi-chart-bar" oncomplete="PF('barsDialog').show();"
+                            <p:commandButton style="margin-left: 2px;" id="barsButton" title="Charts" icon="pi pi-chart-bar" 
+                                             oncomplete="PF('dashboardDialog').show(); setTimeout(renderVisibleCharts, 100);"
                                              actionListener="#{tblRawDataController.getDataBarListPerfGraphs()}"
-                                             update=":TblDataPerfListForm"                                         
+                                             update=":dashboardForm"                                         
                                              />                  
                                                         
                             <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
@@ -120,7 +75,7 @@
                             </p:confirmDialog> 
                         </f:facet>    
                         <f:facet name="paginatorTopRight">
-                            <div class="ui-datatable-header ui-widget-header ui-corner-top">
+                            <div class="ui-datatable-header ui-widget-header ui-corner-top title-rightClass">
                                 <h:outputText value="PERFORMANCE" style="font-size: large"/>
                             </div>
                         </f:facet>                    
@@ -212,9 +167,11 @@
 
                     </div>    
                 </p:dialog>                    
-            </h:form>                                                                    
+            </h:form>     
+            
             <ui:include src="PerSummary.xhtml"/>
-            <ui:include src="PerfGraphs.xhtml"/>
+            <ui:include src="Multi-chart-dashboard.xhtml"/>
+      
         </ui:define>
         
     </ui:composition>

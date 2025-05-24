@@ -8,7 +8,7 @@
       xmlns:p="http://primefaces.org/ui">
     <ui:composition>
         <p:dialog id="popUpBarGraphs" widgetVar="barsDialog" style="min-width: 620px; max-width: 1280px; min-height: 400px; max-height: 840px; overflow-y: auto;"
-                  modal="true" showEffect="fade" closable="false" closeOnEscape="false" hideEffect="fade">   
+                  modal="true" showEffect="fade" closable="false" closeOnEscape="false" hideEffect="fade" onShow="executeChartsInit()">   
             <h:form id="TblDataPerfListForm" style="overflow-y: auto;">  
                 
                 <p:dataGrid var="barList" value="#{tblRawDataController.barCampaignItems}" columns="3" layout="grid"

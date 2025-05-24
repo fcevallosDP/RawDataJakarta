@@ -118,7 +118,7 @@ public class TblRawDataController implements Serializable {
     private BarChartModel barModelIO = new BarChartModel();
     private BarChartModel barModelAD = new BarChartModel();
     private List<BarChartModel> barCampaignItems = new ArrayList<>();
-    
+    private List<String> chartIds;
     private final Map<String, List<String>> labelsMap = new HashMap<>();
     private final Map<String, List<Number>> valoresMap = new HashMap<>();
     private final Map<String, String> chartTitles = new HashMap<>(); // nuevo mapa
@@ -1188,10 +1188,13 @@ public class TblRawDataController implements Serializable {
         return chartTitles.getOrDefault(chartId, chartId);
     }
     
-    */
+    
     public List<String> getChartIds() {
         return new ArrayList<>(labelsMap.keySet());
-    }
+    }*/
+    public List<String> getChartIds() {
+     return new ArrayList<>(labelsMap.keySet());
+    }    
     /*
     public String getLabelsJson(String id) {
         return new Gson().toJson(labelsMap.getOrDefault(id, Collections.emptyList()));

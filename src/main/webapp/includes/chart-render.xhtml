@@ -3,92 +3,95 @@
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:p="http://primefaces.org/ui">
 
-    <div class="chart-container" style="text-align:center; padding: 1rem;">
+    <h:panelGroup layout="block">
         <canvas id="#{canvasId}"
+                style="display:block;"
                 data-labels="#{labelsJson}"
-                data-valores="#{valoresJson}"
-                data-charttitle="#{chartTitle}"
-                width="500" height="280"
-                style="display: block; margin: 0 auto; max-height: 400px; box-sizing: border-box; border: 1px solid #dee2e6;"></canvas>
+                data-valores="#{valoresJson}">
+        </canvas>
+    </h:panelGroup>
 
-        <div class="chart-title" style="font-weight: bold;">#{chartTitle}</div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
-    <h:outputScript>
-    //<![CDATA[
-    (function () {
-        const canvasId = "#{canvasId}";
-        const fnName = "drawChart_" + canvasId;
+    <h:outputScript target="body">
+        function drawChart_#{canvasId}() {
+            const tryDraw = () => {
+                const canvas = document.getElementById("#{canvasId}");
+                if (!canvas || !canvas.getContext) return setTimeout(tryDraw, 100);
 
-        console.log("✅ Registrando drawChart para:", canvasId);
+                let labels, data;
+                try {
+                    labels = JSON.parse(canvas.dataset.labels || "[]");
+                    data = JSON.parse(canvas.dataset.valores || "[]");
+                } catch (e) {
+                    return setTimeout(tryDraw, 100);
+                }
 
-        window[fnName] = function () {
-            console.log("🟦 Intentando renderizar:", canvasId);
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) {
-                console.warn("⚠️ No se encontró canvas con ID:", canvasId);
-                return;
+                if (!Array.isArray(labels) || !Array.isArray(data) || labels.length === 0 || data.length === 0 || canvas.offsetWidth === 0) {
+                    return setTimeout(tryDraw, 100);
             }
 
-            const labels = JSON.parse(canvas.dataset.labels || "[]");
-            const valores = JSON.parse(canvas.dataset.valores || "[]");
-            const chartTitle = canvas.dataset.charttitle || "";
+                // Asignar altura dinámica para mostrar todas las barras
+                canvas.height = labels.length * 40;
 
-            if (window["chart_" + canvasId] instanceof Chart) {
-                window["chart_" + canvasId].destroy();
+                // Calcular el ancho necesario basado en la etiqueta más larga
+                const longestLabel = labels.reduce((a, b) => a.length > b.length ? a : b, "");
+                const ctxMeasure = document.createElement("canvas").getContext("2d");
+                ctxMeasure.font = "12px Arial";
+                const textWidth = ctxMeasure.measureText(longestLabel).width;
+                canvas.width = Math.max(600, Math.min(textWidth + 300, 1200));
+
+                const ctx = canvas.getContext("2d");
+
+                if (window["chart_#{canvasId}"] instanceof Chart) {
+                    window["chart_#{canvasId}"].destroy();
             }
 
-            window["chart_" + canvasId] = new Chart(canvas.getContext("2d"), {
-                type: "bar",
+                const isHorizontal = #{horizontal eq 'true' ? 'true' : 'false'};
+                const isStacked = #{stacked eq 'true' ? 'true' : 'false'};
+
+                window["chart_#{canvasId}"] = new Chart(ctx, {
+                    type: "#{chartType}",
                 data: {
                     labels: labels,
                     datasets: [{
-                        data: valores,
-                        backgroundColor: "rgba(153, 102, 255, 0.5)",
-                        borderColor: "rgba(153, 102, 255, 1)",
-                        borderWidth: 1,
-                        barThickness: 30
+                            label: "#{chartTitle}",
+                            data: data,
+                            backgroundColor: "rgba(75, 192, 192, 0.6)",
+                            borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1
                     }]
                 },
                     options: {
+                        indexAxis: isHorizontal ? "y" : "x",
                         responsive: true,
-                        maintainAspectRatio: true,
-                        indexAxis: 'x',
-                        scales: {
-                            x: {
-                                barPercentage: 0.2,
-                                categoryPercentage: 0.4,
-                                ticks: { autoSkip: false },
-                                grid: { display: true }
-                            },
-                            y: { beginAtZero: true,
-                                grace: 0.1
-                            }
-                        },
+                        maintainAspectRatio: false,
                         plugins: {
                             datalabels: {
-                                anchor: 'end',
-                                align: 'top',
-                                color: '#000',
-                                font: { weight: 'bold' }
+                                anchor: isHorizontal ? "end" : "end",
+                                align: isHorizontal ? "right" : "top",
+                                formatter: Math.round
+                            }
                             },
-                            legend: {
-                                display: false
+                        scales: {
+                            x: {
+                                stacked: isStacked,
+                                beginAtZero: true
                             },
-                            title: {
-                                display: false,
-                                text: chartTitle
-                            },
-                            tooltip: { enabled: false}
+                            y: {
+                                stacked: isStacked,
+                                beginAtZero: true
+                        }
                         }
                     },
                 plugins: [ChartDataLabels]
             });
         };
 
-        window.chartInitFns = window.chartInitFns || [];
-        window.chartInitFns.push(window[fnName]);
-    })();
-    //]]>
+            tryDraw();
+        }
+
+        drawChart_#{canvasId}();
     </h:outputScript>
 </ui:composition>

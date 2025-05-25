@@ -3920,7 +3920,9 @@ public class DAOFile implements Serializable  {
                 }
 
                 if (count > 0) {
-                    item.setdAVG_W(lvalAcum / (count * 1.00));
+                    double num = lvalAcum / (count * 1.00);
+                    BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                                         
+                    item.setdAVG_W(bd.doubleValue());
                 } else {
                     item.setdAVG_W(0.0);
                 }                

@@ -7,12 +7,19 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
     <ui:composition>
-        <p:dialog header="Summary Data" id="popUpSummary" widgetVar="summaryDialog" modal="true" showEffect="fade" style="min-width: 840px; max-width: 1024px"
-                              hideEffect="fade" resizable="false" >   
+        <p:dialog header="Summary Data" id="popUpSummary" 
+                  widgetVar="summaryDialog" modal="true" 
+                  showEffect="fade" 
+                    positionType="absolute"
+                    position="center"
+                    responsive="true"                  
+                  style="max-width: 80vw; max-height: 90vh;"
+                  hideEffect="fade"
+                  resizable="false" >   
             <h:form id="TblRawDataSummForm">                  
                 <p:dataTable id="dataSummaryCampaign" value="#{tblRawDataController.itemsPerfSummary}"
                              var="summaryitemC" widgetVar="summaryWdataList" scrollRows="3" editable="true"
-                                emptyMessage="No data found with given criteria" scrollHeight="320px"
+                                emptyMessage="No data found with given criteria" scrollHeight="350px"
                                 style="overflow-y: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"
                          rowKey="#{summaryitemC.id}" scrollable="true" resizableColumns="true" stripedRows="true">
 
@@ -139,8 +146,6 @@
                             </p:row>                                    
                         </p:columnGroup>
                 </p:dataTable>                                 
-                
-                <p:commandButton value="Close" onclick="summaryDialog.hide()" style="float: right"/>
             </h:form>
         </p:dialog>                                                                                              
     </ui:composition>

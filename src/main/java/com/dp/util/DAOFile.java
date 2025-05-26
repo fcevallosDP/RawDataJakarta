@@ -3818,12 +3818,15 @@ public class DAOFile implements Serializable  {
                 item.setdCPMGoal(rs.getDouble("dCPMGoal"));
                 item.setdCTRGoal(rs.getDouble("dCTRGoal"));
 
-                item.setdRevenueCPM(rs.getDouble("avg_cpm"));
+                double num = rs.getDouble("avg_cpm");
+                BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
+                item.setdRevenueCPM(bd.doubleValue());                
+                
                 item.setiImpressions(rs.getInt("sum_imp"));
                 item.setiClicks(rs.getInt("sum_cli"));
 
-                double num = (item.getiImpressions() > 0) ? (double) item.getiClicks() / item.getiImpressions() : item.getiClicks();
-                BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
+                num = (item.getiImpressions() > 0) ? (double) item.getiClicks() / item.getiImpressions() : item.getiClicks();
+                bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
                 item.setdClickRate(bd.doubleValue());                
                 
                 

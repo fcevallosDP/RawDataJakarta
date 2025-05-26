@@ -9,6 +9,7 @@ import com.dp.util.DAOFile;
 import com.dp.util.TblProfiles;
 import com.dp.util.TblUsers;
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.inject.Produces;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -185,6 +186,7 @@ public class LoginBean implements Serializable {
             JsfUtil.addErrorMessage("Something went wrong");
         }
     }
+    @Produces
     public String login()
     {
         try

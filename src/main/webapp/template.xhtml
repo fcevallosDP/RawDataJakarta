@@ -64,6 +64,35 @@
                     });
                 }
             }
+            
+            function fixAllDialogsAriaHidden() {
+                const dialogs = document.querySelectorAll('div.ui-dialog[aria-hidden="true"]');
+                dialogs.forEach(dialog => {
+                    dialog.removeAttribute('aria-hidden');
+                    console.log("🔧 aria-hidden eliminado de dialog:", dialog.id || dialog);
+                });
+            }
+
+function handleTabChange(event) {
+    const index = event.index;
+    const canvasIds = ['barChartIO', 'barChartCP', 'barChartCH', 'barChartAD'];
+    const canvasId = canvasIds[index];
+
+    if (canvasId && typeof window[`drawChart_${canvasId}`] === 'function') {
+        console.log("⏩ Tab cambiada, ejecutando: drawChart_" + canvasId);
+        setTimeout(() => {
+            try {
+                window[`drawChart_${canvasId}`]();
+            } catch (e) {
+                console.error("❌ Error al ejecutar drawChart para:", canvasId, e);
+            }
+        }, 100); // Le damos tiempo a que se renderice el contenido del tab
+    } else {
+        console.warn("⚠️ No se pudo determinar o ejecutar drawChart para canvasId:", canvasId);
+    }
+}
+
+
             //]]>
         </h:outputScript>        
 

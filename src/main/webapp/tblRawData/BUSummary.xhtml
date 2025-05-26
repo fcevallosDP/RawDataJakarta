@@ -6,8 +6,16 @@
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
     <ui:composition>
-        <p:dialog header="Summary Data" id="popUpSummary" widgetVar="summaryDialog" modal="true" showEffect="fade" style="min-width: 840px; max-width: 1024px"
-                              hideEffect="fade" resizable="false">   
+        <p:dialog header="Summary Data" 
+                  id="popUpSummary" 
+                  widgetVar="summaryDialog" 
+                  modal="true" 
+                  showEffect="fade" 
+                  style="min-width: 840px; max-width: 1024px"
+                  onShow="fixAllDialogsAriaHidden();"    
+                  onHide="fixAllDialogsAriaHidden();"
+                  hideEffect="fade" 
+                  resizable="false">   
             <h:form id="TblRawDataSummForm">                
                 <p:tabView id="tabViewSummary">
                     <p:ajax event="tabChange" listener="#{tblRawDataController.onTabChange}" update="dataSummary, dataSummaryAd, dataSummaryCampaign"/>

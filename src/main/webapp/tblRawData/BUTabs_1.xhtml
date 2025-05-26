@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition xmlns:c="http://java.sun.com/jsp/jstl/core">
+        <p:dialog id="popUpBarSummary"
+          widgetVar="barDialog"
+          modal="true"
+          resizable="false"
+          draggable="true"
+          onShow="setTimeout(() => {fixAllDialogsAriaHidden();}, 300)"
+          onHide="fixAllDialogsAriaHidden();"
+          positionType="absolute"
+          position="top"
+          responsive="true"
+          style="min-width: 60vw; max-width: 90vw; max-height: 90vh; overflow-y: auto;"> 
+            <h:form id="TblRawDataTabForm">              
+                <h:panelGroup id="responsive">
+<p:tabView id="barTabs"
+           activeIndex="0"
+           onTabChange="handleTabChange(event)"
+           widgetVar="barTabsWidget">
+
+                        <p:tab title="InsertionOrder" id="idBarInsertionOrder">                        
+                            <c:set var="canvasId" value="barChartIO" />
+                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartIO')}" />
+                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartIO')}" />
+                            <c:set var="chartType" value="bar" />
+                            <c:set var="chartTitle" value="InsertionOrder" />
+                            <c:set var="horizontal" value="true" />
+                            <ui:include src="/includes/Chart-tab-render.xhtml" />                                                                         
+                        </p:tab>    
+
+                        <p:tab title="Campaign" id="idBarCampaign">
+                            <c:set var="canvasId" value="barChartCP" />
+                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCP')}" />
+                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCP')}" />
+                            <c:set var="chartType" value="bar" />
+                            <c:set var="chartTitle" value="Campaign" />
+                            <c:set var="horizontal" value="true" />
+                            <ui:include src="/includes/Chart-tab-render.xhtml" />  
+                        </p:tab>                        
+                        <p:tab title="Channel" id="idBarChannel">
+                            <c:set var="canvasId" value="barChartCH" />
+                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCH')}" />
+                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCH')}" />
+                            <c:set var="chartType" value="bar" />
+                            <c:set var="chartTitle" value="Channel" />
+                            <c:set var="horizontal" value="true" />
+                            <ui:include src="/includes/Chart-tab-render.xhtml" />  
+                        </p:tab>                        
+                        <p:tab title="Advertiser" id="idBar">                            
+                            <c:set var="canvasId" value="barChartAD" />
+                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartAD')}" />
+                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartAD')}" />
+                            <c:set var="chartType" value="bar" />
+                            <c:set var="chartTitle" value="Advertiser" />
+                            <c:set var="horizontal" value="true" />
+                            <ui:include src="/includes/Chart-tab-render.xhtml" />                              
+                        </p:tab>                          
+                        
+                    </p:tabView>                    
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>             
+    </ui:composition>
+</html>

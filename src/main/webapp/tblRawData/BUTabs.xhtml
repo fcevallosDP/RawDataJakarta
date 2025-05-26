@@ -15,53 +15,19 @@
           positionType="absolute"
           position="top"
           responsive="true"
-          style="min-width: 60vw; max-width: 90vw; max-height: 90vh; overflow-y: auto;"> 
+          style="min-width: 60vw; max-width: 90vw; max-height: 85vh; overflow-y: auto;"> 
             <h:form id="TblRawDataTabForm">              
-                <h:panelGroup id="responsive">
-<p:tabView id="barTabs"
-           activeIndex="0"
-           onTabChange="handleTabChange(event)"
-           widgetVar="barTabsWidget">
-
-                        <p:tab title="InsertionOrder" id="idBarInsertionOrder">                        
-                            <c:set var="canvasId" value="barChartIO" />
-                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartIO')}" />
-                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartIO')}" />
-                            <c:set var="chartType" value="bar" />
-                            <c:set var="chartTitle" value="InsertionOrder" />
-                            <c:set var="horizontal" value="true" />
-                            <ui:include src="/includes/Chart-tab-render.xhtml" />                                                                         
-                        </p:tab>    
-
-                        <p:tab title="Campaign" id="idBarCampaign">
-                            <c:set var="canvasId" value="barChartCP" />
-                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCP')}" />
-                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCP')}" />
-                            <c:set var="chartType" value="bar" />
-                            <c:set var="chartTitle" value="Campaign" />
-                            <c:set var="horizontal" value="true" />
-                            <ui:include src="/includes/Chart-tab-render.xhtml" />  
-                        </p:tab>                        
-                        <p:tab title="Channel" id="idBarChannel">
-                            <c:set var="canvasId" value="barChartCH" />
-                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCH')}" />
-                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCH')}" />
-                            <c:set var="chartType" value="bar" />
-                            <c:set var="chartTitle" value="Channel" />
-                            <c:set var="horizontal" value="true" />
-                            <ui:include src="/includes/Chart-tab-render.xhtml" />  
-                        </p:tab>                        
-                        <p:tab title="Advertiser" id="idBar">                            
-                            <c:set var="canvasId" value="barChartAD" />
-                            <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartAD')}" />
-                            <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartAD')}" />
-                            <c:set var="chartType" value="bar" />
-                            <c:set var="chartTitle" value="Advertiser" />
-                            <c:set var="horizontal" value="true" />
-                            <ui:include src="/includes/Chart-tab-render.xhtml" />                              
-                        </p:tab>                          
-                        
-                    </p:tabView>                    
+                <h:panelGroup id="responsive">                    
+                    <div class="surface-card shadow-2 p-3 border-round">
+                        <ui:include src="/includes/Chart-tab-render.xhtml">
+                            <ui:param name="canvasId" value="barChartCPIO"/>
+                            <ui:param name="chartTitle" value="#{(tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'Campaign' : 'InsertionOrder'}" />
+                            <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />
+                            <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />
+                            <ui:param name="chartType" value="bar" />
+                            <ui:param name="horizontal" value="true" />                    
+                        </ui:include>
+                    </div>                                                         
                 </h:panelGroup>
             </h:form>
         </p:dialog>             

@@ -110,30 +110,11 @@ public class TblRawDataController implements Serializable {
     private Integer iUnderPacingOrange;
     private Integer iUnderpacingRed;
     public static Random numGen =new Random();
-    private HorizontalBarChartModel hbarModelCH = new HorizontalBarChartModel();
-    private HorizontalBarChartModel hbarModel = new HorizontalBarChartModel();
-    private HorizontalBarChartModel hbarModelC = new HorizontalBarChartModel();
-    private HorizontalBarChartModel hbarModelI = new HorizontalBarChartModel();
-    private BarChartModel barModelCA = new BarChartModel();
-    private BarChartModel barModelIO = new BarChartModel();
-    private BarChartModel barModelAD = new BarChartModel();
-    private List<BarChartModel> barCampaignItems = new ArrayList<>();
     private List<String> chartIds;
     private final Map<String, List<String>> labelsMap = new HashMap<>();
     private final Map<String, List<Number>> valoresMap = new HashMap<>();
-    private final Map<String, String> chartTitles = new HashMap<>(); // nuevo mapa
-
-    public List<BarChartModel> getBarCampaignItems() {
-        return barCampaignItems;
-    }
-
-    public void setBarCampaignItems(List<BarChartModel> barCampaignItems) {
-        this.barCampaignItems = barCampaignItems;
-    }    
-    
-    public HorizontalBarChartModel getHbarModelCH() {
-        return hbarModelCH;
-    }
+    private final Map<String, String> chartTitles = new HashMap<>();
+    private final Map<String, String> goalType = new HashMap<>();
 
     public List<String> getRawDeviceTypes() {
         return rawDeviceTypes;
@@ -266,10 +247,6 @@ public class TblRawDataController implements Serializable {
         this.bTrackerSummaryAD = bTrackerSummaryAD;
     }
 
-    public void setHbarModelCH(HorizontalBarChartModel hbarModelCH) {
-        this.hbarModelCH = hbarModelCH;
-    }
-
     protected void getParamOrange() {   
         DAOFile dbCon = new DAOFile();
         iUnderPacingOrange = dbCon.getQtyParameter("%PCT%Underpacing%Orange%");                
@@ -355,26 +332,6 @@ public class TblRawDataController implements Serializable {
         }
     }                       
     
-    public HorizontalBarChartModel getHbarModelC() {
-        return hbarModelC;
-    }
-
-    public void setHbarModelC(HorizontalBarChartModel hbarModelC) {
-        this.hbarModelC = hbarModelC;
-    }
-
-    public HorizontalBarChartModel getHbarModel() {
-        return hbarModel;
-    }
-
-    public HorizontalBarChartModel getHbarModelI() {
-        return hbarModelI;
-    }
-
-    public void setHbarModelI(HorizontalBarChartModel hbarModelI) {
-        this.hbarModelI = hbarModelI;
-    }
-
     public List<String> getRawLineItems() {
         return rawLineItems;
     }
@@ -868,41 +825,11 @@ public class TblRawDataController implements Serializable {
         budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, vOptionSummary);
     }          
 
-    public BarChartModel getBarModelCA() {
-        return barModelCA;
-    }
-
-    public void setBarModelCA(BarChartModel barModelCA) {
-        this.barModelCA = barModelCA;
-    }
-
-    public BarChartModel getBarModelIO() {
-        return barModelIO;
-    }
-
-    public void setBarModelIO(BarChartModel barModelIO) {
-        this.barModelIO = barModelIO;
-    }
-
-    public BarChartModel getBarModelAD() {
-        return barModelAD;
-    }
-
-    public void setBarModelAD(BarChartModel barModelAD) {
-        this.barModelAD = barModelAD;
-    }
-
-    public void getDataPerfGraphs(){
-        DAOFile dbCon = new DAOFile(); //vAdvertiser, vCampaign, vInsertionOrder
-        createBarModelCampaign(dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
-        createBarModelInsertionOrder(dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));        
-        createBarModelAd(dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, "vAdvertiser"));                
-    }       
-  
     public void getDataBarListPerfGraphs() {
         labelsMap.clear();
         valoresMap.clear();
-        chartTitles.clear(); // importante
+        chartTitles.clear();
+        goalType.clear();
 
         DAOFile dbCon = new DAOFile();
         List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
@@ -923,287 +850,18 @@ public class TblRawDataController implements Serializable {
                         item.getdAVG_W(),
                         item.getdCPMGoal() > 0 ? item.getdCPMGoal() : item.getdCTRGoal()
                     );
-
+                    goalType.put(chartId, (item.getdCPMGoal() > 0) ? "CPM" : "CTR");
                     labelsMap.put(chartId, labels);
                     valoresMap.put(chartId, dataPoints);
                     chartTitles.put(chartId, item.getvCampaign());
                 }
             }
         }
-        //System.out.println("CHART TITLES KEYS: " + chartTitles.keySet());
     }
 
-
-
-    public void createBarListCampaign(List<TblDV360SPD> items ){
-        //barModelCA = new BarChartModel();
-        barCampaignItems = new ArrayList<>();
-        ChartData data = new ChartData();
-
-        BarChartDataSet barDataSet = new BarChartDataSet();
-        barDataSet.setLabel("Monthly Performance Campaign");        
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
-
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Monthly Performance");
-        options.setTitle(title);        
-        
-        for (TblDV360SPD itemPerf : items) {
-            BarChartModel itembarModelCA = new BarChartModel();
-            List<Number> values = new ArrayList<>();
-            List<String> labels = new ArrayList<>();
-            
-            values.add(itemPerf.getdRevenueCPM());
-            bgColor.add("rgb(54, 162, 235, 0.2)");
-            borderColor.add("rgb(54, 162, 235)");
-            
-            labels.add(itemPerf.getvCampaign());
-
-            barDataSet.setData(values);
-            barDataSet.setBackgroundColor(bgColor);                 
-            barDataSet.setBorderColor(borderColor);
-            barDataSet.setBorderWidth(1); 
-                        
-            data.addChartDataSet(barDataSet); 
-        
-            data.setLabels(labels);
-            itembarModelCA.setData(data);
-        
-        
-            itembarModelCA.setOptions(options);
-            
-            barCampaignItems.add(itembarModelCA);
-            
-        }                
-    }
-    
-    private BarChartModel createChart(String label, List<Number> dataPoints, List<String> labels) {
-        BarChartModel model = new BarChartModel();
-        ChartData data = new ChartData();
-
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);        
-        
-        
-        BarChartDataSet dataset = new BarChartDataSet();
-        dataset.setLabel(label);
-        dataset.setData(dataPoints);
-        dataset.setBackgroundColor("rgba(153, 102, 255, 0.6)");
-        data.addChartDataSet(dataset);
-        data.setLabels(labels);        
-        
-        model.setData(data);
-        
-        return model;
-    }    
-    
-    public void createBarModelInsertionOrder(List<TblDV360SPD> items ){
-        barModelIO = new BarChartModel();
-        ChartData data = new ChartData();
-
-        BarChartDataSet barDataSet = new BarChartDataSet();
-        barDataSet.setLabel("Monthly Performance I/O");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
-
-        for (TblDV360SPD itemPerf : items) {
-            values.add(itemPerf.getdRevenueCPM());            
-            bgColor.add("rgb(54, 162, 235, 0.2)");
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemPerf.getvInsertionOrder());
-        }            
-        
-        barDataSet.setData(values);
-        barDataSet.setBackgroundColor(bgColor);                 
-        barDataSet.setBorderColor(borderColor);
-        barDataSet.setBorderWidth(1);                         
-        data.addChartDataSet(barDataSet);         
-        data.setLabels(labels);
-        barModelIO.setData(data);
-
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Monthly Performance");
-        options.setTitle(title);
-
-        barModelIO.setOptions(options);       
-    }
-    
-    public void createBarModelCampaign(List<TblDV360SPD> items ){
-        barModelCA = new BarChartModel();
-        ChartData data = new ChartData();
-
-        BarChartDataSet barDataSet = new BarChartDataSet();
-        barDataSet.setLabel("Monthly Performance Campaign");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
-
-        for (TblDV360SPD itemPerf : items) {
-            values.add(itemPerf.getdRevenueCPM());
-            bgColor.add("rgb(54, 162, 235, 0.2)");
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemPerf.getvCampaign());
-            
-        }        
-        
-        barDataSet.setData(values);
-        barDataSet.setBackgroundColor(bgColor);                 
-        barDataSet.setBorderColor(borderColor);
-        barDataSet.setBorderWidth(1); 
-                        
-        data.addChartDataSet(barDataSet); 
-        
-        data.setLabels(labels);
-        barModelCA.setData(data);
-
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Monthly Performance");
-        options.setTitle(title);
-
-        barModelCA.setOptions(options);
-        
-    }
-        
-    public void createBarModelAd(List<TblDV360SPD> items ){
-        barModelAD = new BarChartModel();
-        ChartData data = new ChartData();
-
-        BarChartDataSet barDataSet = new BarChartDataSet();
-        barDataSet.setLabel("Monthly Performance Advertiser");        
-        List<Number> values = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-        List<String> bgColor = new ArrayList<>();
-        List<String> borderColor = new ArrayList<>();
-
-        for (TblDV360SPD itemPerf : items) {
-            values.add(itemPerf.getdRevenueCPM());
-            bgColor.add("rgb(54, 162, 235, 0.2)");
-            borderColor.add("rgb(54, 162, 235)");
-            labels.add(itemPerf.getvClient());
-        }        
-        
-        barDataSet.setData(values);
-        barDataSet.setBackgroundColor(bgColor);                 
-        barDataSet.setBorderColor(borderColor);
-        barDataSet.setBorderWidth(1); 
-                        
-        data.addChartDataSet(barDataSet); 
-        
-        data.setLabels(labels);
-        barModelAD.setData(data);
-
-        //Options
-        BarChartOptions options = new BarChartOptions();
-        CartesianScales cScales = new CartesianScales();
-        CartesianLinearAxes linearAxes = new CartesianLinearAxes();
-        linearAxes.setOffset(true);
-        linearAxes.setBeginAtZero(true);
-        CartesianLinearTicks ticks = new CartesianLinearTicks();
-        linearAxes.setTicks(ticks);
-        cScales.addXAxesData(linearAxes);
-        cScales.setWeight(0.01f);
-        options.setScales(cScales);
-        //options.setBarThickness(2);
-        //options.setResponsive(false);
-        Title title = new Title();
-        title.setDisplay(true);
-        title.setText("Monthly Performance");
-        options.setTitle(title);
-
-        barModelAD.setOptions(options);
-        
-    }
-/*
-    public String getLabelsJson(String chartId) {
-        try {
-            return new ObjectMapper().writeValueAsString(labelsMap.getOrDefault(chartId, Collections.emptyList()));
-        } catch (JsonProcessingException e) {
-            return "[]";
-        }
-    }
-
-    public String getValoresJson(String chartId) {
-        try {
-            return new ObjectMapper().writeValueAsString(valoresMap.getOrDefault(chartId, Collections.emptyList()));
-        } catch (JsonProcessingException e) {
-            return "[]";
-        }
-    }
-
-    public String getChartTitle(String chartId) {
-        return chartTitles.getOrDefault(chartId, chartId);
-    }
-    
-    
-    public List<String> getChartIds() {
-        return new ArrayList<>(labelsMap.keySet());
-    }*/
     public List<String> getChartIds() {
      return new ArrayList<>(labelsMap.keySet());
     }    
-    /*
-    public String getLabelsJson(String id) {
-        return new Gson().toJson(labelsMap.getOrDefault(id, Collections.emptyList()));
-    }
-
-    public String getValoresJson(String id) {
-        return new Gson().toJson(valoresMap.getOrDefault(id, Collections.emptyList()));
-    }
-    */
 
     public String getChartInitCalls() {
         return chartTitles.keySet().stream()
@@ -1229,11 +887,16 @@ public class TblRawDataController implements Serializable {
     public String getChartTitle(String chartId) {
         return chartTitles.getOrDefault(chartId, chartId);
     }
+
+    public String getGoalType(String chartId) {
+        return goalType.getOrDefault(chartId, chartId);
+    }
     
     public void getDataBudgetTrackerGraphs(){
         labelsMap.clear();
         valoresMap.clear();
         chartTitles.clear();
+        goalType.clear();
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
         createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
         createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));

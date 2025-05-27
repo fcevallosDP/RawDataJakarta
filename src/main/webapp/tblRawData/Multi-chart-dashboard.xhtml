@@ -12,6 +12,7 @@
               onHide="fixAllDialogsAriaHidden();"
               positionType="absolute"
               position="center"
+              header="Dashboard"
               responsive="true"
               style="left: 5vh !important; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
 
@@ -19,7 +20,7 @@
 
             <p:dataGrid value="#{tblRawDataController.chartIds}" var="chartId" columns="3" layout="grid" style="overflow-y: auto;"> 
 
-                <div class="surface-card shadow-2 p-3 border-round">
+                
                     <ui:include src="/includes/Multi-chart-render.xhtml">
                         <ui:param name="canvasId" value="#{chartId}" />
                         <ui:param name="chartTitle" value="#{tblRawDataController.getChartTitle(chartId)}" />
@@ -27,7 +28,7 @@
                         <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson(chartId)}" />
                         <ui:param name="goalType" value="#{tblRawDataController.getGoalType(chartId)}" />
                     </ui:include>
-                </div>
+                
 
             </p:dataGrid>
 

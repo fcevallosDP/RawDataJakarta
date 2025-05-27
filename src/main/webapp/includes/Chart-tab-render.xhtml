@@ -3,14 +3,13 @@
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:p="http://primefaces.org/ui">
 
-    <div class="chart-container" style="padding: 1rem;">
+    <div style="text-align:center; padding: 1rem;">
         <canvas id="#{canvasId}"
                 data-labels="#{labelsJson}"
                 data-valores="#{valoresJson}"
                 data-charttitle="#{chartTitle}"
                 style="width: 100%; display: block; margin: 0 auto; box-sizing: border-box; border: 1px solid #dee2e6;">
         </canvas>
-        <div class="chart-title" style="font-weight: bold;">#{chartTitle}</div>
     </div>
 
     <h:outputScript target="body">
@@ -60,10 +59,10 @@
                                 barPercentage: 0.2,
                                 categoryPercentage: 0.4,
                                 ticks: { autoSkip: false },
-                                grid: { display: true }
+                                grid: { display: true },
+                                grace: 0.1
                             },
                             x: { beginAtZero: true,
-                                grace: 0.1
                             }
                         },
                         plugins: {

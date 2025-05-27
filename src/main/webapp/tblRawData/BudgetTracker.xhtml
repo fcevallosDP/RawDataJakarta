@@ -61,7 +61,7 @@
                                              oncomplete="PF('barDialog').show();setTimeout(renderVisibleCharts, 100);"
                                              icon="pi pi-chart-bar"
                                              actionListener="#{tblRawDataController.getDataBudgetTrackerGraphs()}"
-                                             update=":TblRawDataTabForm"                                         
+                                             update=":popUpBarSummary, :TblRawDataTabForm"                                         
                                              />                           
                             
                             <p:commandButton title="Move to Historical" id="btnTransfer" update="datalist, :TblRawDataListForm:messages"

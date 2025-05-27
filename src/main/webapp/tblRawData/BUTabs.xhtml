@@ -13,6 +13,7 @@
           onShow="setTimeout(() => {fixAllDialogsAriaHidden();}, 300)"
           onHide="fixAllDialogsAriaHidden();"
           positionType="absolute"
+          header="#{(tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'Campaign' : 'InsertionOrder'}"
           position="top"
           responsive="true"
           style="min-width: 60vw; max-width: 90vw; max-height: 85vh; overflow-y: auto;"> 

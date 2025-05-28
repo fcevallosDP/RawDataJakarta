@@ -115,6 +115,7 @@ public class TblRawDataController implements Serializable {
     private final Map<String, List<Number>> valoresMap = new HashMap<>();
     private final Map<String, String> chartTitles = new HashMap<>();
     private final Map<String, String> goalType = new HashMap<>();
+    private final Map<String, List<String>> colorsMap = new HashMap<>();
 
     public List<String> getRawDeviceTypes() {
         return rawDeviceTypes;
@@ -269,6 +270,15 @@ public class TblRawDataController implements Serializable {
         todayAsString = df.format(JsfUtil.getFechaSistema().getTime());               
     }
 
+    public String getColorsMap(String chartId) {        
+
+        List<String> labels = colorsMap.getOrDefault(chartId, Collections.emptyList());
+        return labels.isEmpty() ? "[]" : labels.stream()
+                .map(label -> "\"" + label + "\"")
+                .collect(Collectors.joining(",", "[", "]"));
+             
+    }
+    
     public void createHorizontalBarModelChannel(List<TblBudgetTracker> bTrackerSummaryCH){
         if( bTrackerSummaryCH != null && !bTrackerSummaryCH.isEmpty()){
             List<Number> values = new ArrayList<>();
@@ -289,15 +299,18 @@ public class TblRawDataController implements Serializable {
         if( bTrackerSummaryIO != null && !bTrackerSummaryIO.isEmpty()){        
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
+            List<String> colors = new ArrayList<>();
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryIO) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);            
+                colors.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderpacingRed / 100.00)) ? "rgb(217,134,134)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderPacingOrange / 100.00)) ? "rgb(245, 207, 110)" : "rgb(54, 162, 235, 0.2)")));
                 labels.add(itemTracker.getvInsertionOrder());
-            }
-
+            }       
+                        
             labelsMap.put("barChartIO", labels);
-            valoresMap.put("barChartIO", values);              
+            valoresMap.put("barChartIO", values); 
+            colorsMap.put("barChartIO", colors); 
 
         }
     }
@@ -305,15 +318,18 @@ public class TblRawDataController implements Serializable {
         if( bTrackerSummaryCA != null && !bTrackerSummaryCA.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
+            List<String> colors = new ArrayList<>();
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryCA) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);
+                colors.add((itemTracker.getbOverPacing()) ? "rgb(146, 226, 148)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderpacingRed / 100.00)) ? "rgb(217,134,134)" :((itemTracker.getdDifBudgetPacPerc() < Double.valueOf(iUnderPacingOrange / 100.00)) ? "rgb(245, 207, 110)" : "rgb(54, 162, 235, 0.2)")));
                 labels.add(itemTracker.getvCampaign());
             }        
 
             labelsMap.put("barChartCP", labels);
-            valoresMap.put("barChartCP", values);              
+            valoresMap.put("barChartCP", values);  
+            colorsMap.put("barChartCP", colors);             
         }        
     }
     public void createHorizontalBarModel(List<TblBudgetTracker> bTrackerSummaryAD){
@@ -848,9 +864,9 @@ public class TblRawDataController implements Serializable {
                         item.getdCPM_W4(),
                         item.getdCPM_W5(),
                         item.getdAVG_W(),
-                        item.getdCPMGoal() > 0 ? item.getdCPMGoal() : item.getdCTRGoal()
+                        item.getdCPMGoal() > 0 ? item.getdCPMGoal() : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal())
                     );
-                    goalType.put(chartId, (item.getdCPMGoal() > 0) ? "CPM" : "CTR");
+                    goalType.put(chartId, (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR"));
                     labelsMap.put(chartId, labels);
                     valoresMap.put(chartId, dataPoints);
                     chartTitles.put(chartId, item.getvCampaign());
@@ -897,11 +913,12 @@ public class TblRawDataController implements Serializable {
         valoresMap.clear();
         chartTitles.clear();
         goalType.clear();
+        colorsMap.clear();
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
         createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
         createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
-        createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
-        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));                        
+        /*createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
+        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));                        */
     }      
     
     public void getDataBudgetTrackerSumaryGraph(){

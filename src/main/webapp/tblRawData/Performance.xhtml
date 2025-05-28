@@ -134,14 +134,20 @@
                         <p:column width="50" style="text-align: right" headerText="CPM">
                             <h:outputText value="#{item.dRevenueCPM}"><f:convertNumber type="currency"  locale="en_US"/></h:outputText>
                         </p:column>
-                        <p:column width="50" style="text-align: right" headerText="CTR">
-                            <h:outputText value="#{item.dClickRate}"><f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/></h:outputText>                            
+                        <p:column width="50" style="text-align: right" headerText="CTR %">
+                            <h:outputText value="#{item.dClickRate}"><f:convertNumber type="number" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>                            
                         </p:column>
                         <p:column width="60" style="text-align: right" headerText="Impressions">
                             <h:outputText value="#{item.iImpressions}"/>
                         </p:column>
                         <p:column width="50" style="text-align: right" headerText="Clicks">
                             <h:outputText value="#{item.iClicks}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: right;white-space: wrap;" headerText="Complete Views">
+                            <h:outputText value="#{item.iCompleteViews}"/>
+                        </p:column>
+                        <p:column width="50" style="text-align: right" headerText="VCR">
+                            <h:outputText value="#{item.dVCR}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
                         </p:column>
                     </p:dataTable>            
                 </p:panel>

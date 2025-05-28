@@ -24,6 +24,7 @@
                             <ui:param name="canvasId" value="barChartCPIO"/>
                             <ui:param name="chartTitle" value="#{(tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'Campaign' : 'InsertionOrder'}" />
                             <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />
+                            <ui:param name="coloresJson" value="#{tblRawDataController.getColorsMap((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />                            
                             <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />
                             <ui:param name="chartType" value="bar" />
                             <ui:param name="horizontal" value="true" />                    

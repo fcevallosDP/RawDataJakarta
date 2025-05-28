@@ -8,6 +8,7 @@
                 data-labels="#{labelsJson}"
                 data-valores="#{valoresJson}"
                 data-charttitle="#{chartTitle}"
+                data-colores="#{coloresJson}"
                 style="width: 100%; display: block; margin: 0 auto; box-sizing: border-box; border: 1px solid #dee2e6;">
         </canvas>
     </div>
@@ -30,6 +31,7 @@
 
             const labels = JSON.parse(canvas.dataset.labels || "[]");
             const valores = JSON.parse(canvas.dataset.valores || "[]");
+            const colores = JSON.parse(canvas.dataset.colores || "[]");
             const chartTitle = canvas.dataset.charttitle || "";
 
             const dynamicHeight = Math.max(300, labels.length * 30);
@@ -38,14 +40,14 @@
             if (window["chart_" + canvasId] instanceof Chart) {
                 window["chart_" + canvasId].destroy();
             }
-
+            //backgroundColor: "rgba(153, 102, 255, 0.5)"
             window["chart_" + canvasId] = new Chart(canvas.getContext("2d"), {
                 type: "bar",
                 data: {
                     labels: labels,
                     datasets: [{
                         data: valores,
-                        backgroundColor: "rgba(153, 102, 255, 0.5)",
+                        backgroundColor: colores,
                         borderColor: "rgba(153, 102, 255, 1)",
                         borderWidth: 1
                     }]

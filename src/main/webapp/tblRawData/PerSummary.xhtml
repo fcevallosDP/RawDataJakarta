@@ -52,11 +52,23 @@
                             <p:cellEditor>
                                 <f:facet name="output">
                                     <h:outputText value="#{summaryitemC.dCTRGoal}">
-                                        <f:convertNumber type="percent" maxFractionDigits="5" minFractionDigits="5" locale="en_US"/>
+                                        <f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/>
                                     </h:outputText>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputNumber id="inputctr" value="#{summaryitemC.dCTRGoal}" style="width:100% !important;" label="CTR Goal" decimalPlaces="5" decimalSeparator="." minValue="0.00000" maxValue="0.99999" symbol="%"/>
+                                    <p:inputNumber id="inputctr" value="#{summaryitemC.dCTRGoal}" style="width:100% !important;" label="CTR Goal" decimalPlaces="2" decimalSeparator="." minValue="0.00" symbol="%"/>
+                                </f:facet>
+                            </p:cellEditor>                            
+                        </p:column>                                
+                        <p:column width="90" headerText="VCR Goal" style="text-align: right; background: rgb(218 239 221) !important;}">                     
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{summaryitemC.dVCRGoal}">
+                                        <f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/>
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputNumber id="inputvcr" value="#{summaryitemC.dVCRGoal}" style="width:100% !important;" label="VCR Goal" decimalPlaces="2" decimalSeparator="." minValue="0.00" symbol="%"/>
                                 </f:facet>
                             </p:cellEditor>                            
                         </p:column>                                
@@ -93,6 +105,9 @@
                             </p:column> 
                             <p:column style="text-align:right">
                                 <h:outputText value=" "/>
+                            </p:column> 
+                            <p:column style="text-align:right">
+                                <h:outputText value=" "/>
                             </p:column>                                      
                             <p:column style="text-align:right">
                                 <h:outputText value="#{tblRawDataController.getTotalPerfImpGrouped(summaryitemC.vClient)}"/>
@@ -118,6 +133,9 @@
                                         <h:outputText value=" "/>
                                     </f:facet>
                                 </p:column>   
+                                <p:column style="text-align:right">
+                                    <h:outputText value=" "/>
+                                </p:column>                                 
                                 <p:column style="text-align:right">
                                     <f:facet name="footer">
                                         <h:outputText value=" "/>

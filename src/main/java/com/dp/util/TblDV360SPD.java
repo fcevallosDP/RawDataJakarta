@@ -31,6 +31,7 @@ public class TblDV360SPD {
     private String vDealName;
     private Integer iImpressions;
     private Integer iClicks;
+    private Integer iCompleteViews;
     private Integer iDPerf;
     private Timestamp modifiedDate;
     private Double dMediaCosts;
@@ -45,8 +46,10 @@ public class TblDV360SPD {
     private Double dAVG_W;
     private Double dCPMGoal;
     private Double dCTRGoal;
+    private Double dVCRGoal;
     private Double dClickRate;
     private Double dCTR;
+    private Double dVCR;
     private Double dCPC;
     private String vDSP;
     private String vUser;
@@ -63,6 +66,30 @@ public class TblDV360SPD {
 
     public Integer getId() {
         return id;
+    }
+
+    public Integer getiCompleteViews() {
+        return iCompleteViews;
+    }
+
+    public void setiCompleteViews(Integer iCompleteViews) {
+        this.iCompleteViews = iCompleteViews;
+    }
+
+    public Double getdVCRGoal() {
+        return dVCRGoal;
+    }
+
+    public void setdVCRGoal(Double dVCRGoal) {
+        this.dVCRGoal = dVCRGoal;
+    }
+
+    public Double getdVCR() {
+        return dVCR;
+    }
+
+    public void setdVCR(Double dVCR) {
+        this.dVCR = dVCR;
     }
 
     public Integer getiDPerf() {

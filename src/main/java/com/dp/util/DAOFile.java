@@ -830,7 +830,7 @@ public class DAOFile implements Serializable  {
     }    
 
     protected List<TblDV360SPD> scrap_Perf_PP_Data(UploadedFile itemFile, String vAgency) throws FileNotFoundException, IOException{
-        System.out.println("scrap_Perf_MassiveData");
+        System.out.println("scrap_Perf_PP_Data");
         TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
         List<TblDV360SPD> localitemsDV360 = new ArrayList();
         if (itemFile != null){            
@@ -864,6 +864,240 @@ public class DAOFile implements Serializable  {
                         item.setvClient("");         
                         item.setdMediaCosts(0.00);
                         item.setiImpressions(0);
+                        item.setdTotalMediaCosts(0.00);
+                        item.setdCPC(0.00);
+                        item.setdCPM(0.00);
+                        item.setdVCR(0.00);
+                        item.setdCTR(0.000);        
+                        item.setiClicks(0);
+                        item.setiCompleteViews(0);
+
+                        while (cellIterator.hasNext() && !lbEndCol) {
+                            // aqui empiezo a iterar las columnas
+                            Cell nextCell = cellIterator.next();
+                            
+                            int columnIndex = nextCell.getColumnIndex();
+                            
+                            if(nextCell.getCellType() == CellType.BLANK){
+                                iColBlank++;
+                            }
+                            switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiAnio(Integer.valueOf(parts[0]));
+                                                    item.setiMes(Integer.valueOf(parts[1]));
+                                                    item.setiDia(Integer.valueOf(parts[2])); 
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;  
+                                case 1://ADVERTISER
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){
+                                            
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvClient(nextCell.getStringCellValue());
+                                            }else{
+                                                iColBlank++;
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;
+                                case 2://CAMPAIGN
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){
+                                            
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvCampaign(nextCell.getStringCellValue());
+                                            }else{
+                                                iColBlank++;
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;
+                                case 3://Insertion Order
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){
+                                            
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvInsertionOrder(nextCell.getStringCellValue());
+                                            }else{
+                                                iColBlank++;
+                                            }
+                                            
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;
+                                case 4://Line Item
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){
+                                            
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvLineItem(nextCell.getStringCellValue());
+                                            }else{
+                                                iColBlank++;
+                                            }                                           
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){                                                                                      
+                                        ex.printStackTrace();
+                                    }
+                                    break;
+                                case 5://Device Type
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){
+                                            
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDeviceType(nextCell.getStringCellValue());
+                                            }else{
+                                                iColBlank++;
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();                                                                                      
+                                    }
+                                    break;                                                                                                            
+                                case 9://Click Rate CTR
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setdClickRate(nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;                                    
+                                case 10://Impressions
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setiImpressions((int) nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;
+                                case 11://Clicks
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setiClicks((int) nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }                                    
+                                    break;
+                                case 12://CompleteViews
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setiCompleteViews((int) nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }                                    
+                                    break;
+                                case 16://Revenue CPM
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setdRevenueCPM(nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    lbEndCol = true;
+                                    break;                                             
+                            }// END SWITCH
+                        }//END Col
+                        if(iColBlank > 4){
+                            item = null;
+                            lbEndFile = true;
+                        }                        
+                        // Append to list
+                        if (item != null){
+                            localitemsDV360.add(item);
+                        }
+                        
+                    }// END ROWS
+                    workbook.close(); 
+                }               
+        }
+       }
+        return localitemsDV360;
+    } 
+
+    protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data(UploadedFile itemFile, String vAgency) throws FileNotFoundException, IOException{
+        System.out.println("scrap_Perf_ABTDV360_Data");
+        TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
+        List<TblDV360SPD> localitemsDV360 = new ArrayList();
+        if (itemFile != null){            
+            String lsFileName = itemFile.getFileName();
+            if (lsFileName.endsWith(".xlsx")){                                               
+                //Get first sheet from the workbook
+                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
+                    //Get first sheet from the workbook
+                    Sheet firstSheet = workbook.getSheetAt(0);
+                    Iterator<Row> rowIterator = firstSheet.iterator();
+                    // skip the header row
+                    if (rowIterator.hasNext()) {
+                        rowIterator.next(); // 1
+                    }  Boolean lbEndFile = false, lbEndCol = false;
+                    int iColBlank;
+                    TblDV360SPD item = null;                  
+                    while (rowIterator.hasNext() && !lbEndFile) {
+                        // aqui empiezo a iterar filas
+                        Row nextRow = rowIterator.next();
+                        Iterator<Cell> cellIterator = nextRow.cellIterator();
+                        lbEndCol = false;
+                        iColBlank = 0;
+                        item = new TblDV360SPD();
+                        item.setvAgency(vAgency);
+                        item.setIdDaily(idDaily);
+                        item.setvCampaign("");
+                        item.setvInsertionOrder("");
+                        item.setvLineItem("");
+                        item.setvExchange("");
+                        item.setvDealName("");
+                        item.setvClient("");         
+                        item.setdMediaCosts(0.00);
+                        item.setiImpressions(0);
+                        item.setiClicks(0);
+                        item.setiCompleteViews(0);
+                        item.setdVCR(0.00);
                         item.setdTotalMediaCosts(0.00);
                         item.setdCPC(0.00);
                         item.setdCPM(0.00);
@@ -992,7 +1226,7 @@ public class DAOFile implements Serializable  {
                                         ex.printStackTrace();
                                     }
                                     break;         
-                                case 7://Click Rate CTR
+                                case 8://Click Rate CTR
                                     try{
                                         if(nextCell.getCellType() == CellType.NUMERIC){
                                             item.setdClickRate(nextCell.getNumericCellValue());
@@ -1003,7 +1237,7 @@ public class DAOFile implements Serializable  {
                                         ex.printStackTrace();
                                     }
                                     break;                                    
-                                case 8://Impressions
+                                case 9://Impressions
                                     try{
                                         if(nextCell.getCellType() == CellType.NUMERIC){
                                             item.setiImpressions((int) nextCell.getNumericCellValue());
@@ -1014,7 +1248,7 @@ public class DAOFile implements Serializable  {
                                         ex.printStackTrace();
                                     }
                                     break;
-                                case 9://Clicks
+                                case 10://Clicks
                                     try{
                                         if(nextCell.getCellType() == CellType.NUMERIC){
                                             item.setiClicks((int) nextCell.getNumericCellValue());
@@ -1043,10 +1277,10 @@ public class DAOFile implements Serializable  {
         }
        }
         return localitemsDV360;
-    } 
-
+    }     
+    
     protected List<TblDV360SPD> scrap_Perf_DV360_Data(UploadedFile itemFile, String vAgency) throws FileNotFoundException, IOException{
-        System.out.println("scrap_Perf_MassiveData");
+        System.out.println("scrap_Perf_DV360_Data");
         TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
         List<TblDV360SPD> localitemsDV360 = new ArrayList();
         if (itemFile != null){            
@@ -1080,6 +1314,9 @@ public class DAOFile implements Serializable  {
                         item.setvClient("");         
                         item.setdMediaCosts(0.00);
                         item.setiImpressions(0);
+                        item.setiClicks(0);
+                        item.setiCompleteViews(0);
+                        item.setdVCR(0.00);                        
                         item.setdTotalMediaCosts(0.00);
                         item.setdCPC(0.00);
                         item.setdCPM(0.00);
@@ -4006,7 +4243,7 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
-            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
                                                                 "from vwperfgoals\n" +
                                                                 "where iYear = ? and iMonth = ? and vAgency = ?;"); 
             pstmt.setInt(1, iYear);
@@ -4033,6 +4270,7 @@ public class DAOFile implements Serializable  {
                 item.setvCampaign(rs.getString("vCampaign"));
                 item.setdCPMGoal(rs.getDouble("dCPMGoal"));
                 item.setdCTRGoal(rs.getDouble("dCTRGoal"));
+                item.setdVCRGoal(rs.getDouble("dVCRGoal"));
 
                 double num = rs.getDouble("avg_cpm");
                 BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
@@ -4087,6 +4325,11 @@ public class DAOFile implements Serializable  {
                     item.setdCTRGoal(rs.getDouble("dCTRGoal"));
                 } catch (Exception e) {
                     item.setdCTRGoal(0.00);
+                }                
+                try {
+                    item.setdVCRGoal(rs.getDouble("dVCRGoal"));
+                } catch (Exception e) {
+                    item.setdVCRGoal(0.00);
                 }                
                 try {
                     item.setdCPM_W1(rs.getDouble("dW1"));
@@ -4522,7 +4765,7 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `dDate`, `vAdvertiser`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vDeviceType`, `dRevenueCPM`, `dClickRate`, `iImpressions`, `iClicks`,\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `dDate`, `vAdvertiser`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vDeviceType`, `dRevenueCPM`, `dClickRate`, `iImpressions`, `iClicks`, iCompleteViews, dVCR,\n" +
                                                             "	`vUser`, `iAnio`, `iMes`, `iWeek`, `iDia`, `vFileName`\n" +
                                                             "from `tbl_raw_perf_data`\n" +
                                                             "where `tStatus` = 1 and `iAnio` = ? and `iMes` = ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
@@ -4537,7 +4780,8 @@ public class DAOFile implements Serializable  {
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dDate"));
                 item.setdRevenueCPM(rs.getDouble("dRevenueCPM"));                
-                //item.setdClickRate(rs.getDouble("dClickRate"));
+                item.setdClickRate(rs.getDouble("dClickRate"));
+                item.setdVCR(rs.getDouble("dVCR"));
                 item.setiAnio(iYear);
                 item.setvAgency(vAgency);
                 item.setiClicks(rs.getInt("iClicks"));
@@ -4545,15 +4789,10 @@ public class DAOFile implements Serializable  {
                 item.setiSemana(rs.getInt("iWeek"));
                 item.setiDia(rs.getInt("iDia"));
                 item.setiImpressions(rs.getInt("iImpressions"));
-
-                double num = (item.getiImpressions() > 0) ? (double) item.getiClicks() / item.getiImpressions() : item.getiClicks();
-                BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
-                item.setdClickRate(bd.doubleValue());              
-                
+                item.setiCompleteViews(rs.getInt("iCompleteViews"));                                
                 item.setiMes(Imonth);
                 item.setvUser(rs.getString("vUser"));
                 item.setvCampaign(rs.getString("vCampaign"));
-                //item.setvChannel((rs.getString("vChannel") != null) ? rs.getString("vChannel") :"");
                 item.setvClient(rs.getString("vAdvertiser"));
                 item.setvDeviceType(rs.getString("vDeviceType"));
                 item.setvInsertionOrder(rs.getString("vInsertionOrder"));
@@ -4599,7 +4838,7 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select distinct " + pattern +" from tbl_raw_perf_data where `tStatus` = 1 and `iAnio` = ? and `iMes` = ? and vAgency = ?"); 
+            PreparedStatement pstmt = connect.prepareStatement("select distinct " + pattern +" from tbl_raw_perf_data where `tStatus` = 1 and `iAnio` = ? and `iMes` = ? and vAgency = ? and " + pattern +" is not null" ); 
             pstmt.setInt(1, iYear);
             pstmt.setInt(2, iMonth);
             pstmt.setString(3, vPartnerSelected);
@@ -5621,8 +5860,8 @@ public class DAOFile implements Serializable  {
             try (Connection connect = DatabaseConnector.getConnection()) { 
                  
                 PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_perf_data` "
-                                        + "(`dDate`,`iWeek`,`iDia`,`iMes`,`iAnio`, `vAgency`, `vAdvertiser`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vDeviceType`,`dRevenueCPM`, `dClickRate`, `iImpressions`,`iClicks`,`dSystemDate`,`vFileName`, `vUser`)"
-                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?);");
+                                        + "(`dDate`,`iWeek`,`iDia`,`iMes`,`iAnio`, `vAgency`, `vAdvertiser`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vDeviceType`,`dRevenueCPM`, `dClickRate`, `iImpressions`,`iClicks`,`iCompleteViews`,`dVCR`,`dSystemDate`,`vFileName`, `vUser`)"
+                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?);");
 
                 for (TblDV360SPD item : localitemsDV360) {                                    
                     pstmt.setString(1, item.getvDate());
@@ -5641,15 +5880,21 @@ public class DAOFile implements Serializable  {
                     BigDecimal bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);                                                              
                     pstmt.setDouble(12, bd.doubleValue());
 
-                    /*num = item.getdClickRate();
-                    bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);*/
-                    pstmt.setDouble(13, 0.000000);
+                    
+                    num = (item.getiImpressions() != null && item.getiClicks() != null && item.getiImpressions() > 0) ? (double) ((item.getiClicks() / item.getiImpressions()) * 100.00) : 0.00;
+                    bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
+                    pstmt.setDouble(13, bd.doubleValue());
                     
                     pstmt.setInt(14, item.getiImpressions());                
-                    pstmt.setInt(15, item.getiClicks());       
+                    pstmt.setInt(15, item.getiClicks());  
+                    pstmt.setInt(16, item.getiCompleteViews());
+                    
+                    num = (item.getiCompleteViews() * 1.00) / ((item.getiImpressions() != null && item.getiImpressions() > 0) ? item.getiImpressions() : 1.00);
+                    bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);
+                    pstmt.setDouble(17, bd.doubleValue());//VCR                    
                                         
-                    pstmt.setString(16, lsFileName.trim());                                       
-                    pstmt.setString(17, (userSession != null) ? userSession.getvUser():"");
+                    pstmt.setString(18, lsFileName.trim());                                       
+                    pstmt.setString(19, (userSession != null) ? userSession.getvUser():"");
                     pstmt.executeUpdate();
                 }                
                 pstmt.close(); 
@@ -5916,6 +6161,8 @@ public class DAOFile implements Serializable  {
             String lsFileName = itemFile.getFileName();
             if (lsFileName.contains("PP")){
                 save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_PP_Data(itemFile, vAgency), iWeek);                                  
+            }else if (lsFileName.contains("ABT")){
+                save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_ABTDV360_Data(itemFile, vAgency), iWeek);                  
             }else/* if (lsFileName.contains("HLK"))*/{
                 save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_DV360_Data(itemFile, vAgency), iWeek);                  
             }

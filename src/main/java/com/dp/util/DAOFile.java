@@ -1258,8 +1258,19 @@ public class DAOFile implements Serializable  {
                                     }catch (Exception ex){
                                         ex.printStackTrace();
                                     }
-                                    lbEndCol = true;
                                     break;
+                                case 11://CompleteViews
+                                    try{
+                                        if(nextCell.getCellType() == CellType.NUMERIC){
+                                            item.setiCompleteViews((int) nextCell.getNumericCellValue());
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    lbEndCol = true;                                    
+                                    break;                                    
                             }// END SWITCH
                         }//END Col
                         if(iColBlank > 4){

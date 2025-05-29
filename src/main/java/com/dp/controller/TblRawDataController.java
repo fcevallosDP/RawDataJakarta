@@ -846,17 +846,23 @@ public class TblRawDataController implements Serializable {
         valoresMap.clear();
         chartTitles.clear();
         goalType.clear();
-
+        colorsMap.clear();        
         DAOFile dbCon = new DAOFile();
         List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
 
         if (items != null) {
+            
             List<String> labels = List.of("W1", "W2", "W3", "W4", "W5", "AVG", "Goal");
             int count = 1;
 
-            for (TblDV360SPD item : items) {
+            for (TblDV360SPD item : items) {                
                 if (item != null) {
+                    Double ldGoal = item.getdCPMGoal() > 0 ? item.getdCPMGoal() : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal());
+                    Double minGoal = ldGoal * 0.90;
+                    Double maxGoal = ldGoal * 1.10;
+                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR");
                     String chartId = "chart" + count++; // numérico incremental
+                    
                     List<Number> dataPoints = List.of(
                         item.getdCPM_W1(),
                         item.getdCPM_W2(),
@@ -864,12 +870,23 @@ public class TblRawDataController implements Serializable {
                         item.getdCPM_W4(),
                         item.getdCPM_W5(),
                         item.getdAVG_W(),
-                        item.getdCPMGoal() > 0 ? item.getdCPMGoal() : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal())
+                        ldGoal
                     );
-                    goalType.put(chartId, (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR"));
+
+                    List<String> colors = List.of(
+                            (lsGoalType.contains("CPM") ? (item.getdCPM_W1() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W1() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W1() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W1() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")),                            
+                            (lsGoalType.contains("CPM") ? (item.getdCPM_W2() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W2() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W2() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W2() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
+                            (lsGoalType.contains("CPM") ? (item.getdCPM_W3() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W3() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W3() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W3() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")),                            
+                            (lsGoalType.contains("CPM") ? (item.getdCPM_W4() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W4() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W4() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W4() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
+                            (lsGoalType.contains("CPM") ? (item.getdCPM_W5() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W5() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W5() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W5() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
+                            "rgb(54, 162, 235, 0.2)", 
+                            "rgb(54, 162, 235, 0.2)");                    
+                    
+                    goalType.put(chartId, lsGoalType);
                     labelsMap.put(chartId, labels);
                     valoresMap.put(chartId, dataPoints);
                     chartTitles.put(chartId, item.getvCampaign());
+                    colorsMap.put(chartId, colors);
                 }
             }
         }

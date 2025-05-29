@@ -68,7 +68,8 @@
                                              disabled="#{empty tblRawDataController.itemsPerf}" style="margin-left: 2px;"
                                              icon="pi pi-trash" update="TblRawDataListForm:datalist, btnFilesUpload">
                                 <p:confirm header="Confirmation" message="Are you sure you want to delete the data?" icon="pi pi-sync"/>                                                                                
-                            </p:commandButton>                            
+                            </p:commandButton>    
+                            <p:commandButton id="excelButton" icon="pi pi-sync" ajax="false" title="Clear Filters" style="margin-left: 2px;" type="button" onclick="location.reload();"/>                            
                             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
                                 <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
                                 <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />

@@ -19,102 +19,86 @@
 
     <h:outputScript>
     //<![CDATA[
-    (function () {
+
+    if (!window.chartInitFns) {
+        window.chartInitFns = [];
+    }
+
+    window.chartInitFns.push(function() {
+    
         const canvasId = "#{canvasId}";
-        const fnName = "drawChart_" + canvasId;
+        const canvas = document.getElementById(canvasId);
 
-        console.log("✅ Registrando drawChart para:", canvasId);
+        if (!canvas) {
+            console.warn(`⚠️ Canvas ${canvasId} no encontrado.`);
+            return;
+        }
 
-        window[fnName] = function () {
-            console.log("🟦 Intentando renderizar:", canvasId);
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) {
-                console.warn("⚠️ No se encontró canvas con ID:", canvasId);
-                return;
-            }
+        // Verifica visibilidad y si ya fue renderizado
+        if (canvas.offsetParent === null) {
+            console.log(`📌 ${canvasId} no está visible, se omite renderizado.`);
+            return;
+        }
+        if (canvas.rendered) {
+            console.log(`⏭️ ${canvasId} ya fue renderizado anteriormente.`);
+            return;
+        }
+        
+        const ctx = canvas.getContext("2d");
+        const labels = JSON.parse(canvas.dataset.labels || "[]");
+        const data = JSON.parse(canvas.dataset.valores || "[]");
+        const chartTitle = canvas.dataset.charttitle || "";
+        const goal = parseFloat(canvas.dataset.goal || "0");
+        const colors = JSON.parse(canvas.dataset.colores || "[]");
 
-            const labels = JSON.parse(canvas.dataset.labels || "[]");
-            const valores = JSON.parse(canvas.dataset.valores || "[]").map(v => Math.round(parseFloat(v) * 100) / 100);
-            const colores = JSON.parse(canvas.dataset.colores || "[]");
-            const chartTitle = canvas.dataset.charttitle || "";
-            const goal = parseFloat(canvas.dataset.goal || "0");          
-
-            if (window["chart_" + canvasId] instanceof Chart) {
-                window["chart_" + canvasId].destroy();
-            }
-
-            window["chart_" + canvasId] = new Chart(canvas.getContext("2d"), {
-                type: "bar",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: valores,
-                        backgroundColor: colores,
-                        borderColor: "rgba(153, 102, 255, 1)",
-                        borderWidth: 1
-                    }]
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: chartTitle,
+                    data: data,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        aspectRadio: 2,
-                        indexAxis: 'x',
-                        scales: {
-                            x: {
-                                barPercentage: 0.2,
-                                categoryPercentage: 0.4,
-                                ticks: { autoSkip: false },
-                                grid: { display: true }
-                            },
-                            y: { beginAtZero: true,
-                                grace: 0.5
-                            }
-                        },
-                        plugins: {
-                            datalabels: {
-                                anchor: 'end',
-                                align: 'top',
-                                color: '#000',
-                                font: { weight: 'bold', size: 11 }
-                            },
-                            legend: {
-                                display: false
-                            },
-                            title: {
-                                display: false,
-                                text: chartTitle
-                            },
-                            tooltip: { enabled: false},
-                            annotation: {
-                                    annotations: {
-                                        goalLine: {
-                                            type: 'line',
-                                            yMin: goal,
-                                            yMax: goal,
-                                            borderColor: '#0b07f0',
-                                            borderWidth: 1,
-                                            borderDash: [3 ,3],
-                                            label: {
-                                                display: false,
-                                                content: 'Goal',
-                                                position: 'end',
-                                                color: '#0b07f0',
-                                                font: { style: 'italic', size: 10 },
-                                                backgroundColor: 'rgba(255,255,255,0.7)'
-                                            }
-                                        }
-                                    }
-                                }
-                            
-                        }
+                plugins: {
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#000',
+                        font: { weight: 'bold', size: 11 }
                     },
-                plugins: [ChartDataLabels]
-            });
-        };
-
-        window.chartInitFns = window.chartInitFns || [];
-        window.chartInitFns.push(window[fnName]);
-    })();
+                
+                    annotation: {
+                        annotations: {
+                            goalLine: {
+                                type: 'line',
+                                yMin: goal,
+                                yMax: goal,
+                                borderColor: 'blue',
+                                borderWidth: 1,
+                                borderDash: [3, 3]
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Marcar como renderizado
+        canvas.rendered = true;
+        console.log(`✅ ${canvasId} renderizado correctamente.`);        
+        
+    });    
+    
     //]]>
     </h:outputScript>
 </ui:composition>

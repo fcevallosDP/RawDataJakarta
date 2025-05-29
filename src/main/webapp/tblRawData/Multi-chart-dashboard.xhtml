@@ -17,23 +17,34 @@
               style="left: 5vh !important; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
 
         <h:form id="dashboardForm">
+            <ui:repeat value="#{tblRawDataController.groupedCharts}" var="chartGroup" varStatus="status">
+                <p:panel id="panel#{status.index}"
+                         widgetVar="panelWidget#{status.index}"
+                         header="#{chartGroup.metricName}"
+                         toggleable="true"
+                         collapsed="#{chartGroup.metricName ne 'CPM'}">
 
-            <p:dataGrid value="#{tblRawDataController.chartIds}" var="chartId" columns="3" layout="grid" style="overflow-y: auto;"> 
+                    <p:ajax event="toggle"
+                            oncomplete="handleExclusivePanelToggle(#{status.index}, #{tblRawDataController.totalChartGroups}); setTimeout(renderVisibleCharts, 100);" />
 
-                
-                    <ui:include src="/includes/Multi-chart-render.xhtml">
-                        <ui:param name="canvasId" value="#{chartId}" />
-                        <ui:param name="chartTitle" value="#{tblRawDataController.getChartTitle(chartId)}" />
-                        <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson(chartId)}" />
-                        <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson(chartId)}" />
-                        <ui:param name="goalType" value="#{tblRawDataController.getGoalType(chartId)}" />
-                        <ui:param name="coloresJson" value="#{tblRawDataController.getColorsMap(chartId)}" />
-                        <ui:param name="goalJson" value="#{tblRawDataController.getGoalVal(chartId)}" />
-                    </ui:include>
-                
+                    <div class="grid">
+                        <ui:repeat value="#{chartGroup.chartIds}" var="chartId">
+                            <div class="col-12 md:col-4">
+                                <ui:include src="/includes/Multi-chart-render.xhtml">
+                                    <ui:param name="canvasId" value="#{chartId}" />
+                                    <ui:param name="chartTitle" value="#{tblRawDataController.getChartTitle(chartId)}" />
+                                    <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson(chartId)}" />
+                                    <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson(chartId)}" />
+                                    <ui:param name="goalType" value="#{tblRawDataController.getGoalType(chartId)}" />
+                                    <ui:param name="coloresJson" value="#{tblRawDataController.getColorsMap(chartId)}" />
+                                    <ui:param name="goalJson" value="#{tblRawDataController.getGoalVal(chartId)}" />
+                                </ui:include>
+                            </div>
+                        </ui:repeat>
+                    </div>
 
-            </p:dataGrid>
-
+                </p:panel>
+            </ui:repeat>
         </h:form>
 
     </p:dialog>

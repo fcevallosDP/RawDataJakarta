@@ -74,6 +74,30 @@
                 });
             }
 
+            
+            let exclusiveToggleInProgress = false;
+            function handleExclusivePanelToggle(openedIndex, total) {
+                if (exclusiveToggleInProgress) {
+                    return;
+                }
+
+                exclusiveToggleInProgress = true;
+
+                setTimeout(() => {
+                    for (let i = 0; i < total; i++) {
+                        if (i === openedIndex) continue;
+                        const panelWidget = PF('panelWidget' + i);
+                        if (panelWidget && !panelWidget.cfg.collapsed) {
+                            panelWidget.toggle(true);
+                        }
+                    }
+
+                    // Liberar después de que todas las operaciones se completen
+                    setTimeout(() => {
+                        exclusiveToggleInProgress = false;
+                    }, 300); // margen de seguridad
+                }, 0);
+            }        
 
             //]]>
         </h:outputScript>        

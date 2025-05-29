@@ -1,0 +1,41 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui">
+
+    <p:dialog id="dashboardDialog"
+              widgetVar="dashboardDialog"
+              modal="true"
+              resizable="false"
+              draggable="true"
+              onShow="fixAllDialogsAriaHidden();"
+              onHide="fixAllDialogsAriaHidden();"
+              positionType="absolute"
+              position="center"
+              header="Dashboard"
+              responsive="true"
+              style="left: 5vh !important; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+
+        <h:form id="dashboardForm">
+
+            <p:dataGrid value="#{tblRawDataController.chartIds}" var="chartId" columns="3" layout="grid" style="overflow-y: auto;"> 
+
+                
+                    <ui:include src="/includes/Multi-chart-render.xhtml">
+                        <ui:param name="canvasId" value="#{chartId}" />
+                        <ui:param name="chartTitle" value="#{tblRawDataController.getChartTitle(chartId)}" />
+                        <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson(chartId)}" />
+                        <ui:param name="valoresJson" value="#{tblRawDataController.getValoresJson(chartId)}" />
+                        <ui:param name="goalType" value="#{tblRawDataController.getGoalType(chartId)}" />
+                        <ui:param name="coloresJson" value="#{tblRawDataController.getColorsMap(chartId)}" />
+                        <ui:param name="goalJson" value="#{tblRawDataController.getGoalVal(chartId)}" />
+                    </ui:include>
+                
+
+            </p:dataGrid>
+
+        </h:form>
+
+    </p:dialog>
+
+</ui:composition>

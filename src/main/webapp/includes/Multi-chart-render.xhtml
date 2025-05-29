@@ -10,6 +10,7 @@
                 data-valores="#{valoresJson}"
                 data-charttitle="#{chartTitle}"
                 data-colores="#{coloresJson}"
+                data-goal="#{goalJson}"
                 style="width: 100%; display: block; margin: 0 auto; max-height: 400px; box-sizing: border-box; border: 1px solid #dee2e6;">
         </canvas>
 
@@ -36,6 +37,7 @@
             const valores = JSON.parse(canvas.dataset.valores || "[]");
             const colores = JSON.parse(canvas.dataset.colores || "[]");
             const chartTitle = canvas.dataset.charttitle || "";
+            const goal = parseFloat(canvas.dataset.goal || "0")
 
             if (window["chart_" + canvasId] instanceof Chart) {
                 window["chart_" + canvasId].destroy();
@@ -82,7 +84,28 @@
                                 display: false,
                                 text: chartTitle
                             },
-                            tooltip: { enabled: false}
+                            tooltip: { enabled: false},
+                            annotation: {
+                                    annotations: {
+                                        goalLine: {
+                                            type: 'line',
+                                            yMin: goal,
+                                            yMax: goal,
+                                            borderColor: '#0b07f0',
+                                            borderWidth: 1,
+                                            borderDash: [3 ,3],
+                                            label: {
+                                                display: true,
+                                                content: 'Goal: ' + goal,
+                                                position: 'start',
+                                                color: '#0b07f0',
+                                                font: { style: 'italic', size: 10 },
+                                                backgroundColor: 'rgba(255,255,255,0.7)'
+                                            }
+                                        }
+                                    }
+                                }
+                            
                         }
                     },
                 plugins: [ChartDataLabels]

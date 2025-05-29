@@ -115,6 +115,7 @@ public class TblRawDataController implements Serializable {
     private final Map<String, List<Number>> valoresMap = new HashMap<>();
     private final Map<String, String> chartTitles = new HashMap<>();
     private final Map<String, String> goalType = new HashMap<>();
+    private final Map<String, Number> goalVal = new HashMap<>();
     private final Map<String, List<String>> colorsMap = new HashMap<>();
 
     public List<String> getRawDeviceTypes() {
@@ -847,6 +848,7 @@ public class TblRawDataController implements Serializable {
         chartTitles.clear();
         goalType.clear();
         colorsMap.clear();        
+        goalVal.clear();
         DAOFile dbCon = new DAOFile();
         List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
 
@@ -857,10 +859,21 @@ public class TblRawDataController implements Serializable {
 
             for (TblDV360SPD item : items) {                
                 if (item != null) {
+                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR");
                     Double ldGoal = item.getdCPMGoal() > 0 ? item.getdCPMGoal() : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal());
+                    if(lsGoalType.contains("VCR")){
+                        ldGoal = ldGoal * 100.00;
+                        item.setdCPM_W1(item.getdCPM_W1() * 100.00);
+                        item.setdCPM_W2(item.getdCPM_W2() * 100.00);
+                        item.setdCPM_W3(item.getdCPM_W3() * 100.00);
+                        item.setdCPM_W4(item.getdCPM_W4() * 100.00);
+                        item.setdCPM_W5(item.getdCPM_W5() * 100.00);
+                        item.setdAVG_W(item.getdAVG_W() * 100.00);                     
+                    }                                        
+                    
                     Double minGoal = ldGoal * 0.90;
                     Double maxGoal = ldGoal * 1.10;
-                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR");
+                    
                     String chartId = "chart" + count++; // numérico incremental
                     
                     List<Number> dataPoints = List.of(
@@ -886,6 +899,7 @@ public class TblRawDataController implements Serializable {
                     labelsMap.put(chartId, labels);
                     valoresMap.put(chartId, dataPoints);
                     chartTitles.put(chartId, item.getvCampaign());
+                    goalVal.put(chartId, ldGoal);
                     colorsMap.put(chartId, colors);
                 }
             }
@@ -924,6 +938,11 @@ public class TblRawDataController implements Serializable {
     public String getGoalType(String chartId) {
         return goalType.getOrDefault(chartId, chartId);
     }
+   
+    public String getGoalVal(String chartId) {
+        Number goalValue = goalVal.getOrDefault(chartId, 0);
+        return String.valueOf(goalValue);
+    }    
     
     public void getDataBudgetTrackerGraphs(){
         labelsMap.clear();
@@ -931,6 +950,7 @@ public class TblRawDataController implements Serializable {
         chartTitles.clear();
         goalType.clear();
         colorsMap.clear();
+        goalVal.clear();
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
         createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
         createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));

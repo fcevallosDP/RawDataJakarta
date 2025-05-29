@@ -34,10 +34,10 @@
             }
 
             const labels = JSON.parse(canvas.dataset.labels || "[]");
-            const valores = JSON.parse(canvas.dataset.valores || "[]");
+            const valores = JSON.parse(canvas.dataset.valores || "[]").map(v => Math.round(parseFloat(v) * 100) / 100);
             const colores = JSON.parse(canvas.dataset.colores || "[]");
             const chartTitle = canvas.dataset.charttitle || "";
-            const goal = parseFloat(canvas.dataset.goal || "0")
+            const goal = parseFloat(canvas.dataset.goal || "0");          
 
             if (window["chart_" + canvasId] instanceof Chart) {
                 window["chart_" + canvasId].destroy();
@@ -95,9 +95,9 @@
                                             borderWidth: 1,
                                             borderDash: [3 ,3],
                                             label: {
-                                                display: true,
-                                                content: 'Goal: ' + goal,
-                                                position: 'start',
+                                                display: false,
+                                                content: 'Goal',
+                                                position: 'end',
                                                 color: '#0b07f0',
                                                 font: { style: 'italic', size: 10 },
                                                 backgroundColor: 'rgba(255,255,255,0.7)'

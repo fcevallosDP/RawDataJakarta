@@ -4,14 +4,13 @@
                 xmlns:p="http://primefaces.org/ui">
 
     <div style="text-align:center; padding: 1rem;">
-        <h4 style="font-size: 1.2rem;font-weight: bold;margin-bottom: 0.5rem;box-sizing: border-box; border: 1px solid #dee2e6; color: #0b07f0">#{goalType}</h4>
         <canvas id="#{canvasId}"
                 data-labels="#{labelsJson}"
                 data-valores="#{valoresJson}"
                 data-charttitle="#{chartTitle}"
                 data-colores="#{coloresJson}"
                 data-goal="#{goalJson}"
-                style="width: 100%; display: block; margin: 0 auto; max-height: 400px; box-sizing: border-box; border: 1px solid #dee2e6;">
+                style="width: 100%; display: block; margin: 0 auto; min-height: 220px; max-height: 400px; box-sizing: border-box; border: 1px solid #dee2e6;">
         </canvas>
 
         <div class="chart-title" style="font-weight: bold; color: #0b07f0">#{chartTitle}</div>
@@ -46,7 +45,7 @@
         
         const ctx = canvas.getContext("2d");
         const labels = JSON.parse(canvas.dataset.labels || "[]");
-        const data = JSON.parse(canvas.dataset.valores || "[]");
+        const data = JSON.parse(canvas.dataset.valores || "[]").map(v => Math.round(parseFloat(v) * 100) / 100);        
         const chartTitle = canvas.dataset.charttitle || "";
         const goal = parseFloat(canvas.dataset.goal || "0");
         const colors = JSON.parse(canvas.dataset.colores || "[]");
@@ -64,9 +63,17 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                aspectRadio: 2,
+                indexAxis: 'x',
                 scales: {
-                    y: {
-                        beginAtZero: true
+                            x: {
+                                barPercentage: 0.2,
+                                categoryPercentage: 0.4,
+                                ticks: { autoSkip: false },
+                                grid: { display: true }
+                            },
+                            y: { beginAtZero: true,
+                                grace: 1.5
                     }
                 },
                 plugins: {
@@ -74,7 +81,14 @@
                         anchor: 'end',
                         align: 'top',
                         color: '#000',
-                        font: { weight: 'bold', size: 11 }
+                        font: { weight: 'bold', size: 10 }
+                    },
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: false,
+                        text: chartTitle
                     },
                 
                     annotation: {
@@ -90,7 +104,8 @@
                         }
                     }
                 }
-            }
+            },
+             plugins: [ChartDataLabels]
         });
         
         // Marcar como renderizado

@@ -20,7 +20,7 @@
             <h:form id="TblRawDataTabForm">              
                 <h:panelGroup id="responsive">                    
                     <div class="surface-card shadow-2 p-3 border-round">
-                        <ui:include src="/includes/Chart-tab-render.xhtml">
+                        <ui:include src="/includes/Chart-render.xhtml">
                             <ui:param name="canvasId" value="barChartCPIO"/>
                             <ui:param name="chartTitle" value="#{(tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'Campaign' : 'InsertionOrder'}" />
                             <ui:param name="labelsJson" value="#{tblRawDataController.getLabelsJson((tblRawDataController.vPartnerSelected eq 'ATAYLOR') ? 'barChartCP' : 'barChartIO')}" />

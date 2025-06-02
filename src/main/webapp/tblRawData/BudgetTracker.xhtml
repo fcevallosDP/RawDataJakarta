@@ -58,10 +58,10 @@
                                              />                                     
                             
                             <p:commandButton style="margin-left: 2px;" id="barButton" title="Chart"
-                                             oncomplete="PF('barDialog').show();setTimeout(renderVisibleCharts, 100);"
+                                             oncomplete="PF('barDialog').show();setTimeout(renderTabbedCharts, 100);"
                                              icon="pi pi-chart-bar"
                                              actionListener="#{tblRawDataController.getDataBudgetTrackerGraphs()}"
-                                             update=":popUpBarSummary, :TblRawDataTabForm"                                         
+                                             update=":barDialog, :TblRawDataTabForm"                                         
                                              />                           
                             
                             <p:commandButton title="Move to Historical" id="btnTransfer" update="datalist, :TblRawDataListForm:messages"
@@ -248,7 +248,7 @@
             </h:form>            
             <ui:include src="BUSummary.xhtml"/>
             <ui:include src="BULines.xhtml"/>
-            <ui:include src="BUTabs.xhtml"/>     
+            <ui:include src="tabbed-charts.xhtml"/>     
             <ui:include src="BUReIO.xhtml"/>
             <ui:include src="BUReCampaign.xhtml"/>
         </ui:define>        

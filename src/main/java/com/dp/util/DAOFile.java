@@ -4097,7 +4097,7 @@ public class DAOFile implements Serializable  {
              
             PreparedStatement pstmt = connect.prepareStatement("select distinct `vAgency`\n" +
                                                                 "from tbl_vPartners \n"
-                                                                + "where `vType` = 'DSP' and iEstado = 1 and (vAgency = ? or ? = 'ALL');"); 
+                                                              + "where `vType` = 'DSP' and iEstado = 1 and (vAgency = ? or ? = 'ALL');"); 
             pstmt.setString(1, vAgency);
             pstmt.setString(2, vAgency);
             
@@ -4412,6 +4412,95 @@ public class DAOFile implements Serializable  {
         }
         return null;
     }        
+    public List<TblBudgetTracker> getBudgetTrackerDataSummaryChannelAll(Integer iYear, Integer iMonth, String lsPartNer, String vByGroup, boolean lbAll){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+            
+            PreparedStatement pstmt;
+            if (lbAll){
+
+            pstmt = connect.prepareStatement("select vAgency, "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
+                                                                "from vwbudgettracker\n" +
+                                                                "where iYear = ? and iMonth = ? and dBudget > 0\n" +
+                                                                "group by vAgency, " + vByGroup + "\n"+
+                                                                "order by vAgency, vCampaign, " + vByGroup); 
+                pstmt.setInt(1, iYear);
+                pstmt.setInt(2, iMonth);
+                
+            }else{
+
+                pstmt = connect.prepareStatement("select "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
+                                                                    "from vwbudgettracker\n" +
+                                                                    "where iYear = ? and iMonth = ? and vAgency = ? and dBudget > 0\n" +
+                                                                    "group by " + vByGroup + "\n"+
+                                                                    "order by vCampaign, " + vByGroup);                 
+                pstmt.setInt(1, iYear);
+                pstmt.setInt(2, iMonth);
+                pstmt.setString(3, lsPartNer);
+            }
+
+            
+            ResultSet rs = pstmt.executeQuery();  
+            List<TblBudgetTracker> itemsLocalDV360 = new ArrayList();
+            while (rs.next()) {             
+                 
+                TblBudgetTracker item = new TblBudgetTracker();
+                item.setId(itemsLocalDV360.size()+1);
+                
+                if (lbAll){
+                    try {
+                        item.setvPartner(rs.getString("vAgency"));
+                        item.setvAgency(rs.getString("vAgency"));
+                    } catch (Exception e) {
+                        item.setvClient("");    
+                    }                                        
+                }else{
+                    item.setvPartner(lsPartNer);
+                    item.setvAgency(lsPartNer);                    
+                }
+                
+                try {
+                    item.setvClient(rs.getString("vClient"));
+                } catch (Exception e) {
+                    item.setvClient("");    
+                }
+                try {
+                    item.setvCampaign(rs.getString("vCampaign"));
+                } catch (Exception e) {
+                    item.setvCampaign("");
+                }                
+                try {
+                    item.setvChannel(rs.getString("vChannel"));
+                } catch (Exception e) {
+                    item.setvChannel("");
+                }                
+                try {
+                    item.setvInsertionOrder(rs.getString("vInsertionOrder"));
+                } catch (Exception e) {
+                    item.setvInsertionOrder("");
+                }                
+                item.setdProjBudgPerc(rs.getDouble("ProjBudgPerc"));
+                item.setdBudgetPacing(rs.getDouble("BudgetPacing"));
+                item.setdBudgetPacing((item.getdBudgetPacing() > 1.00) ? 1.00 : item.getdBudgetPacing());
+                item.setdDifBudgetPacPerc(item.getdBudgetPacing() - item.getdProjBudgPerc());           
+                item.setbUnderPacing(item.getdDifBudgetPacPerc() < (-0.03));
+                item.setbOverPacing((item.getdBudgetPacing() > 0.98));
+                item.setdBudget(rs.getDouble("TotalBudget"));
+                item.setdMediaSpend(rs.getDouble("TotalSpend"));
+                item.setdBalance((item.getdBudget() - item.getdMediaSpend()) > 0 ? (item.getdBudget() - item.getdMediaSpend()) : 0.00);
+                item.setdPacingPercent((item.getdBudget() > 0.00) ? (item.getdMediaSpend() / item.getdBudget()) : 0.00);
+                itemsLocalDV360.add(item);
+            }
+            rs.close();
+            pstmt.close();   
+            return itemsLocalDV360;
+        } catch (Exception ex) {            
+            System.out.println("getBudgetTrackerDataSummaryChannelAll");
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();                
+        }
+        return null;
+    }    
     
     public List<TblBudgetTracker> getBudgetTrackerDataSummary(Integer iYear, Integer iMonth, String lsPartNer, String vByGroup){
 
@@ -4476,7 +4565,7 @@ public class DAOFile implements Serializable  {
             ex.printStackTrace();                
         }
         return null;
-    }    
+    }        
     
     public List<TblLineItems> getSpendLineItems(TblBudgetTracker item){
 

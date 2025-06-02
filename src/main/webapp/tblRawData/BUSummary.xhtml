@@ -97,6 +97,9 @@
                     </p:tab>
 
                     <p:tab title="Channel">
+                        <p:selectBooleanCheckbox value="#{tblRawDataController.showAllChannelBT}" itemLabel="Ajax">
+                            <p:ajax update="dataSummary" listener="#{tblRawDataController.getDataBudgetTrackerSumaryChannelAll()}"/>
+                        </p:selectBooleanCheckbox>
                         <p:dataTable id="dataSummary" value="#{tblRawDataController.budgetTrackerSummary}"
                                         var="summaryitem" widgetVar="summaryWdataList" scrollRows="3"
                                         emptyMessage="No data found with given criteria" scrollHeight="320px"

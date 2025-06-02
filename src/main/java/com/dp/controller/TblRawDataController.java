@@ -82,7 +82,7 @@ public class TblRawDataController implements Serializable {
     private TblCatalogo editCatalog;
     private List<TblTypeSources> itemsTypes = null;    
     private boolean globalFilterOnly = true;
-    
+    private boolean showAllChannelBT = false;
     private String todayAsString;
     private String vPartnerSelected;
     private String vInitialCampaign;
@@ -130,6 +130,14 @@ public class TblRawDataController implements Serializable {
 
     public String getvPerfSummary() {
         return vPerfSummary;
+    }
+
+    public boolean isShowAllChannelBT() {
+        return showAllChannelBT;
+    }
+
+    public void setShowAllChannelBT(boolean showAllChannelBT) {
+        this.showAllChannelBT = showAllChannelBT;
     }
 
     public Integer getiWeek() {
@@ -290,15 +298,18 @@ public class TblRawDataController implements Serializable {
         if( bTrackerSummaryCH != null && !bTrackerSummaryCH.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
+            List<String> colors = new ArrayList<>();
             
             for (TblBudgetTracker itemTracker : bTrackerSummaryCH) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);
+                colors.add("rgb(54, 162, 235, 0.2)");
                 labels.add(itemTracker.getvChannel());
             }        
 
             labelsMap.put("barChartCH", labels);
-            valoresMap.put("barChartCH", values);              
+            valoresMap.put("barChartCH", values);     
+            colorsMap.put("barChartCH", colors);
         }
         
     }
@@ -321,6 +332,7 @@ public class TblRawDataController implements Serializable {
 
         }
     }
+    
     public void createHorizontalBarModelCampaign(List<TblBudgetTracker> bTrackerSummaryCA){
         if( bTrackerSummaryCA != null && !bTrackerSummaryCA.isEmpty()){
             List<Number> values = new ArrayList<>();
@@ -339,19 +351,23 @@ public class TblRawDataController implements Serializable {
             colorsMap.put("barChartCP", colors);             
         }        
     }
+    
     public void createHorizontalBarModel(List<TblBudgetTracker> bTrackerSummaryAD){
         if( bTrackerSummaryAD != null && !bTrackerSummaryAD.isEmpty()){
             List<Number> values = new ArrayList<>();
             List<String> labels = new ArrayList<>();
+            List<String> colors = new ArrayList<>();
 
             for (TblBudgetTracker itemTracker : bTrackerSummaryAD) {
                 Double ldValor = new BigDecimal(itemTracker.getdBudgetPacing() * 100.00).setScale(2, RoundingMode.HALF_UP).doubleValue();
                 values.add(ldValor);
+                colors.add("rgb(54, 162, 235, 0.2)");
                 labels.add(itemTracker.getvClient());
             }        
             
             labelsMap.put("barChartAD", labels);
             valoresMap.put("barChartAD", values);              
+            colorsMap.put("barChartAD", colors);   
         }
     }                       
     
@@ -846,7 +862,13 @@ public class TblRawDataController implements Serializable {
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();
         budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, vOptionSummary);
-    }          
+    }     
+    
+    public void getDataBudgetTrackerSumaryChannelAll(){
+        budgetTrackerSummary = null;
+        DAOFile dbCon = new DAOFile();
+        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummaryChannelAll(iYear, iMonth, vPartnerSelected, vOptionSummary, isShowAllChannelBT());
+    }         
 
     public int getTotalChartGroups() {
         return groupedCharts != null ? groupedCharts.size() : 0;
@@ -1046,11 +1068,11 @@ public class TblRawDataController implements Serializable {
         goalType.clear();
         colorsMap.clear();
         goalVal.clear();
-        DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";                                           
+        DAOFile dbCon = new DAOFile();
         createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
         createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
-        /*createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
-        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));                        */
+        createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
+        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));
     }      
     
     public void getDataBudgetTrackerSumaryGraph(){

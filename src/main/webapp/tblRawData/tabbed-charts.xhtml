@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition xmlns:c="http://java.sun.com/jsp/jstl/core">
+        <p:dialog id="barDialog"
+                  widgetVar="barDialog"
+                  header="Gráficos por categoría"
+                  modal="true"
+                  resizable="false"
+                  draggable="true"
+                  closable="true"
+                  onShow="setTimeout(() => {fixAllDialogsAriaHidden();renderTabbedCharts();}, 300)"
+                  onHide="fixAllDialogsAriaHidden();"
+                  positionType="absolute"
+                  position="top"
+                  responsive="true"
+                  style="min-width: 60vw; max-width: 90vw; max-height: 85vh; overflow-y: auto;"                  
+                  
+                  >
+            <h:form id="TblRawDataTabForm">
+                <p:tabView id="tabViewCharts" dynamic="false" cache="false" onTabChange="onTabChangeRender(event);">
+
+                    <p:tab id="idBarInsertionOrder" title="Insertion Order">
+
+                        <c:set var="canvasId" value="barChartIO" />
+                        <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartIO')}" />
+                        <c:set var="coloresJson" value="#{tblRawDataController.getColorsMap('barChartIO')}" />
+                        <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartIO')}" />
+                        <ui:include src="/includes/Chart-tab-render.xhtml" />
+                    </p:tab>
+
+                    <p:tab id="idBarCampaign" title="Campaign">
+
+                        <c:set var="canvasId" value="barChartCP" />
+                        <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCP')}" />
+                        <c:set var="coloresJson" value="#{tblRawDataController.getColorsMap('barChartCP')}" />
+                        <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCP')}" />
+                        <ui:include src="/includes/Chart-tab-render.xhtml" />
+                    </p:tab>
+
+                    <p:tab id="idBarChannel" title="Channel">
+
+                        <c:set var="canvasId" value="barChartCH" />
+                        <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartCH')}" />
+                        <c:set var="coloresJson" value="#{tblRawDataController.getColorsMap('barChartCH')}" />
+                        <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartCH')}" />
+                        <ui:include src="/includes/Chart-tab-render.xhtml" />
+                    </p:tab>
+
+                    <p:tab id="idBar" title="Advertiser">
+
+                        <c:set var="canvasId" value="barChartAD" />
+                        <c:set var="labelsJson" value="#{tblRawDataController.getLabelsJson('barChartAD')}" />
+                        <c:set var="coloresJson" value="#{tblRawDataController.getColorsMap('barChartAD')}" />
+                        <c:set var="valoresJson" value="#{tblRawDataController.getValoresJson('barChartAD')}" />
+                        <ui:include src="/includes/Chart-tab-render.xhtml" />
+                    </p:tab>
+
+                </p:tabView>
+            </h:form>    
+        </p:dialog>
+    </ui:composition>        
+    
+</html>

@@ -478,6 +478,10 @@ public class TblRawDataController implements Serializable {
         return budgetTrackerSummary.stream().filter(customer -> vPartnerSelected.equals(customer.getvAgency())).map(TblBudgetTracker::getdBudget).reduce(Double.valueOf(0), Double::sum);
     }        
 
+    public Double getTotalBudgetByAll() {
+        return budgetTrackerSummary.stream().map(TblBudgetTracker::getdBudget).reduce(Double.valueOf(0), Double::sum);
+    }            
+    
     public Double getTotaldProjBudgPercByAgency() {
         return budgetTrackerSummary.stream().filter(customer -> vPartnerSelected.equals(customer.getvAgency())).map(TblBudgetTracker::getdProjBudgPerc).reduce(Double.valueOf(0), Double::sum);
     }        
@@ -500,6 +504,10 @@ public class TblRawDataController implements Serializable {
 
     public Double getTotalBalanceByAgency() {
         return budgetTrackerSummary.stream().filter(customer -> vPartnerSelected.equals(customer.getvAgency())).map(TblBudgetTracker::getdBalance).reduce(Double.valueOf(0), Double::sum);
+    }          
+
+    public Double getTotalBalanceByAll() {
+        return budgetTrackerSummary.stream().map(TblBudgetTracker::getdBalance).reduce(Double.valueOf(0), Double::sum);
     }          
     
     public Double getTotalBalanceGroupedPartner(String name) {
@@ -553,6 +561,11 @@ public class TblRawDataController implements Serializable {
     public Double getTotalMediaSpendByAgency() {
         return budgetTrackerSummary.stream().filter(customer -> vPartnerSelected.equals(customer.getvAgency())).map(TblBudgetTracker::getdMediaSpend).reduce(Double.valueOf(0), Double::sum);
     }    
+
+    public Double getTotalMediaSpendByAll() {
+        return budgetTrackerSummary.stream().map(TblBudgetTracker::getdMediaSpend).reduce(Double.valueOf(0), Double::sum);
+    }    
+
     
     public Double getTotalMediaSpendGroupedPartner(String name) {
         return budgetTrackerSummary.stream().filter(customer -> name.equals(customer.getvPartner())).map(TblBudgetTracker::getdMediaSpend).reduce(Double.valueOf(0), Double::sum);

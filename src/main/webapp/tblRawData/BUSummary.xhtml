@@ -73,22 +73,22 @@
                                         <p:column style="text-align:right" footerText="Totals:"/>
                                         <p:column style="text-align:right">
                                             <f:facet name="footer">
-                                                <h:outputText value="#{tblRawDataController.totalBudgetByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                                <h:outputText value="#{tblRawDataController.getTotalBudgetByAgency()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
                                             </f:facet>
                                         </p:column>                                    
                                         <p:column style="text-align:right">
                                             <f:facet name="footer">
-                                                <h:outputText value="#{tblRawDataController.totalMediaSpendByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                                <h:outputText value="#{tblRawDataController.getTotalMediaSpendByAgency()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
                                             </f:facet>
                                         </p:column>                                    
                                         <p:column style="text-align:right">
                                             <f:facet name="footer">
-                                                <h:outputText value="#{tblRawDataController.pacingPercentByAgency}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                                <h:outputText value="#{tblRawDataController.getPacingPercentByAgency()}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
                                             </f:facet>
                                         </p:column>                                    
                                         <p:column style="text-align:right">
                                             <f:facet name="footer">
-                                                <h:outputText value="#{tblRawDataController.totalBalanceByAgency}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                                <h:outputText value="#{tblRawDataController.getTotalBalanceByAgency()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
                                             </f:facet>
                                         </p:column> 
                                     </p:row>                                    
@@ -97,7 +97,7 @@
                     </p:tab>
 
                     <p:tab title="Channel">
-                        <p:selectBooleanCheckbox value="#{tblRawDataController.showAllChannelBT}" itemLabel="Ajax">
+                        <p:selectBooleanCheckbox value="#{tblRawDataController.showAllChannelBT}" itemLabel="All Agencies" style="display: flex; flex-direction: row-reverse; padding: 0.2em 0.2em 0.5em 0.5em;;">
                             <p:ajax update="dataSummary" listener="#{tblRawDataController.getDataBudgetTrackerSumaryChannelAll()}"/>
                         </p:selectBooleanCheckbox>
                         <p:dataTable id="dataSummary" value="#{tblRawDataController.budgetTrackerSummary}"
@@ -139,7 +139,27 @@
                                     <p:column style="text-align:right">
                                         <h:outputText value="#{tblRawDataController.getTotalBalanceGroupedPartner(summaryitem.vPartner)}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
                                     </p:column>                                    
-                                </p:summaryRow>                                        
+                                </p:summaryRow>  
+                                <p:columnGroup type="footer" rendered="#{tblRawDataController.showAllChannelBT}">
+                                    <p:row>
+                                        <p:column style="text-align:right" footerText="Totals:"/>
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalBudgetByAll()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalMediaSpendByAll()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column>                                    
+                                        <p:column style="text-align:right">
+                                            <f:facet name="footer">
+                                                <h:outputText value="#{tblRawDataController.getTotalBalanceByAll()}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                                            </f:facet>
+                                        </p:column> 
+                                    </p:row>                                    
+                                </p:columnGroup>                            
                         </p:dataTable>                                      
                     </p:tab>         
 

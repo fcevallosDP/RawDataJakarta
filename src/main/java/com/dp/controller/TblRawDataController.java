@@ -1455,6 +1455,7 @@ public class TblRawDataController implements Serializable {
 
     public void getItemPerfByMonthYear() {              
         selectedPerf = null;
+        itemsPerf = null;
         DAOFile dbCon = new DAOFile();
         itemsPerf = dbCon.getRawDataPerfbyDate(iYear, iMonth, vPartnerSelected);          
         if (itemsPerf != null && !itemsPerf.isEmpty()){

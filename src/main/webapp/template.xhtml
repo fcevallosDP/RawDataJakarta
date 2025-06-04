@@ -183,6 +183,11 @@
                 chartInstances[canvasId] = newChart;
             }
 
+            setInterval(function() {
+                fetch(window.location.href, {method: 'HEAD'}).catch(() => {
+                    window.location.href = '/login.xhtml';
+                });
+            }, 60000); // Cada 60 segundos            
                         
             //]]>
         </h:outputScript>        

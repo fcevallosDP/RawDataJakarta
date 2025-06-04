@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="mobile-web-app-capable" content="yes"/>
+            <meta name="theme-color" content="bluegray"/>
+            <link href="#{resource['layout/images/favicon-32x32.png']}" rel="icon" type="image/png" sizes="32x32"/>
+            <link href="#{resource['layout/images/favicon-16x16.png']}" rel="icon" type="image/png" sizes="16x16"/>
+        </f:facet>
+        <title>Datapoint Intranet</title>
+        <h:outputScript name="ripple/ripple.js" library="layout" rendered="#{app.ripple}" />
+        <h:outputScript name="js/layout.js" library="layout" />
+        <ui:insert name="head" />
+    </h:head>    
+    
+    <h:body style="text-align: center; padding-top: 100px;" styleClass="#{app.bodyClass}">
+    
+        <div class="layout-wrapper layout-menu-bluegrey layout-topbar-bluegrey layout-menu-static #{app.layoutClass}">   
+
+           <ui:include src="/resources/sections/topbarExpired.xhtml" />
+            <div class="layout-main">
+                <div class="layout-content">                       
+
+                    <h1>Your session has expired</h1>
+                    <p>For security reasons, your session has been automatically closed due to inactivity.</p>
+
+                    <p:button value="Login again" icon="pi pi-sign-in" outcome="/login.xhtml"
+                              style="margin-top: 2rem;" />
+                    
+                </div>                  
+                <ui:include src="/resources/sections/footer.xhtml"/>
+           </div>                              
+           <ui:include src="/resources/sections/loader.xhtml" />
+           
+        </div>
+         
+        <h:outputStylesheet name="styles/layout-light.css" library="layout" />
+        <h:outputStylesheet name="primeflex/primeflex.min.css" library="layout"/>
+        <h:outputStylesheet name="ripple/ripple.css" library="layout"/>
+        <h:outputStylesheet name="styles/apptiny.css" library="layout" />
+</h:body>
+</html>

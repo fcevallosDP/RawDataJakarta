@@ -16,22 +16,20 @@
                     <p:submenu id="m_budget" label="Operations" icon="pi pi-briefcase">
                         <p:menuitem id="m_tracker" value="Budget Tracker" icon="pi pi-fw pi-briefcase" url="/RawData/tblRawData/BudgetTracker.xhtml" /> 
                         <p:menuitem id="m_performace" value="Performance" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/Performance.xhtml" />                        
-                        <p:menuitem id="m_dtracker" value="Deal Tracker" icon="pi pi-fw pi-list" url="/RawData/tblRawData/DealTracker.xhtml" /> 
+                        <p:menuitem id="m_dtracker" value="Deal Tracker" icon="pi pi-fw pi-list" url="/RawData/tblRawData/DealTracker.xhtml" disabled="true"/> 
                     </p:submenu>
-                    <p:submenu id="m_data" label="Data" icon="pi pi-map">
-                        <p:submenu id="m_primeblocks" label="DSP" icon="pi pi-fw pi-check-square"  >
-                            <p:menuitem id="m_freeblocks" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/List.xhtml" />
-                            <p:menuitem id="m_allblocks" value="Monthly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/MassiveList.xhtml" />
-                            <p:menuitem id="m_landing" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/DSPReport.xhtml" />
-                        </p:submenu>
-                        <p:submenu id="start" label="SSP" icon="pi pi-fw pi-wallet">
-                            <p:menuitem id="m_buy" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
-                            <p:menuitem id="m_doc" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml" />
-                        </p:submenu>  
-                        <p:submenu id="m_utils" label="Settings" icon="pi pi-fw pi-cog">
-                            <p:menuitem id="m_icons" value="Catalog" icon="pi pi-fw pi-wrench" url="/RawData/tblCatalog/List.xhtml" />                        
-                        </p:submenu>                        
+                    <p:submenu id="m_primeblocks" label="DSP" icon="pi pi-fw pi-check-square"  >
+                        <p:menuitem id="m_freeblocks" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/List.xhtml" />
+                        <p:menuitem id="m_allblocks" value="Monthly Data" icon="pi pi-fw pi-list" url="/RawData/tblRawData/MassiveList.xhtml" />
+                        <p:menuitem id="m_landing" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/DSPReport.xhtml" />
                     </p:submenu>
+                    <p:submenu id="start" label="SSP" icon="pi pi-fw pi-wallet">
+                        <p:menuitem id="m_buy" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
+                        <p:menuitem id="m_doc" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml" />
+                    </p:submenu>  
+                    <p:submenu id="m_utils" label="Settings" icon="pi pi-fw pi-cog">
+                        <p:menuitem id="m_icons" value="Catalog" icon="pi pi-fw pi-wrench" url="/RawData/tblCatalog/List.xhtml" />                        
+                    </p:submenu>                        
                     <p:submenu id="m_exits" label="Logout" icon="pi pi-fw pi pi-power-off">
                         <p:menuitem id="m_logout" value="Logout" ajax="false" icon="pi pi-fw pi pi-power-off" actionListener="#{loginBean.logout}"/>
                     </p:submenu>    

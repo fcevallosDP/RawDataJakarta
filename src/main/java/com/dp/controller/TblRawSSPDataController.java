@@ -8,7 +8,6 @@ import com.dp.util.DAOFile;
 import com.dp.util.TblCatalogo;
 import com.dp.util.TblCatalogoColumn;
 import com.dp.util.TblDVXANDRSPD;
-import com.dp.util.TblDailyProcess;
 import com.dp.util.TblHistoricalSSP;
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -35,15 +34,13 @@ public class TblRawSSPDataController implements Serializable {
     private Date dDateSelected;
     private Date dMonthSelected; 
     private Date maxDate;    
-    private TblDailyProcess idDailySelected;
     private Boolean lbDataFound;
     private Boolean lbDataTransfer;
     private TblCatalogo editCatalog;
     private List<TblTypeSources> itemsTypes = null;      
     private boolean globalFilterOnly = true;
     private String todayAsString;
-    private List<TblCatalogo> itemsCatalogo = null;
-    //private List<TblCatalogoColumn> itemsCatalogoColumn = null;    
+    private List<TblCatalogo> itemsCatalogo = null;  
     private List<String> rawColumns;
     private String[] selectedrawColumns;    
     private Integer iYear;
@@ -327,7 +324,7 @@ public class TblRawSSPDataController implements Serializable {
             if (dbCon.createItemCatalogColumnsRelated(editCatalog,selectedrawColumns)){
                 dbCon.setItemsCatalogo(itemsCatalogo);           
                 dbCon.setItemsXANDRRefactor((filteredItems != null && !filteredItems.isEmpty()) ? filteredItems :items);                  
-                if (dbCon.refactorRawSSPData(idDailySelected.getId_daily(), editCatalog, selectedrawColumns)){
+                if (dbCon.refactorRawSSPData(editCatalog, selectedrawColumns)){
                     selected = null;
                     items =  null;
                     filteredItems =  null;
@@ -391,28 +388,18 @@ public class TblRawSSPDataController implements Serializable {
     public Date getDDateSelected() {
         return dDateSelected;
     }
-
-    public TblDailyProcess getIdDailySelected() {
-        return idDailySelected;
-    }
     
     public void transferToHistorical(){
-        if (idDailySelected != null){
-            DAOFile dbCon = new DAOFile();            
-            if (dbCon.transferToHistorical("SSP", idDailySelected.getiYear(), idDailySelected.getiMonth() )){
-                items = null;
-                monthlyItems = null;
-                filteredItems = null;
-                selected = null;      
-                JsfUtil.addSuccessMessage("Data transfered successfully");
-            }
+        DAOFile dbCon = new DAOFile();            
+        if (dbCon.transferToHistorical("SSP", iYear, iMonth)){
+            items = null;
+            monthlyItems = null;
+            filteredItems = null;
+            selected = null;      
+            JsfUtil.addSuccessMessage("Data transfered successfully");
         }
     }    
     
-    public void setIdDailySelected(TblDailyProcess idDailySelected) {
-        this.idDailySelected = idDailySelected;
-    }
-
     public void montlyClean(){
         if (filteredItems != null && !filteredItems.isEmpty()){
             DAOFile dbCon = new DAOFile();
@@ -430,58 +417,41 @@ public class TblRawSSPDataController implements Serializable {
         }
     }
     
-    
-    public void getItemCalendarByMonth() {              
+    protected void setYearMonth(){
         try { 
-            internalClear();
             if (dMonthSelected != null){ 
                 DAOFile dbCon = new DAOFile();
                 LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
-                idDailySelected = new TblDailyProcess();
-                idDailySelected.setiDay(localDate.lengthOfMonth());
-                idDailySelected.setiMonth(localDate.getMonthValue());
-                idDailySelected.setiYear(localDate.getYear());
-                idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
-                idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
+                iYear = localDate.getYear();
+                iMonth = localDate.getMonthValue();
             }   
         } catch (Exception ex) {
-            System.out.println("getItemCalendarByMonth");
+            System.out.println("setYearMonth");
             System.out.println(ex.getMessage());
             ex.printStackTrace();            
-        }              
+        }                      
+    }
+    
+    public void getItemCalendarByMonth() {              
+        internalClear();
+        setYearMonth();
     } 
     public void getItemCalendarByDate() {
-        try {            
-            internalClear();
-            if (dDateSelected != null){            
-                LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dDateSelected) );
-                DAOFile dbCon = new DAOFile();
-                idDailySelected = new TblDailyProcess();
-                idDailySelected.setiDay(localDate.getDayOfMonth());
-                idDailySelected.setiMonth(localDate.getMonthValue());
-                idDailySelected.setiYear(localDate.getYear());
-                idDailySelected.setdDate(new java.sql.Date(dDateSelected.getTime()));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
-                setLbDataFound(false);
-                lbDataTransfer = false;
-                if(localDate.lengthOfMonth() == localDate.getDayOfMonth()) lbDataTransfer = true;                
-            }
-        } catch (Exception ex) {
-            System.out.println("getItemCalendarByDate");
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();            
-        }            
+        internalClear();
+        setYearMonth();        
     }   
     
     protected void getDateBounds(){
         Calendar cal = JsfUtil.getFechaSistema();
         LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-        cal.add(Calendar.DATE, -1);
-        setMaxDate(cal.getTime());
-        setDDateSelected(cal.getTime());
         setIYear(localDate.getYear());
-        setIMonth(localDate.getMonthValue());        
+        setIMonth(localDate.getMonthValue());                
+       /* 
+          cal.add(Calendar.DATE, -1);
+          setMaxDate(cal.getTime());
+        */
+        setDDateSelected(cal.getTime());
+        setDMonthSelected(cal.getTime());
     }    
 
     public void removeSelected(){
@@ -501,8 +471,10 @@ public class TblRawSSPDataController implements Serializable {
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
                 dbCon.setItemsCatalogo(itemsCatalogo);
+                dbCon.setiAnio(iYear);
+                dbCon.setiMes(iMonth);
                 //dbCon.setItemsCatalogoColumn(itemsCatalogoColumn);                
-                dbCon.ScanFiles("SSP", event.getFile(), idDailySelected);
+                dbCon.ScanFiles("SSP", event.getFile());
                 JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
                 items = null;
                 monthlyItems = null;
@@ -518,7 +490,7 @@ public class TblRawSSPDataController implements Serializable {
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
                 dbCon.setItemsCatalogo(itemsCatalogo);
-                dbCon.ScanFiles("SSP", event.getFile(), idDailySelected);
+                dbCon.ScanFiles("SSP", event.getFile());
                 JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
                 monthlyItems = null;
                 filteredItems = null;
@@ -535,8 +507,6 @@ public class TblRawSSPDataController implements Serializable {
         monthlyItems = null;
         filteredItems = null;
         selected = null;
-        idDailySelected = null;
-        //PrimeFaces.current().executeScript("$('#TblRawDataListForm\\:datalist\\:globalFilter').val('').keyup(); return false;");
     }
     
     public void internalLimpiar(){      
@@ -547,7 +517,6 @@ public class TblRawSSPDataController implements Serializable {
         filteredItems = null;
         selected = null;
         dDateSelected = null;
-        idDailySelected = null;
     }    
          
     public void simpleLimpiar(){      
@@ -558,16 +527,13 @@ public class TblRawSSPDataController implements Serializable {
         filteredItems = null;
         selected = null;
         dDateSelected = null;
-        idDailySelected = null;
-        //PrimeFaces.current().executeScript("$('#TblRawSSPDataListForm\\:datalist\\:globalFilter').val('').keyup(); return false;");
     }
 
     public void complexLimpiar(){
-        if (idDailySelected != null && idDailySelected.getId_daily() > 0){
+        if (iYear > 0 && iMonth > 0){
             DAOFile dbCon = new DAOFile();
-            if (dbCon.cleanRawDataByDaily(idDailySelected.getId_daily(), "SSP")){
+            if (dbCon.cleanRawDataByDaily(iYear, iMonth, "SSP")){
                 itemsCatalogo = dbCon.getCatalogoItems("S");
-                //itemsCatalogoColumn = dbCon.getCatalogoColumnItems("S");
                 rawColumns = dbCon.getItemsColumnNames("S");                
                 items = null;
                 monthlyItems = null;
@@ -598,19 +564,20 @@ public class TblRawSSPDataController implements Serializable {
     }
 
     public List<TblDVXANDRSPD> getItems() {
-        if ((items == null || items.isEmpty()) && idDailySelected != null && idDailySelected.getId_daily() > 0) {
+        if ((items == null || items.isEmpty()) && dMonthSelected != null) {
             cleanInternalFilters();
+            LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
             DAOFile dbCon = new DAOFile();
-            items = dbCon.getRawSSPDatabyDate(idDailySelected.getId_daily());
+            items = dbCon.getRawSSPDatabyDate(localDate.getYear(), localDate.getMonthValue());
             if (items != null && !items.isEmpty()){
-                setRawSeat(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vSeat"));
-                setRawAgency(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vAgency"));
-                setRawChannel(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vChannel"));
-                setRawClient(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vClient"));
-                setRawDsp(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vDsp"));
-                setRawExchange(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vExchange"));
-                setRawAdvertiser(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vAdvertiser"));
-                setRawBrand(dbCon.getRawDatabyDateDistinctbyPattern("SSP", idDailySelected.getId_daily(),"vBrand"));                  
+                setRawSeat(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(), "vSeat",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawAgency(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vAgency",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawChannel(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(), "vChannel",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawClient(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vClient",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawDsp(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vDsp",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawExchange(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vExchange",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawAdvertiser(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vAdvertiser",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawBrand(dbCon.getRawDatabyYearMonthDistinctbyPattern("SSP", localDate.getYear(), localDate.getMonthValue(),"vBrand",JsfUtil.getUsuarioSesion().getvAgency()));                  
                 setLbDataFound(true);
             }else{
                  setLbDataFound(false);

@@ -27,30 +27,16 @@ import java.util.Random;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.faces.view.ViewScoped;
-import java.util.Arrays;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.model.charts.ChartData;
-import org.primefaces.model.charts.axes.cartesian.CartesianScales;
-import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
-import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearTicks;
-import org.primefaces.model.charts.bar.BarChartDataSet;
-import org.primefaces.model.charts.bar.BarChartModel;
-import org.primefaces.model.charts.bar.BarChartOptions;
-import org.primefaces.model.charts.hbar.HorizontalBarChartDataSet;
-import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
-import org.primefaces.model.charts.optionconfig.title.Title;
 import org.primefaces.util.LangUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 @Named("tblRawDataController")
 @ViewScoped
@@ -76,7 +62,6 @@ public class TblRawDataController implements Serializable {
     private Date dDateSelected;
     private Date dMonthSelected;    
     private Date maxDate;    
-    private TblDailyProcess idDailySelected;
     private Boolean lbDataFound;
     private Boolean lbDataTransfer;
     private TblCatalogo editCatalog;
@@ -746,7 +731,7 @@ public class TblRawDataController implements Serializable {
         this.todayAsString = todayAsString;
     }
 
-    public List<TblDV360SPD> getItems() {
+    /*public List<TblDV360SPD> getItems() {
         if ((items == null || items.isEmpty()) && idDailySelected != null && idDailySelected.getId_daily() > 0) {
             cleanInternalFilters();
             DAOFile dbCon = new DAOFile();
@@ -770,8 +755,34 @@ public class TblRawDataController implements Serializable {
             }
         }
         return items;
-    }
+    }*/
 
+    public List<TblDV360SPD> getItems() {
+        if ((items == null || items.isEmpty()) && dMonthSelected != null) {
+            cleanInternalFilters();
+            LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
+            DAOFile dbCon = new DAOFile();
+            items = dbCon.getRawDatabyYearMonth(localDate.getYear(), localDate.getMonthValue(),JsfUtil.getUsuarioSesion().getvAgency());
+            if (items != null && !items.isEmpty()){
+                setRawPartners(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vPartner",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawAgency(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vAgency",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawCampaign(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vCampaign",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawChannel(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vChannel",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawClient(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vClient",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawDsp(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vDSP",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawVendor(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vVendor",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawExchanges(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vExchange",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawDeviceTypes(new ArrayList());
+                setRawVendor(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vVendor",JsfUtil.getUsuarioSesion().getvAgency()));
+                setRawInsertionOrders(dbCon.getRawDatabyYearMonthDistinctbyPattern("DSP", localDate.getYear(), localDate.getMonthValue(),"vInsertionOrder",JsfUtil.getUsuarioSesion().getvAgency()));
+                setLbDataFound(true);            
+            }else{
+                 setLbDataFound(false);
+            }
+        }
+        return items;
+    }    
+    
     public void onRenameCampaign() {
         if (budgetSelected != null && !budgetSelected.getvCampaign().isEmpty() && !vCampaignSelected.isEmpty()){
             DAOFile dbCon = new DAOFile();
@@ -1262,7 +1273,7 @@ public class TblRawDataController implements Serializable {
             if (dbCon.createItemCatalogColumnsRelated(editCatalog,selectedrawColumns)){
                 dbCon.setItemsCatalogo(itemsCatalogo);                 
                 dbCon.setItemsDV360Refactor((filteredItems !=null && !filteredItems.isEmpty()) ? filteredItems:items);                   
-                if (dbCon.refactorRawData(idDailySelected.getId_daily(), editCatalog, selectedrawColumns)){
+                if (dbCon.refactorRawData(editCatalog, selectedrawColumns)){
                     selected = null;
                     items =  null;
                     filteredItems = null;
@@ -1340,14 +1351,6 @@ public class TblRawDataController implements Serializable {
         return dDateSelected;
     }
 
-    public TblDailyProcess getIdDailySelected() {
-        return idDailySelected;
-    }
-
-    public void setIdDailySelected(TblDailyProcess idDailySelected) {
-        this.idDailySelected = idDailySelected;
-    }
-
     public void removeSelected(){
         if (selected != null){
             DAOFile dbCon = new DAOFile();
@@ -1396,9 +1399,9 @@ public class TblRawDataController implements Serializable {
                 JsfUtil.addSuccessMessage("Items deleted successfully");
             }
         }else{
-            if (idDailySelected != null && idDailySelected.getId_daily() > 0){
+            if (iYear != null && iMonth > 0){
                 DAOFile dbCon = new DAOFile();
-                if (dbCon.cleanRawDataByDaily(idDailySelected.getId_daily(), "DSP")){
+                if (dbCon.cleanRawDataByDaily(iYear, iMonth, "DSP")){
                     itemsCatalogo = dbCon.getCatalogoItems("D");
                     rawColumns = dbCon.getItemsColumnNames("D");
                     items = null;
@@ -1412,15 +1415,13 @@ public class TblRawDataController implements Serializable {
     }    
     
     public void transferToHistorical(){
-        if (idDailySelected != null){
-            DAOFile dbCon = new DAOFile();
-            if (dbCon.transferToHistorical("DSP", idDailySelected.getiYear(), idDailySelected.getiMonth() )){
-                items = null;
-                monthlyItems = null;
-                filteredItems = null;
-                selected = null;       
-                JsfUtil.addSuccessMessage("Data transfered successfully"); 
-            }
+        DAOFile dbCon = new DAOFile();
+        if (dbCon.transferToHistorical("DSP", iYear, iMonth)){
+            items = null;
+            monthlyItems = null;
+            filteredItems = null;
+            selected = null;       
+            JsfUtil.addSuccessMessage("Data transfered successfully"); 
         }
     }    
 
@@ -1466,33 +1467,19 @@ public class TblRawDataController implements Serializable {
             setRawLineItems(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vLineItem"));
         }        
     } 
+
+    public void getItemsByYearMonth() {              
+        internalClear();
+        setYearMonth();
+    } 
     
     public void getItemCalendarByMonth() {              
-        try { 
-            internalClear();
-            if (dMonthSelected != null){ 
-                DAOFile dbCon = new DAOFile();
-                LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
-                idDailySelected = new TblDailyProcess();
-                iYear = localDate.getYear();
-                iMonth = localDate.getMonthValue();
-                idDailySelected.setiDay(localDate.lengthOfMonth());
-                idDailySelected.setiMonth(iMonth);
-                idDailySelected.setiYear(iYear);
-                idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
-                idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
-            }   
-        } catch (Exception ex) {
-            System.out.println("getItemCalendarByMonth");
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();            
-        }              
+        internalClear();             
+        setYearMonth();
     } 
 
-    public void getPerfCalendarByMonth() {              
+    protected void setYearMonth(){
         try { 
-            //internalClear();
             if (dMonthSelected != null){ 
                 DAOFile dbCon = new DAOFile();
                 LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
@@ -1500,10 +1487,14 @@ public class TblRawDataController implements Serializable {
                 iMonth = localDate.getMonthValue();
             }   
         } catch (Exception ex) {
-            System.out.println("getPerfCalendarByMonth");
+            System.out.println("setYearMonth");
             System.out.println(ex.getMessage());
             ex.printStackTrace();            
-        }              
+        }                      
+    }
+    
+    public void getPerfCalendarByMonth() {
+        setYearMonth();
     }     
     
     public Boolean getLbDataTransfer() {
@@ -1515,52 +1506,33 @@ public class TblRawDataController implements Serializable {
     }
 
     public void getItemCalendarByDate() {
-        try {           
-            internalClear();
-            if (dDateSelected != null){ 
-                DAOFile dbCon = new DAOFile();
-                LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dDateSelected) );
-                idDailySelected = new TblDailyProcess();
-                idDailySelected.setiDay(localDate.getDayOfMonth());
-                idDailySelected.setiMonth(localDate.getMonthValue());
-                idDailySelected.setiYear(localDate.getYear());
-                idDailySelected.setdDate(new java.sql.Date(dDateSelected.getTime()));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
-                setLbDataFound(false);
-                lbDataTransfer = false;
-                if(localDate.lengthOfMonth() == localDate.getDayOfMonth()) lbDataTransfer = true;
-            }
-        } catch (Exception ex) {
-            System.out.println("getItemCalendarByDate");
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();            
-        }            
+        internalClear();
+        setYearMonth();
     }   
     
     protected void getDateBounds(){
         Calendar cal = JsfUtil.getFechaSistema();
         LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-        cal.add(Calendar.DATE, -1);
+        /*cal.add(Calendar.DATE, -1);
         setMaxDate(cal.getTime());
-        setDDateSelected(cal.getTime());        
+        */setDDateSelected(cal.getTime());        
         setIYear(localDate.getYear());
         setIMonth(localDate.getMonthValue()); 
         setDMonthSelected(cal.getTime());
         setiWeek(1);
     }    
     
-    public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {            
-        if( dDateSelected != null){
-            if (event != null && event.getFile() != null){
-                DAOFile dbCon = new DAOFile();
-                dbCon.setItemsCatalogo(itemsCatalogo);
-                dbCon.ScanFiles("DSP", event.getFile(), idDailySelected);
-                JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
-                items = null;
-                filteredItems = null;
-            }            
+    public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {                            
+
+        if (event != null && event.getFile() != null){
+            DAOFile dbCon = new DAOFile();
+            dbCon.setItemsCatalogo(itemsCatalogo);
+            dbCon.ScanFiles("DSP", event.getFile());
+            JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
+            items = null;
+            filteredItems = null;
         }else{
-            JsfUtil.addErrorMessage("No date selected");
+            JsfUtil.addErrorMessage("No files detected");
         }
     }    
 
@@ -1569,7 +1541,7 @@ public class TblRawDataController implements Serializable {
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
                 dbCon.setItemsCatalogo(itemsCatalogo);
-                dbCon.ScanFiles("DSP", event.getFile(), idDailySelected);
+                dbCon.ScanFiles("DSP", event.getFile());
                 JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
                 monthlyItems = null;
                 filteredItems = null;
@@ -1636,8 +1608,6 @@ public class TblRawDataController implements Serializable {
         budgetTrackerItems = null;
         filteredItems = null;
         selected = null;
-        idDailySelected = null;
-        //PrimeFaces.current().executeScript("$('#TblRawDataListForm\\:datalist\\:globalFilter').val('').keyup(); return false;");
     }
 
     public TblBudgetTracker getBudgetSelected() {
@@ -1670,7 +1640,6 @@ public class TblRawDataController implements Serializable {
         selected = null;
         dDateSelected = null;
         dMonthSelected = null;
-        idDailySelected = null;
         cleanInternalFilters();
     }
 
@@ -1700,7 +1669,6 @@ public class TblRawDataController implements Serializable {
         selected = null;
         dDateSelected = null;
         dMonthSelected = null;
-        idDailySelected = null;
         cleanInternalFilters();
     }    
     

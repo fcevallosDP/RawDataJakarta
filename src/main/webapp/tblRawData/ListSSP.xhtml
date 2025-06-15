@@ -49,13 +49,12 @@
                             <h:outputText value="SSP Daily DATA" style="font-size: larger"/>
                         </f:facet>                        
                         <f:facet name="paginatorTopLeft">
-                                <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DDateSelected}"
-                                      readonlyInput="true" maxdate="#{tblRawSSPDataController.maxDate}" size="10">                                
-                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByDate()}" 
-                                            update="TblRawSSPDataListForm"
-                                            onstart="PF('buiDatatable').show()"
-                                            oncomplete="PF('buiDatatable').hide()"/>                                   
-                                </p:datePicker>
+                                <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DMonthSelected}"
+                                      readonlyInput="true" view="month" pattern="MMM/yyyy" 
+                                      yearNavigator="true" yearRange="2025:2026" size="10">                               
+                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByDate()}"
+                                            update="TblRawSSPDataListForm"/>                                   
+                                </p:datePicker>                                                                                     
                                 <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
                                                  disabled="#{empty tblRawSSPDataController.DDateSelected}" 
                                                  icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 10px;"/>                                                                                                                
@@ -87,7 +86,10 @@
                         <f:facet name="paginatorTopRight">                                                        
                             <p:inputText id="globalFilter" onkeyup="PF('WSSPdataList').filter()" style="width:150px;margin-right:5px;"
                                          placeholder="Search all fields" />
-                        </f:facet>                        
+                        </f:facet>          
+                        <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Date">
+                            <h:outputText value="#{item.dDate}"/>
+                        </p:column>                         
                         <p:column width="80" style="text-align: center" headerText="Advertiser" field="vAdvertiser" filterMatchMode="exact">                    
                             <f:facet name="filter">
                                 <p:selectOneMenu id="idadvertiser" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">

@@ -3323,6 +3323,29 @@ public class DAOFile implements Serializable  {
             }   
     }    
         
+    public Integer getItemDailybyMonth(TblDailyProcess itemDaily){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+                Integer iDaily = 0;
+                
+                PreparedStatement pstmt = connect.prepareStatement("select `id_monthly` from tbl_monthlyprocess where iYear = ? and iMonth = ? and iStatus = 1 limit 1");            
+                pstmt.setInt(1, itemDaily.getiYear());
+                pstmt.setInt(2, itemDaily.getiMonth());
+                ResultSet rs = pstmt.executeQuery();  
+                if (rs.next()) {             
+                    iDaily = rs.getInt("id_monthly");                    
+                }
+                rs.close();
+                pstmt.close();   
+                return iDaily;                
+            } catch (Exception ex) {                
+                System.out.println("getItemDailybyMonth");
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();   
+                return 0;
+            } 
+    }  
+
     public Integer getItemDailybyDate(TblDailyProcess itemDaily){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
@@ -4803,10 +4826,10 @@ public class DAOFile implements Serializable  {
         try (Connection connect = DatabaseConnector.getConnection()) {
             
             PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`, `iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
-                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`, `tbl_raw_data`.`vUser`,	`dCPM`, `dCTR`, `dCPC`, `tbl_daily_process`.`iYear`, `tbl_daily_process`.`iMonth`, `tbl_daily_process`.`iDay`, `vFileName`, `tbl_raw_data`.`id_daily`, `tbl_daily_process`.`dDate` as dateProcess\n" +
-                                                            "from `tbl_raw_data`, `tbl_daily_process`\n" +
-                                                            "where `tbl_raw_data`.`id_daily` = `tbl_daily_process`.`id_daily` and\n" +
-                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_daily_process`.`id_daily` =  ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
+                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`, `tbl_raw_data`.`vUser`,	`dCPM`, `dCTR`, `dCPC`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vFileName`, `tbl_raw_data`.`id_monthly`, `tbl_raw_data`.`dDate` as dateProcess\n" +
+                                                            "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
+                                                            "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
             pstmt.setInt(1, iDaily);
             pstmt.setString(2, vAgency);
             pstmt.setString(3, vAgency);
@@ -4814,7 +4837,7 @@ public class DAOFile implements Serializable  {
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
                 TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_daily"));
+                itemDaily.setId_monthly(rs.getInt("id_monthly"));
                 itemDaily.setdDate(rs.getDate("dateProcess"));                    
                 TblDV360SPD item = new TblDV360SPD();
 
@@ -4829,7 +4852,6 @@ public class DAOFile implements Serializable  {
                 item.setiAnio(rs.getInt("iYear"));
                 item.setiClicks(rs.getInt("iClicks"));
                 item.setVFileName(rs.getString("vFileName"));
-                item.setiDia(rs.getInt("iDay"));
                 item.setiImpressions(rs.getInt("iImpressions"));
                 item.setiMes(rs.getInt("iMonth"));
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");
@@ -4915,7 +4937,7 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            String lsStatement = (lsSource.compareTo("DSP") == 0) ? "select distinct " + pattern +" from tbl_raw_data where `tStatus` = 1 and `id_daily` = ?" : "select distinct " + pattern +" from tbl_raw_ssp_data where `tEstado` = 1 and `id_daily` = ?";
+            String lsStatement = (lsSource.compareTo("DSP") == 0) ? "select distinct " + pattern +" from tbl_raw_data where `tStatus` = 1 and `id_monthly` = ?" : "select distinct " + pattern +" from tbl_raw_ssp_data where `tEstado` = 1 and `id_monthly` = ?";
             PreparedStatement pstmt = connect.prepareStatement(lsStatement); 
             pstmt.setInt(1, iDaily);
             ResultSet rs = pstmt.executeQuery();  
@@ -5080,16 +5102,16 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`,  `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_daily_process`.`iYear`, `tbl_daily_process`.`iMonth`, `tbl_daily_process`.`iDay`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_daily`, `tbl_daily_process`.`dDate` as dateProcess, `tEstado`\n" +
-                                                                "from `tbl_raw_ssp_data` , `tbl_daily_process`\n" +
-                                                                "where `tbl_raw_ssp_data`.`id_daily` = `tbl_daily_process`.`id_daily` and\n" +
-                                                                "`tbl_raw_ssp_data`.`tEstado` = 1 and `tbl_daily_process`.`id_daily` = ?"); 
+            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`,  `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_monthly`, `tbl_raw_ssp_data`.`dDate` as dateProcess, `tEstado`\n" +
+                                                                "from `tbl_raw_ssp_data` , `tbl_monthlyprocess`\n" +
+                                                                "where `tbl_raw_ssp_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                                "`tbl_raw_ssp_data`.`tEstado` = 1 and `tbl_monthlyprocess`.`id_monthly` = ?"); 
             pstmt.setInt(1, iDaily);
             ResultSet rs = pstmt.executeQuery();  
             List<TblDVXANDRSPD> itemsXandr = new ArrayList();
             while (rs.next()) {             
                 TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_daily"));
+                itemDaily.setId_daily(rs.getInt("id_monthly"));
                 itemDaily.setdDate(rs.getDate("dateProcess"));                    
                 TblDVXANDRSPD item = new TblDVXANDRSPD();
 
@@ -5111,7 +5133,6 @@ public class DAOFile implements Serializable  {
                 item.setdGrossRevenue(rs.getDouble("dGrossRevenue"));
                 item.setdNetRevenue(rs.getDouble("dNetRevenue"));
                 item.setiYear(rs.getInt("iYear"));
-                item.setiDay(rs.getInt("iDay"));
                 item.setiImpressions(rs.getInt("iImpressions"));
                 item.setiMonth(rs.getInt("iMonth"));
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");

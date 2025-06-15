@@ -747,22 +747,22 @@ public class TblRawDataController implements Serializable {
     }
 
     public List<TblDV360SPD> getItems() {
-        if ((items == null || items.isEmpty()) && idDailySelected != null && idDailySelected.getId_daily() > 0) {
+        if ((items == null || items.isEmpty()) && dMonthSelected != null) {
             cleanInternalFilters();
             DAOFile dbCon = new DAOFile();
-            items = dbCon.getRawDatabyDate(idDailySelected.getId_daily(),JsfUtil.getUsuarioSesion().getvAgency());
+            items = dbCon.getRawDatabyDate(idDailySelected.getId_monthly(),JsfUtil.getUsuarioSesion().getvAgency());
             if (items != null && !items.isEmpty()){
-                setRawPartners(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vPartner"));
-                setRawAgency(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vAgency"));
-                setRawCampaign(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vCampaign"));
-                setRawChannel(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vChannel"));
-                setRawClient(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vClient"));
-                setRawDsp(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vDSP"));
-                setRawVendor(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vVendor"));
-                setRawExchanges(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vExchange"));
+                setRawPartners(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vPartner"));
+                setRawAgency(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vAgency"));
+                setRawCampaign(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vCampaign"));
+                setRawChannel(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vChannel"));
+                setRawClient(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vClient"));
+                setRawDsp(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vDSP"));
+                setRawVendor(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vVendor"));
+                setRawExchanges(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vExchange"));
                 setRawDeviceTypes(new ArrayList());//dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vDeviceTypes"));
-                setRawVendor(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vVendor"));
-                setRawInsertionOrders(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vInsertionOrder"));
+                setRawVendor(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vVendor"));
+                setRawInsertionOrders(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vInsertionOrder"));
                 //setRawLineItems(dbCon.getRawDatabyDateDistinctbyPattern(idDailySelected.getId_daily(),"vLineItem"));
                 setLbDataFound(true);            
             }else{
@@ -1476,12 +1476,13 @@ public class TblRawDataController implements Serializable {
                 idDailySelected = new TblDailyProcess();
                 iYear = localDate.getYear();
                 iMonth = localDate.getMonthValue();
-                idDailySelected.setiDay(localDate.lengthOfMonth());
+                //idDailySelected.setiDay(localDate.lengthOfMonth());
                 idDailySelected.setiMonth(iMonth);
                 idDailySelected.setiYear(iYear);
-                idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
-                idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
+                //idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
+                //idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
+                idDailySelected.setId_monthly(dbCon.getItemDailybyMonth(idDailySelected));
+                idDailySelected.setId_daily(idDailySelected.getId_monthly());
             }   
         } catch (Exception ex) {
             System.out.println("getItemCalendarByMonth");
@@ -1491,19 +1492,7 @@ public class TblRawDataController implements Serializable {
     } 
 
     public void getPerfCalendarByMonth() {              
-        try { 
-            //internalClear();
-            if (dMonthSelected != null){ 
-                DAOFile dbCon = new DAOFile();
-                LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
-                iYear = localDate.getYear();
-                iMonth = localDate.getMonthValue();
-            }   
-        } catch (Exception ex) {
-            System.out.println("getPerfCalendarByMonth");
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();            
-        }              
+        getItemCalendarByMonth();
     }     
     
     public Boolean getLbDataTransfer() {
@@ -1513,28 +1502,9 @@ public class TblRawDataController implements Serializable {
     public void setLbDataTransfer(Boolean lbDataTransfer) {
         this.lbDataTransfer = lbDataTransfer;
     }
-
+    
     public void getItemCalendarByDate() {
-        try {           
-            internalClear();
-            if (dDateSelected != null){ 
-                DAOFile dbCon = new DAOFile();
-                LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dDateSelected) );
-                idDailySelected = new TblDailyProcess();
-                idDailySelected.setiDay(localDate.getDayOfMonth());
-                idDailySelected.setiMonth(localDate.getMonthValue());
-                idDailySelected.setiYear(localDate.getYear());
-                idDailySelected.setdDate(new java.sql.Date(dDateSelected.getTime()));
-                idDailySelected.setId_daily(dbCon.getItemDailybyDate(idDailySelected));
-                setLbDataFound(false);
-                lbDataTransfer = false;
-                if(localDate.lengthOfMonth() == localDate.getDayOfMonth()) lbDataTransfer = true;
-            }
-        } catch (Exception ex) {
-            System.out.println("getItemCalendarByDate");
-            System.out.println(ex.getMessage());
-            ex.printStackTrace();            
-        }            
+        getItemCalendarByMonth();
     }   
     
     protected void getDateBounds(){

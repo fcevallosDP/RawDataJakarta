@@ -13,6 +13,7 @@ import java.sql.Date;
  */
 public class TblDailyProcess {
     private Integer id_daily;
+    private Integer id_monthly;
     private Integer iYear;
     private Integer iMonth;
     private Integer iDay;
@@ -32,6 +33,7 @@ public class TblDailyProcess {
     
     public TblDailyProcess(Integer iYear, Integer iMonth, Integer iDay, String lsDate){
         this.id_daily = 0;
+        this.id_monthly = 0;
         this.iYear = iYear;
         this.iMonth = iMonth;
         this.iDay = iDay;
@@ -40,6 +42,14 @@ public class TblDailyProcess {
 
     public String getVDate() {
         return vDate;
+    }
+
+    public Integer getId_monthly() {
+        return id_monthly;
+    }
+
+    public void setId_monthly(Integer id_monthly) {
+        this.id_monthly = id_monthly;
     }
 
     public void setVDate(String vDate) {

@@ -173,7 +173,7 @@ public class TblRawSSPDataController implements Serializable {
         if ((monthlyItems == null || monthlyItems.isEmpty()) && dMonthSelected != null/* && idDailySelected != null && idDailySelected.getId_daily() > 0*/) {
             LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
             DAOFile dbCon = new DAOFile();
-            monthlyItems = dbCon.getRawSSPDatabyMonth(localDate.getYear(), localDate.getMonthValue());
+            monthlyItems = dbCon.getRawSSPDatabyMonth(idDailySelected.getId_monthly());
             if (monthlyItems != null && !monthlyItems.isEmpty()){
                 setLbDataFound(true);
             }else{
@@ -327,7 +327,7 @@ public class TblRawSSPDataController implements Serializable {
             if (dbCon.createItemCatalogColumnsRelated(editCatalog,selectedrawColumns)){
                 dbCon.setItemsCatalogo(itemsCatalogo);           
                 dbCon.setItemsXANDRRefactor((filteredItems != null && !filteredItems.isEmpty()) ? filteredItems :items);                  
-                if (dbCon.refactorRawSSPData(idDailySelected.getId_daily(), editCatalog, selectedrawColumns)){
+                if (dbCon.refactorRawSSPData(editCatalog, selectedrawColumns)){
                     selected = null;
                     items =  null;
                     filteredItems =  null;
@@ -463,11 +463,10 @@ public class TblRawSSPDataController implements Serializable {
     protected void getDateBounds(){
         Calendar cal = JsfUtil.getFechaSistema();
         LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-        cal.add(Calendar.DATE, -1);
-        setMaxDate(cal.getTime());
         setDDateSelected(cal.getTime());
         setIYear(localDate.getYear());
         setIMonth(localDate.getMonthValue());        
+        setDMonthSelected(cal.getTime());
     }    
 
     public void removeSelected(){
@@ -483,11 +482,10 @@ public class TblRawSSPDataController implements Serializable {
     }
     
     public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {            
-        if( dDateSelected != null){
+        if( dMonthSelected != null){
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
-                dbCon.setItemsCatalogo(itemsCatalogo);
-                //dbCon.setItemsCatalogoColumn(itemsCatalogoColumn);                
+                dbCon.setItemsCatalogo(itemsCatalogo);       
                 dbCon.ScanFiles("SSP", event.getFile(), idDailySelected);
                 JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
                 items = null;
@@ -549,9 +547,9 @@ public class TblRawSSPDataController implements Serializable {
     }
 
     public void complexLimpiar(){
-        if (idDailySelected != null && idDailySelected.getId_daily() > 0){
+        if (idDailySelected != null && idDailySelected.getId_monthly() > 0){
             DAOFile dbCon = new DAOFile();
-            if (dbCon.cleanRawDataByDaily(idDailySelected.getId_daily(), "SSP")){
+            if (dbCon.cleanRawDataByDaily(idDailySelected.getId_monthly(), "SSP")){
                 itemsCatalogo = dbCon.getCatalogoItems("S");
                 //itemsCatalogoColumn = dbCon.getCatalogoColumnItems("S");
                 rawColumns = dbCon.getItemsColumnNames("S");                

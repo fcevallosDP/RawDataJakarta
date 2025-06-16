@@ -33,6 +33,7 @@ public class TblDVXANDRSPD {
     private Double dNetRevenue;
     private String vClient;
     private String vChannel;
+    private String vDealId;
     private String vDsp;
     private String vAgency;
     private int iYear;
@@ -43,9 +44,26 @@ public class TblDVXANDRSPD {
     private Double dMargin;   
     private Double dNetMargin;
     private TblDailyProcess idDaily;
+    private Integer idMonthly;
 
     public Integer getId() {
         return id;
+    }
+
+    public String getvDealId() {
+        return vDealId;
+    }
+
+    public void setvDealId(String vDealId) {
+        this.vDealId = vDealId;
+    }
+
+    public Integer getIdMonthly() {
+        return idMonthly;
+    }
+
+    public void setIdMonthly(Integer idMonthly) {
+        this.idMonthly = idMonthly;
     }
 
     public String getvUser() {

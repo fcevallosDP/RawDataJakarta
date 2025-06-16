@@ -52,8 +52,11 @@
                                 <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DMonthSelected}"
                                       readonlyInput="true" view="month" pattern="MMM/yyyy" 
                                       yearNavigator="true" yearRange="2025:2026" size="10">                               
-                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByDate()}"
-                                            update="TblRawSSPDataListForm"/>                                   
+                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByMonth()}"
+                                            update="TblRawSSPDataListForm"
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"                                            
+                                            />                                   
                                 </p:datePicker>                                                                                     
                                 <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
                                                  disabled="#{empty tblRawSSPDataController.DDateSelected}" 

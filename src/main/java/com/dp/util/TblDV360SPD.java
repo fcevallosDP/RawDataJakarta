@@ -60,6 +60,7 @@ public class TblDV360SPD {
     private String vVendor;
     private String vVendorSource;
     private TblDailyProcess idDaily;
+    private Integer idMontly;
     
     public TblDV360SPD() {
     }    
@@ -82,6 +83,14 @@ public class TblDV360SPD {
 
     public void setdVCRGoal(Double dVCRGoal) {
         this.dVCRGoal = dVCRGoal;
+    }
+
+    public Integer getIdMontly() {
+        return idMontly;
+    }
+
+    public void setIdMontly(Integer idMontly) {
+        this.idMontly = idMontly;
     }
 
     public Double getdVCR() {

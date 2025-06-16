@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 //import jakarta.faces.bean.ManagedBean;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import java.text.ParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -166,7 +167,7 @@ public class DAOFile implements Serializable  {
                         item.setdCPC(0.00);
                         item.setdCPM(0.00);
                         item.setdCTR(0.000);
-                        item.setIdDaily(idDaily);
+                        item.setIdMontly(idDaily.getId_monthly());
                         item.setvPartner("");
                         item.setvCampaign("");
                         item.setvInsertionOrder("");
@@ -184,6 +185,28 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                case 1://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiAnio(Integer.valueOf(parts[0]));
+                                                    item.setiMes(Integer.valueOf(parts[1]));
+                                                    item.setiDia(Integer.valueOf(parts[2])); 
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;                                    
                                 case 2://Partner
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -385,7 +408,7 @@ public class DAOFile implements Serializable  {
                         lbEndCol = false;
                         iColBlank = 0;
                         item = new TblDV360SPD();
-                        item.setIdDaily(idDaily);
+                        item.setIdMontly(idDaily.getId_monthly());
                         item.setvPartner("");
                         item.setvCampaign("");
                         item.setvInsertionOrder("");
@@ -409,6 +432,28 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiAnio(Integer.valueOf(parts[0]));
+                                                    item.setiMes(Integer.valueOf(parts[1]));
+                                                    item.setiDia(Integer.valueOf(parts[2])); 
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;                                      
                                 case 2://CAMPAIGN
                                     try{
                                         if (nextCell.getCellType() == CellType.STRING){
@@ -587,9 +632,8 @@ public class DAOFile implements Serializable  {
         return idDaily;
     }
     
-    protected List<TblDV360SPD> scrap_PPOINT_MassiveData(UploadedFile itemFile) throws FileNotFoundException, IOException{
-        System.out.println("scrap_PPOINT_MassiveData");
-        TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
+    protected List<TblDV360SPD> scrap_PPOINT_MassiveData(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
+        System.out.println("scrap_PPOINT_MassiveData");     
         List<TblDV360SPD> localitemsDV360 = new ArrayList();
         if (itemFile != null){            
             String lsFileName = itemFile.getFileName();
@@ -613,7 +657,7 @@ public class DAOFile implements Serializable  {
                         iColBlank = 0;
                         item = new TblDV360SPD();
                         item.setvPartner("");
-                        item.setIdDaily(idDaily);
+                        item.setIdMontly(idDaily.getId_monthly());
                         item.setvCampaign("");
                         item.setvInsertionOrder("");
                         item.setvLineItem("");
@@ -642,16 +686,11 @@ public class DAOFile implements Serializable  {
                                             if (!nextCell.getStringCellValue().isEmpty()){
                                                 item.setvDate(nextCell.getStringCellValue());
                                                 String string = item.getvDate();
-                                                String[] parts = string.split("-");
-                                                if (parts.length > 0){
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
                                                     item.setiAnio(Integer.valueOf(parts[0]));
                                                     item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2]));   
-                                                    if (idDaily.getiDay() != item.getiDia() || idDaily.getiMonth()!= item.getiMes() || idDaily.getiYear()!= item.getiAnio()){
-                                                        idDaily = new TblDailyProcess(item.getiAnio(), item.getiMes(), item.getiDia(), item.getvDate()); 
-                                                        idDaily = getDailyByDate(idDaily);
-                                                        item.setIdDaily(idDaily);
-                                                    }
+                                                    item.setiDia(Integer.valueOf(parts[2])); 
                                                 }                                          
                                             }else{
                                                 iColBlank++;    
@@ -662,7 +701,7 @@ public class DAOFile implements Serializable  {
                                     }catch (Exception ex){
                                        ex.printStackTrace();
                                     }
-                                    break;  
+                                    break;                                      
                                 case 2://CAMPAIGN
                                     try{
                                         if (nextCell.getCellType() == CellType.STRING){
@@ -1772,7 +1811,25 @@ public class DAOFile implements Serializable  {
         
         return lsRet;
     }
-        
+
+    public static String convertToMySQLFormat(String input) throws ParseException {
+        SimpleDateFormat inputFormat;
+        if (input.contains("-")) {
+            inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+        } else if (input.contains("/")) {
+            inputFormat = new SimpleDateFormat("M/d/yyyy");
+        } else {
+            throw new ParseException("Formato desconocido: " + input, 0);
+        }
+
+        // Parseamos la fecha al objeto Date
+        Date date = inputFormat.parse(input);
+
+        // Formateamos al formato que MySQL espera
+        SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return mysqlFormat.format(date);
+    }       
+    
     protected List<TblDVXANDRSPD> scrap_SSP_Equative_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException, Exception{
         System.out.println("scrap_SSP_Equative_Format");
         List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();
@@ -1816,7 +1873,7 @@ public class DAOFile implements Serializable  {
                         item.setdSalesRevenue(0.00);
                         item.setdNetMargin(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -1838,13 +1895,16 @@ public class DAOFile implements Serializable  {
                             switch (columnIndex) {
                                 case 0://Date
                                     try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().trim().isEmpty()){
-                                                lsBase = (lsBase.isEmpty()) ? nextCell.getStringCellValue().trim(): lsBase;                                            
-                                                lbAddRow = false;
-                                                if (lsBase.compareTo(nextCell.getStringCellValue().trim()) == 0){
-                                                    lbAddRow = true;
-                                                }                                          
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(convertToMySQLFormat(nextCell.getStringCellValue()));
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiYear(Integer.valueOf(parts[0])); 
+                                                    item.setiMonth(Integer.valueOf(parts[1]));
+                                                    item.setiDay(Integer.valueOf(parts[2]));                                                                                                        
+                                                }
                                             }else{
                                                 iColBlank++;    
                                             }
@@ -1854,7 +1914,20 @@ public class DAOFile implements Serializable  {
                                     }catch (Exception ex){
                                        ex.printStackTrace();
                                     }
-                                    break;                                 
+                                    break;  
+                                case 2://deal_external_id
+                                    try{
+                                        if(nextCell.getCellType() == CellType.STRING){
+                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
+                                                item.setvDealId(nextCell.getStringCellValue());
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;  
                                 case 3://DealName
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -2028,7 +2101,7 @@ public class DAOFile implements Serializable  {
                         item.setdTechFee(0.00);
                         item.setdSalesRevenue(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -2048,6 +2121,42 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(convertToMySQLFormat(nextCell.getStringCellValue()));
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiYear(Integer.valueOf(parts[0]));                                                    
+                                                    item.setiMonth(Integer.valueOf(parts[1]));
+                                                    item.setiDay(Integer.valueOf(parts[2]));                                                     
+                                                }
+                                                
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;   
+                                case 1://deal id
+                                    try{
+                                        if(nextCell.getCellType() == CellType.STRING){
+                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
+                                                item.setvDealId(nextCell.getStringCellValue());
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;                                              
                                 case 2://DealName
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -2224,7 +2333,7 @@ public class DAOFile implements Serializable  {
                         item.setdTechFee(0.00);
                         item.setdSalesRevenue(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -2244,6 +2353,7 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                
                                 case 2://DealName
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -2416,7 +2526,7 @@ public class DAOFile implements Serializable  {
                         item.setdTechFee(0.00);
                         item.setdSalesRevenue(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -2436,6 +2546,29 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiYear(Integer.valueOf(parts[0]));                                                    
+                                                    item.setiMonth(Integer.valueOf(parts[1]));
+                                                    item.setiDay(Integer.valueOf(parts[2]));                                                     
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;   
+                                
                                 case 1://Advertiser
                                     try{
                                         if (nextCell.getCellType() == CellType.STRING){
@@ -2716,7 +2849,7 @@ public class DAOFile implements Serializable  {
                         item.setdTechFee(0.00);
                         item.setdSalesRevenue(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -2736,6 +2869,41 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }
                             switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){                                                    
+                                                    item.setiMonth(Integer.valueOf(parts[0]));
+                                                    item.setiDay(Integer.valueOf(parts[1]));                                                     
+                                                    item.setiYear(Integer.valueOf(parts[2]));                                                                                                        
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;        
+                                case 1://deal id
+                                    try{
+                                        if(nextCell.getCellType() == CellType.STRING){
+                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
+                                                item.setvDealId(nextCell.getStringCellValue());
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }catch (Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                    break;                                         
                                 case 2://DealName
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -2932,7 +3100,7 @@ public class DAOFile implements Serializable  {
                         item.setdSalesRevenue(0.00);
                         item.setdNetMargin(0.00);
                         item.setvDevice("NA");
-                        item.setIdDaily(idDaily);
+                        item.setIdMonthly(idDaily.getId_monthly());
                         item.setvDeal("");                                                    
                         item.setvBrand("");
                         item.setvAdvertiser("");                                                
@@ -2952,6 +3120,28 @@ public class DAOFile implements Serializable  {
                                 iColBlank++;
                             }*/
                             switch (columnIndex) {
+                                case 0://Date
+                                    try{
+                                        if (nextCell.getCellType() == CellType.STRING){                                        
+                                            if (!nextCell.getStringCellValue().isEmpty()){
+                                                item.setvDate(nextCell.getStringCellValue());
+                                                String string = item.getvDate();
+                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
+                                                if (parts.length == 3){
+                                                    item.setiYear(Integer.valueOf(parts[0]));                                                                                                        
+                                                    item.setiMonth(Integer.valueOf(parts[1]));
+                                                    item.setiDay(Integer.valueOf(parts[2]));
+                                                }                                          
+                                            }else{
+                                                iColBlank++;    
+                                            }
+                                        }
+                                    }catch (IllegalStateException e) {
+                                       e.printStackTrace();
+                                    }catch (Exception ex){
+                                       ex.printStackTrace();
+                                    }
+                                    break;                                   
                                 case 1://Ad Network Gross Revenue
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
@@ -3092,17 +3282,23 @@ public class DAOFile implements Serializable  {
        }
         return localitemsXANDR;
     }
-        
-    protected boolean save_ItemsSSP(String lsFileName, List<TblDVXANDRSPD> localitemsXANDR){
+
+    protected boolean save_ItemsSSPDeleteFisrt(String lsFileName, List<TblDVXANDRSPD> localitemsXANDR, TblDailyProcess idDaily){
         System.out.println("save_ItemsSSP "+lsFileName);
         if (localitemsXANDR != null && !localitemsXANDR.isEmpty() && !lsFileName.isEmpty()){
             try (Connection connect = DatabaseConnector.getConnection()) { 
+                
+                PreparedStatement pstmt_d = connect.prepareStatement("delete from tbl_raw_ssp_data where id_montly = ? and vExchange = 'EQUATIV'");      
+                pstmt_d.setInt(1, idDaily.getId_monthly());
+                pstmt_d.executeUpdate();
+                pstmt_d.close();                 
+                
                 PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_ssp_data` "
-                                        + "(`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`id_daily`,`dSystemDate`, `dMargin`, `vFileName`, `dNetMargin`, `vUser`)"
-                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?,?);");
+                                        + "(`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dSystemDate`, `dMargin`, `vFileName`, `dNetMargin`, `vUser`, `vDealId`, `id_monthly`)"
+                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?,?,?,?);");
 
                 for (TblDVXANDRSPD item : localitemsXANDR) {                                    
-                    pstmt.setDate(1, item.getIdDaily().getdDate());
+                    pstmt.setString(1, item.getvDate());
                     pstmt.setString(2, item.getvAdvertiser());
                     pstmt.setString(3, item.getvBrand());
                     pstmt.setString(4, item.getvDeal());
@@ -3158,12 +3354,111 @@ public class DAOFile implements Serializable  {
                     pstmt.setString(19, item.getvChannel());
                     pstmt.setString(20, item.getvDsp());
                     pstmt.setString(21, item.getvAgency());
-                    pstmt.setInt(22, item.getIdDaily().getiYear());
-                    pstmt.setInt(23, item.getIdDaily().getiMonth());
-                    pstmt.setInt(24, item.getIdDaily().getiDay());
+                    pstmt.setInt(22, item.getiYear());
+                    pstmt.setInt(23, item.getiMonth());
+                    pstmt.setInt(24, item.getiDay());
                     pstmt.setString(25, item.getvSeat());
                     pstmt.setString(26, item.getvExchange());
-                    pstmt.setInt(27, item.getIdDaily().getId_daily());
+
+                    num = item.getdMargin();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                    pstmt.setDouble(27, bd.doubleValue());                    
+                    
+                    pstmt.setString(28, lsFileName.trim());                    
+
+                    num = item.getdNetMargin();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                    pstmt.setDouble(29, bd.doubleValue()); 
+                    
+                    pstmt.setString(30, (userSession != null) ? userSession.getvUser():"");
+                    pstmt.setString(31, item.getvDealId());    
+                    pstmt.setInt(32, item.getIdMonthly());    
+                    pstmt.executeUpdate();
+                }                
+                pstmt.close();                 
+                System.out.println("items saved: " + String.valueOf(localitemsXANDR.size()));
+                return true;
+            } catch (Exception ex) {
+            
+                System.out.println("in save_ItemsSSP");
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();                
+            }        
+        }
+        return false;
+    }                  
+    
+    protected boolean save_ItemsSSP(String lsFileName, List<TblDVXANDRSPD> localitemsXANDR){
+        System.out.println("save_ItemsSSP "+lsFileName);
+        if (localitemsXANDR != null && !localitemsXANDR.isEmpty() && !lsFileName.isEmpty()){
+            try (Connection connect = DatabaseConnector.getConnection()) { 
+                PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_ssp_data` "
+                                        + "(`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`id_monthly`,`dSystemDate`, `dMargin`, `vFileName`, `dNetMargin`, `vUser`, `vDealId`)"
+                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?,?,?);");
+
+                for (TblDVXANDRSPD item : localitemsXANDR) {                                    
+                    pstmt.setString(1, item.getvDate());
+                    pstmt.setString(2, item.getvAdvertiser());
+                    pstmt.setString(3, item.getvBrand());
+                    pstmt.setString(4, item.getvDeal());
+                    pstmt.setString(5, item.getvDevice());
+                    
+                    double num = item.getdGrossMargin();
+                    BigDecimal bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                      
+                    pstmt.setDouble(6, bd.doubleValue());                    
+                    
+                    pstmt.setInt(7, item.getiImpressions());
+                    
+                    num = item.getdSalesRevenue();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                      
+                    pstmt.setDouble(8, bd.doubleValue());                     
+                    
+                    num = item.getdTechFee();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                                        
+                    pstmt.setDouble(9, bd.doubleValue());
+                    
+                    num = item.getdMediaCost();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                    
+                    pstmt.setDouble(10, bd.doubleValue());
+                    
+                    num = item.getdTotalCost();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                    
+                    pstmt.setDouble(11, bd.doubleValue());                
+                    
+                    num = item.getdCPM();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                     
+                    pstmt.setDouble(12, bd.doubleValue());                    
+                    
+                    num = item.getdMlFee();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                    
+                    pstmt.setDouble(13, bd.doubleValue());
+                    
+                    num = item.getdMarginFee();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                     
+                    pstmt.setDouble(14, bd.doubleValue());
+                    
+                    num = item.getdDspFee();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                    
+                    pstmt.setDouble(15, bd.doubleValue());
+                    
+                    num = item.getdGrossRevenue();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                     
+                    pstmt.setDouble(16, bd.doubleValue());
+                    
+                    num = item.getdNetRevenue();
+                    bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                    
+                    pstmt.setDouble(17, bd.doubleValue());
+                                        
+                    pstmt.setString(18, item.getvClient());
+                    pstmt.setString(19, item.getvChannel());
+                    pstmt.setString(20, item.getvDsp());
+                    pstmt.setString(21, item.getvAgency());
+                    pstmt.setInt(22, item.getiYear());
+                    pstmt.setInt(23, item.getiMonth());
+                    pstmt.setInt(24, item.getiDay());
+                    pstmt.setString(25, item.getvSeat());
+                    pstmt.setString(26, item.getvExchange());
+                    pstmt.setInt(27, item.getIdMonthly());
 
                     num = item.getdMargin();
                     bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
@@ -3176,7 +3471,7 @@ public class DAOFile implements Serializable  {
                     pstmt.setDouble(30, bd.doubleValue()); 
                     
                     pstmt.setString(31, (userSession != null) ? userSession.getvUser():"");
-
+                    pstmt.setString(32, item.getvDealId());
                     pstmt.executeUpdate();
                 }                
                 pstmt.close();                 
@@ -3541,7 +3836,7 @@ public class DAOFile implements Serializable  {
             }     
     }     
     
-    public boolean cleanRawDataByDaily(Integer idDaily, String lsSource){
+    public boolean cleanRawDataByDaily(Integer idMonthly, String lsSource){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                
@@ -3549,23 +3844,23 @@ public class DAOFile implements Serializable  {
                 PreparedStatement pstmt_i = null, pstmt_d = null;
                 
                 if(lsSource.contains("DSP")){
-                    pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_daily`,`tStatus`,`vDescription`,`vUser`)\n" +
-                                                                         "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_daily`,`tStatus`,'Reprocess Data', ? from tbl_raw_data where id_daily = ?");                
+                    pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_monthly`,`tStatus`,`vDescription`,`vUser`)\n" +
+                                                                         "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_monthly`,`tStatus`,'Reprocess Data', ? from tbl_raw_data where id_monthly = ?");                
 
-                    pstmt_d = connect.prepareStatement("delete from tbl_raw_data where `id_daily` = ?");                            
+                    pstmt_d = connect.prepareStatement("delete from tbl_raw_data where `id_monthly` = ?");                            
                 }else{
                     pstmt_i = connect.prepareStatement("insert into tbl_raw_ssp_data_moved\n" +
-                                                        "	(`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,`vDescription`)\n" +
-                                                        "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where id_daily = ?");                
+                                                        "	(`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,`vDescription`)\n" +
+                                                        "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where id_monthly = ?");                
 
-                    pstmt_d = connect.prepareStatement("delete from tbl_raw_ssp_data where `id_daily` = ?");                  
+                    pstmt_d = connect.prepareStatement("delete from tbl_raw_ssp_data where `id_monthly` = ?");                  
                 }
                 
                 pstmt_i.setString(1, (userSession != null) ? userSession.getvUser():"");
-                pstmt_i.setInt(2, idDaily);                
+                pstmt_i.setInt(2, idMonthly);                
                 pstmt_i.executeUpdate();  
                 
-                pstmt_d.setInt(1, idDaily);                
+                pstmt_d.setInt(1, idMonthly);                
                 pstmt_d.executeUpdate();                 
                 
                 pstmt_i.close();   
@@ -3589,14 +3884,14 @@ public class DAOFile implements Serializable  {
                 PreparedStatement pstmt_i = null, pstmt_d = null;
                 
                 if(lsSource.contains("DSP")){
-                    pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_daily`,`tStatus`,`vDescription`,`vUser`)\n" +
-                                                                         "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_daily`,`tStatus`,'Reprocess Data', ? from tbl_raw_data where Id_raw = ?");                
+                    pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_monthly`,`tStatus`,`vDescription`,`vUser`)\n" +
+                                                                         "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_monthly`,`tStatus`,'Reprocess Data', ? from tbl_raw_data where Id_raw = ?");                
 
                     pstmt_d = connect.prepareStatement("delete from tbl_raw_data where `Id_raw` = ?");                            
                 }else{
                     pstmt_i = connect.prepareStatement("insert into tbl_raw_ssp_data_moved\n" +
-                                                        "	(`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,`vDescription`)\n" +
-                                                        "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where Id_raw = ?");                
+                                                        "	(`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,`vDescription`)\n" +
+                                                        "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where Id_raw = ?");                
 
                     pstmt_d = connect.prepareStatement("delete from tbl_raw_ssp_data where `Id_raw` = ?");                  
                 }
@@ -3645,8 +3940,8 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                                    
-                PreparedStatement pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_daily`,`tStatus`,`vDescription`,`vUser`)\n" +
-                                                                     "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_daily`,`tStatus`,'Monthly Replacement', ? from tbl_raw_data where id_raw = ?");
+                PreparedStatement pstmt_i = connect.prepareStatement("insert into tbl_raw_data_moved (`Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,`dSystemDate`,`vFileName`,`id_monthly`,`tStatus`,`vDescription`,`vUser`)\n" +
+                                                                     "select `Id_raw`,`dDate`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor`,`vVendorSource`,`dCPM`,	`dCTR`,`dCPC`,`iAnio`,`iMes`,`iDia`,now(),`vFileName`,`id_monthly`,`tStatus`,'Monthly Replacement', ? from tbl_raw_data where id_raw = ?");
                 PreparedStatement pstmt_d = connect.prepareStatement("delete from tbl_raw_data where `Id_raw` = ?"); 
                 String lsUser = (userSession != null) ? userSession.getvUser():"";
                 for (TblDV360SPD item : itemsToClean) {
@@ -3699,8 +3994,8 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                                   
-                PreparedStatement pstmt_i = connect.prepareStatement("insert into tbl_raw_ssp_data_moved (`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,`vDescription`)\n" +
-                                                                            "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_daily`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where id_raw = ?");                
+                PreparedStatement pstmt_i = connect.prepareStatement("insert into tbl_raw_ssp_data_moved (`Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,`vUser`,`dSystemDate`,`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,`vDescription`)\n" +
+                                                                            "select `Id_raw`,`dDate`,`vAdvertiser`,`vBrand`,`vDeal`,`vDevice`,`dGrossMargin`,`iImpressions`,`dSalesRevenue`,`dTechFee`,`dMediaCost`,`dTotalCost`,`dCPM`,`dMlFee`,`dMarginFee`,`dDspFee`,`dGrossRevenue`,`dNetRevenue`,`vClient`,`vChannel`,`vDsp`,`vAgency`,`iYear`,`iMonth`,`iDay`,`vSeat`,`vExchange`,`dMargin`,`dNetMargin`,?,now(),`dModifiedDate`,`vFileName`,`id_monthly`,`tEstado`,'Reprocess Data' from tbl_raw_ssp_data where id_raw = ?");                
 
                 PreparedStatement pstmt_d = connect.prepareStatement("delete from tbl_raw_ssp_data where `Id_raw` = ?"); 
                 String lsUser = (userSession != null) ? userSession.getvUser():"";
@@ -3733,21 +4028,19 @@ public class DAOFile implements Serializable  {
              
             lsPattern = lsPattern.toLowerCase();
             PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`, `iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
-                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`,	`dCPM`, `dCTR`, `dCPC`, `tbl_daily_process`.`iYear`, `tbl_daily_process`.`iMonth`, `tbl_daily_process`.`iDay`, `vFileName`, `tbl_raw_data`.`id_daily`, `tbl_daily_process`.`dDate` as dateProcess\n" +
-                                                            "from `tbl_raw_data`, `tbl_daily_process`\n" +
-                                                            "where `tbl_raw_data`.`id_daily` = `tbl_daily_process`.`id_daily` and\n" +
-                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_daily_process`.`id_daily` = ? and\n" +
+                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`,	`dCPM`, `dCTR`, `dCPC`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vFileName`, `tbl_raw_data`.`id_monthly`, `tbl_raw_data`.`dDate` as dateProcess\n" +
+                                                            "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
+                                                            "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` = ? and\n" +
                                                             "(lower(vPartner) like '%" + lsPattern + "%' or lower(vCampaign) like '%" + lsPattern + "%' or lower(vInsertionOrder) like '%" + lsPattern + "%' or lower(vLineItem) like '%" + lsPattern + "%' or lower(vExchange) like '%" + lsPattern + "%' or lower(vDealName) like '%" + lsPattern + "%' or lower(vDSP) like '%" + lsPattern + "%' or lower(vClient) like '%" + lsPattern + "%' or lower(vAgency) like '%" + lsPattern + "%' or lower(vChannel) like '%" + lsPattern + "%' or lower(vAlias) like '%" + lsPattern + "%' or lower(vVendor) like '%" + lsPattern + "%')"); 
             pstmt.setInt(1, iDaily);
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
-                TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_daily"));
-                itemDaily.setdDate(rs.getDate("dateProcess"));                    
+                  
                 TblDV360SPD item = new TblDV360SPD();
 
-                item.setIdDaily(itemDaily);
+                item.setIdMontly(rs.getInt("id_monthly"));
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dateProcess"));
                 item.setdCPC(rs.getDouble("dCPC"));
@@ -3787,27 +4080,24 @@ public class DAOFile implements Serializable  {
         return null;
     }    
     
-    public List<TblDV360SPD> getRawDatabyMonth(Integer iYear, Integer iMonth){
+    public List<TblDV360SPD> getRawDatabyMonth(Integer iMonthly){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`,	`iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
-                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`,	`dCPM`, `dCTR`, `dCPC`, `tbl_daily_process`.`iYear`, `tbl_daily_process`.`iMonth`, `tbl_daily_process`.`iDay`, `vFileName`, `tbl_raw_data`.`id_daily`, `tbl_daily_process`.`dDate` as dateProcess\n" +
-                                                            "from `tbl_raw_data`, `tbl_daily_process`\n" +
-                                                            "where `tbl_raw_data`.`id_daily` = `tbl_daily_process`.`id_daily` and\n" +
-                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_daily_process`.`iYear` =  ? and `tbl_daily_process`.`iMonth` = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
+                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`,	`dCPM`, `dCTR`, `dCPC`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vFileName`, `tbl_raw_data`.`id_monthly`, `tbl_raw_data`.`dDate` as dateProcess\n" +
+                                                            "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
+                                                            "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` = ?"); 
+            pstmt.setInt(1, iMonthly);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
-                TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_daily"));
-                itemDaily.setdDate(rs.getDate("dateProcess"));                    
+
                 TblDV360SPD item = new TblDV360SPD();
 
-                item.setIdDaily(itemDaily);
+                item.setIdMontly(rs.getInt("id_monthly"));
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dateProcess"));
                 item.setdCPC(rs.getDouble("dCPC"));
@@ -3817,7 +4107,6 @@ public class DAOFile implements Serializable  {
                 item.setdTotalMediaCosts(rs.getDouble("dTotalMediaCost"));
                 item.setiAnio(rs.getInt("iYear"));
                 item.setiClicks(rs.getInt("iClicks"));
-                item.setiDia(rs.getInt("iDay"));
                 item.setiImpressions(rs.getInt("iImpressions"));
                 item.setiMes(rs.getInt("iMonth"));
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");
@@ -3894,28 +4183,25 @@ public class DAOFile implements Serializable  {
         return null;
     }      
 
-    protected List<TblPacing> getMonthSpendView(Integer iYear, Integer iMonth){
+    protected List<TblPacing> getMonthSpendView(Integer iMonthly){
         try (Connection connect = DatabaseConnector.getConnection()) {
-            PreparedStatement pstmt = connect.prepareStatement("select `vagency`, `vclient`, `vchannel`, `TotalMediaCost`, `MediaSpend`, (case when `TotalMediaCost` > 0 then cast((`MediaSpend` / `TotalMediaCost`) as decimal(18,2)) else 0 end) as 'PMPNetSplit'\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `vagency`, `vclient`, `vchannel`, `TotalMediaCost`, `MediaSpend`, (case when `TotalMediaCost` > 0 then cast((`MediaSpend` / `TotalMediaCost`) as decimal(18,2)) else 0 end) as 'PMPNetSplit', dMonthStart, dMonthEnd, iYear, iMonth, datediff(`dMonthEnd`, now()) as daysLeft\n" +
                                                                 "from vwmonthspend\n" +
-                                                                "where iYear = ? and iMonth = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
+                                                                "where id_monthly = ?"); 
+            pstmt.setInt(1, iMonthly);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblPacing> itemsLocalDV360 = new ArrayList();
             double num;
             BigDecimal bd;
-            LocalDate dateStart = LocalDate.parse( String.valueOf(iYear) + "-" + String.format("%02d", iMonth) + "-" + "01");
-            LocalDate dateEnd = LocalDate.parse( String.valueOf(iYear) + "-" + String.format("%02d", iMonth) + "-" + String.format("%02d", dateStart.lengthOfMonth()));
-            LocalDate localToday = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(JsfUtil.getFechaSistema().getTime()));
-            long ldaysLeft = ChronoUnit.DAYS.between(localToday, dateEnd);
+
             
             while (rs.next()) {             
                  
                 TblPacing item = new TblPacing();
-                item.setiYear(iYear);
-                item.setiMonth(iMonth);
+                item.setiYear(rs.getInt("iYear"));
+                item.setiMonth(rs.getInt("iMonth"));
+                
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");                
                 item.setvClient((rs.getString("vClient") != null) ? rs.getString("vClient") :""); 
                 item.setvChannel((rs.getString("vChannel") != null) ? rs.getString("vChannel") :"");
@@ -3942,9 +4228,10 @@ public class DAOFile implements Serializable  {
                 item.setdSuccessRate(bd.doubleValue());                                  
                 
                 
-                item.setStartDate(java.sql.Date.valueOf(dateStart));
-                item.setEndDate(java.sql.Date.valueOf(dateEnd));
-                item.setiDaysLeft(Math.toIntExact(ldaysLeft));
+                item.setStartDate(rs.getDate("dMonthStart"));
+                item.setEndDate(rs.getDate("dMonthEnd"));
+                item.setiDaysLeft(rs.getInt("daysLeft") > 0 ? rs.getInt("daysLeft") : 0);
+                
                 item.setdMT2YDaySpend(0.00);
                 item.setdRemainingBudget(item.getdBudget() - item.getdMT2YDaySpend());
                 item.setdTargetDailySpend(item.getdRemainingBudget() / ((item.getiDaysLeft() > 0) ? item.getiDaysLeft() : 1));                                
@@ -3962,13 +4249,12 @@ public class DAOFile implements Serializable  {
         return null;
     }           
 
-    protected List<TblPacing> getMonthSpendNetSplitView(Integer iYear, Integer iMonth){
+    protected List<TblPacing> getMonthSpendNetSplitView(Integer iMonthly){
         try (Connection connect = DatabaseConnector.getConnection()) {
-            PreparedStatement pstmt = connect.prepareStatement("select `vagency`, `vclient`, `vchannel`, `dCampaignSpend`, `dPMPSpend`, `PMPNetSplit`, `startDate`, `endDate`, datediff(`endDate`, now()) as daysLeft\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `vagency`, `vclient`, `vchannel`, `dCampaignSpend`, `dPMPSpend`, `PMPNetSplit`, `startDate`, `endDate`, datediff(`endDate`, now()) as daysLeft, iYear, iMonth\n" +
                                                                 "from vwmonthspendnetsplit\n" +
-                                                                "where iYear = ? and iMonth = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
+                                                                "where id_monthly = ?"); 
+            pstmt.setInt(1, iMonthly);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblPacing> itemsLocalDV360 = new ArrayList();
@@ -3976,8 +4262,8 @@ public class DAOFile implements Serializable  {
             while (rs.next()) {             
                  
                 TblPacing item = new TblPacing();
-                item.setiYear(iYear);
-                item.setiMonth(iMonth);
+                item.setiYear(rs.getInt("iYear"));
+                item.setiMonth(rs.getInt("iMonth"));                
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");                
                 item.setvClient((rs.getString("vClient") != null) ? rs.getString("vClient") :""); 
                 item.setvChannel((rs.getString("vChannel") != null) ? rs.getString("vChannel") :"");
@@ -3988,7 +4274,7 @@ public class DAOFile implements Serializable  {
                 item.setdPMPNetSplit(rs.getDouble("PMPNetSplit"));
                 item.setEndDate(rs.getDate("endDate"));
                 item.setStartDate(rs.getDate("startDate"));
-                item.setiDaysLeft(rs.getInt("daysLeft"));
+                item.setiDaysLeft(rs.getInt("daysLeft") > 0 ? rs.getInt("daysLeft") : 0);
 
                 double num = item.getdBudget() * item.getdPMPNetSplit();
                 BigDecimal bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
@@ -4065,15 +4351,14 @@ public class DAOFile implements Serializable  {
         return null;
     }  
    
-    public List<TblPacing> getMonthPacingData(Integer iYear, Integer iMonth){
+    public List<TblPacing> getMonthPacingData(Integer iMonthly){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             PreparedStatement pstmt = connect.prepareStatement("select `IdBudget`, `iYear`, `iMonth`, `vAgency`, `vClient`, `vChannel`, `dBudget`, `dPMPBudget`, `dCampaignSpend`, `dPMPSpend`, `dConsumeRate`, `dPMPRate`, `dSucessRate`, `PMPNetSplit`, `startDate`, `endDate`, `daysLeft`, `MT2YDaySpent`, `RemainingBudget`, `TargetDailySpend`\n" +
                                                                 "from vwspendpacing\n" +
-                                                                "where iYear = ? and iMonth = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
+                                                                "where id_monthly = ?"); 
+            pstmt.setInt(1, iMonthly);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblPacing> itemsLocalDV360 = new ArrayList();
@@ -4140,17 +4425,16 @@ public class DAOFile implements Serializable  {
         return null;
     }
     
-    public List<TblBudgetTracker> getBudgetTrackerData(Integer iYear, Integer iMonth, String lsPartNer){
+    public List<TblBudgetTracker> getBudgetTrackerData(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             
-            PreparedStatement pstmt = connect.prepareStatement("select idBudget, iYear, iMonth, vUser, dSystemDate,vPartner, vClient, vAgency, vPlatform, vCampaign, vInsertionOrder, vChannel, dBudget, dStartDate, dEndDate, dYesterdaySpend, MediaSpend, FlightDays, RemainingDays, ProjDailySpend, MtdCtr, YestCtr\n" +
-                                                                "from vwbudgettracker\n" +
-                                                                "where iYear = ? and iMonth = ? and vAgency = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
-            pstmt.setString(3, lsPartNer);
+            PreparedStatement pstmt = connect.prepareStatement("select idBudget, id_monthly, iYear, iMonth, vUser, dSystemDate,vPartner, vClient, vAgency, vPlatform, vCampaign, vInsertionOrder, vChannel, dBudget, dStartDate, dEndDate, dYesterdaySpend, MediaSpend, FlightDays, RemainingDays, ProjDailySpend, MtdCtr, YestCtr\n" +
+                                                                "from budget_tracker_materialized\n" +
+                                                                "where id_monthly = ? and vAgency = ?"); 
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblBudgetTracker> itemsLocalDV360 = new ArrayList();
@@ -4158,6 +4442,7 @@ public class DAOFile implements Serializable  {
                 TblBudgetTracker item = new TblBudgetTracker();
                 item.setId(itemsLocalDV360.size()+1);
                 item.setIdBudget(rs.getInt("idBudget"));
+                item.setiMonthly(rs.getInt("id_monthly"));
                 item.setvUser(rs.getString("vUser"));
                 item.setModifiedDate(rs.getTimestamp("dSystemDate"));
                 item.setiYear(rs.getInt("iYear"));
@@ -4209,18 +4494,17 @@ public class DAOFile implements Serializable  {
         return null;
     }   
 
-    public List<TblDV360SPD> getPerfDataSummary(Integer iYear, Integer iMonth, String lsPartNer, String vByGroup){
+    public List<TblDV360SPD> getPerfDataSummary(Integer iMonthly, String lsPartNer, String vByGroup){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
             PreparedStatement pstmt = connect.prepareStatement("select "+vByGroup+", avg(avg_cpm) promcpm, sum(sum_imp) sumimp, sum(sum_cli) sumcli\n" +
                                                                 "from vwdataperfsummary\n" +
-                                                                "where ianio = ? and imes = ? and vAgency = ?" +
+                                                                "where id_monthly = ? and vAgency = ?" +
                                                                 "group by " + vByGroup + "\n"+
                                                                 "order by " + vByGroup); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
-            pstmt.setString(3, lsPartNer);
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
@@ -4272,17 +4556,15 @@ public class DAOFile implements Serializable  {
         return null;
     }        
 
-
-    public List<TblDV360SPD> getPerfDataGoals(Integer iYear, Integer iMonth, String lsPartNer){
+    public List<TblDV360SPD> getPerfDataGoals(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
-            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, id_monthly, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
                                                                 "from vwperfgoals\n" +
-                                                                "where iYear = ? and iMonth = ? and vAgency = ?;"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
-            pstmt.setString(3, lsPartNer);
+                                                                "where id_monthly = ? and vAgency = ?;"); 
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
@@ -4294,6 +4576,7 @@ public class DAOFile implements Serializable  {
                 item.setvAgency(lsPartNer);
                 
                 item.setiDPerf(rs.getInt("IdPerf"));
+                item.setIdMontly(rs.getInt("id_monthly"));
                 item.setvUser(rs.getString("vUser"));
                 item.setModifiedDate(rs.getTimestamp("dSystemDate"));
                 item.setiAnio(rs.getInt("iYear"));
@@ -4331,11 +4614,11 @@ public class DAOFile implements Serializable  {
         return null;
     }     
     
-    public List<TblDV360SPD> getPerfDataPivot(Integer iYear, Integer iMonth, String lsPartNer){
+    public List<TblDV360SPD> getPerfDataPivot(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
-            PreparedStatement pstmt = connect.prepareStatement("call get_pivoted_cpm(" + iYear + "," + iMonth + ",'" + lsPartNer + "');");             
+            PreparedStatement pstmt = connect.prepareStatement("call get_pivoted_cpm(" + iMonthly + ",'" + lsPartNer + "');");             
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
@@ -4435,7 +4718,7 @@ public class DAOFile implements Serializable  {
         }
         return null;
     }        
-    public List<TblBudgetTracker> getBudgetTrackerDataSummaryChannelAll(Integer iYear, Integer iMonth, String lsPartNer, String vByGroup, boolean lbAll){
+    public List<TblBudgetTracker> getBudgetTrackerDataSummaryChannelAll(Integer iMonthly, String lsPartNer, String vByGroup, boolean lbAll){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
             
@@ -4443,23 +4726,21 @@ public class DAOFile implements Serializable  {
             if (lbAll){
 
             pstmt = connect.prepareStatement("select vAgency, "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
-                                                                "from vwbudgettracker\n" +
-                                                                "where iYear = ? and iMonth = ? and dBudget > 0\n" +
+                                                                "from budget_tracker_materialized\n" +
+                                                                "where id_monthly = ? and dBudget > 0\n" +
                                                                 "group by vAgency, " + vByGroup + "\n"+
                                                                 "order by vAgency, vCampaign, " + vByGroup); 
-                pstmt.setInt(1, iYear);
-                pstmt.setInt(2, iMonth);
+                pstmt.setInt(1, iMonthly);
                 
             }else{
 
                 pstmt = connect.prepareStatement("select "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
                                                                     "from vwbudgettracker\n" +
-                                                                    "where iYear = ? and iMonth = ? and vAgency = ? and dBudget > 0\n" +
+                                                                    "where id_monthly = ? and vAgency = ? and dBudget > 0\n" +
                                                                     "group by " + vByGroup + "\n"+
                                                                     "order by vCampaign, " + vByGroup);                 
-                pstmt.setInt(1, iYear);
-                pstmt.setInt(2, iMonth);
-                pstmt.setString(3, lsPartNer);
+                pstmt.setInt(1, iMonthly);
+                pstmt.setString(2, lsPartNer);
             }
 
             
@@ -4525,18 +4806,17 @@ public class DAOFile implements Serializable  {
         return null;
     }    
     
-    public List<TblBudgetTracker> getBudgetTrackerDataSummary(Integer iYear, Integer iMonth, String lsPartNer, String vByGroup){
+    public List<TblBudgetTracker> getBudgetTrackerDataSummary(Integer iMonthly, String lsPartNer, String vByGroup){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
             PreparedStatement pstmt = connect.prepareStatement("select "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
-                                                                "from vwbudgettracker\n" +
-                                                                "where iYear = ? and iMonth = ? and vAgency = ? and dBudget > 0\n" +
+                                                                "from budget_tracker_materialized\n" +
+                                                                "where id_monthly = ? and vAgency = ? and dBudget > 0\n" +
                                                                 "group by " + vByGroup + "\n"+
                                                                 "order by vCampaign, " + vByGroup); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
-            pstmt.setString(3, lsPartNer);
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblBudgetTracker> itemsLocalDV360 = new ArrayList();
@@ -4597,14 +4877,13 @@ public class DAOFile implements Serializable  {
             
             PreparedStatement pstmt = connect.prepareStatement("select vLineItem, TotalMediaCost \n" +
                                                                 "from vwspendyesterdaylineitem \n" +
-                                                                "where iyear = ? and imonth = ? and vAgency = ? and \n" +
+                                                                "where id_monthly = ? and vAgency = ? and \n" +
                                                                 "	vCampaign = ? and vInsertionOrder = ? and vChannel = ?"); 
-            pstmt.setInt(1, item.getiYear());
-            pstmt.setInt(2, item.getiMonth());
-            pstmt.setString(3, item.getvAgency());
-            pstmt.setString(4, item.getvCampaign());
-            pstmt.setString(5, item.getvInsertionOrder());
-            pstmt.setString(6, item.getvChannel());
+            pstmt.setInt(1, item.getiMonthly());
+            pstmt.setString(2, item.getvAgency());
+            pstmt.setString(3, item.getvCampaign());
+            pstmt.setString(4, item.getvInsertionOrder());
+            pstmt.setString(5, item.getvChannel());
             
             
             ResultSet rs = pstmt.executeQuery();  
@@ -4628,12 +4907,12 @@ public class DAOFile implements Serializable  {
         return null;
     }   
     
-    public List<TblPacing> getPacingByMonthOLD(Integer iYear, Integer iMonth){
+    public List<TblPacing> getPacingByMonthOLD(Integer iMonthly){
  
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            List<TblPacing> itemsPacingData = getMonthPacingData(iYear, iMonth);
-            List<TblPacing> itemsSpendView = getMonthSpendNetSplitView(iYear, iMonth);
+            List<TblPacing> itemsPacingData = getMonthPacingData(iMonthly);
+            List<TblPacing> itemsSpendView = getMonthSpendNetSplitView(iMonthly);
 
             
             List<TblPacing> itemsMerged = new ArrayList();
@@ -4699,17 +4978,16 @@ public class DAOFile implements Serializable  {
     }
 
     
-    public boolean updateInsertionOrder(Integer iYear, Integer iMonth, String vPartner, String lsOldIO, String lsNewIO){        
+    public boolean updateInsertionOrder(Integer iMonthly, String vPartner, String lsOldIO, String lsNewIO){        
 
         try (Connection connect = DatabaseConnector.getConnection()) {            
             
-            PreparedStatement pstmt = connect.prepareStatement("update tbl_raw_data set vInsertionOrder = ?, dSystemDate = now(), vUser = ? where ianio = ? and imes = ? and vAgency = ? and vInsertionOrder = ?");                  
+            PreparedStatement pstmt = connect.prepareStatement("update tbl_raw_data set vInsertionOrder = ?, dSystemDate = now(), vUser = ? where id_monthly = ? and vAgency = ? and vInsertionOrder = ?");                  
             pstmt.setString(1, lsNewIO);
             pstmt.setString(2, (userSession != null) ? userSession.getvUser():"");
-            pstmt.setInt(3, iYear);
-            pstmt.setInt(4, iMonth);            
-            pstmt.setString(5, vPartner);
-            pstmt.setString(6, lsOldIO);                                
+            pstmt.setInt(3, iMonthly);      
+            pstmt.setString(4, vPartner);
+            pstmt.setString(5, lsOldIO);                                
             pstmt.executeUpdate();
                 
             pstmt.close(); 
@@ -4722,17 +5000,16 @@ public class DAOFile implements Serializable  {
         return false;
     }    
 
-    public boolean updateCampaign(Integer iYear, Integer iMonth, String vPartner, String lsOldCampaign, String lsNewCampaign){        
+    public boolean updateCampaign(Integer iMonthly, String vPartner, String lsOldCampaign, String lsNewCampaign){        
 
         try (Connection connect = DatabaseConnector.getConnection()) {            
             
-            PreparedStatement pstmt = connect.prepareStatement("update tbl_raw_data set vCampaign = ?, dSystemDate = now(), vUser = ? where ianio = ? and imes = ? and vAgency = ? and vCampaign = ?");                  
+            PreparedStatement pstmt = connect.prepareStatement("update tbl_raw_data set vCampaign = ?, dSystemDate = now(), vUser = ? where id_monthly = ? and vAgency = ? and vCampaign = ?");                  
             pstmt.setString(1, lsNewCampaign);
             pstmt.setString(2, (userSession != null) ? userSession.getvUser():"");
-            pstmt.setInt(3, iYear);
-            pstmt.setInt(4, iMonth);            
-            pstmt.setString(5, vPartner);
-            pstmt.setString(6, lsOldCampaign);                                
+            pstmt.setInt(3, iMonthly);  
+            pstmt.setString(4, vPartner);
+            pstmt.setString(5, lsOldCampaign);                                
             pstmt.executeUpdate();
                 
             pstmt.close(); 
@@ -4759,8 +5036,8 @@ public class DAOFile implements Serializable  {
             pstmt = connect.prepareStatement("insert into `tbl_budget_pacing` (iYear, iMonth, vAgency, vClient, vChannel, dBudget, dPMPBudget, dCampaignSpend, dPMPSpend, dConsumeRate, dPMPRate, dSucessRate, dPMPNetSplit, dStartDate, dEndDate, iDaysLeft, dMT2YDaySpent, dRemainingBudget, dTargetDailySpend, vUser) VALUES \n"
                     + "                         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");      
             */
-            pstmt = connect.prepareStatement("insert into `tbl_budget_tracker` (iYear, iMonth, vPartner, vClient, vAgency, vPlatform, vCampaign, vInsertionOrder, vChannel, dBudget, dStartDate, dEndDate, vUser) VALUES \n"
-                    + "                         (?,?,?,?,?,?,?,?,?,?,?,?,?)");                  
+            pstmt = connect.prepareStatement("insert into `tbl_budget_tracker` (iYear, iMonth, vPartner, vClient, vAgency, vPlatform, vCampaign, vInsertionOrder, vChannel, dBudget, dStartDate, dEndDate, vUser, id_monthly) VALUES \n"
+                    + "                         (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");                  
             pstmt.setInt(1, item.getiYear());
             pstmt.setInt(2, item.getiMonth());            
             pstmt.setString(3, item.getvPartner());
@@ -4774,6 +5051,7 @@ public class DAOFile implements Serializable  {
             pstmt.setDate(11, new java.sql.Date(item.getStartDate().getTime()));
             pstmt.setDate(12, new java.sql.Date(item.getEndDate().getTime()));
             pstmt.setString(13, (userSession != null) ? userSession.getvUser():"");
+            pstmt.setInt(14, item.getiMonthly());
             pstmt.executeUpdate();
                 
             pstmt.close(); 
@@ -4800,8 +5078,8 @@ public class DAOFile implements Serializable  {
             pstmt = connect.prepareStatement("insert into `tbl_budget_pacing` (iYear, iMonth, vAgency, vClient, vChannel, dBudget, dPMPBudget, dCampaignSpend, dPMPSpend, dConsumeRate, dPMPRate, dSucessRate, dPMPNetSplit, dStartDate, dEndDate, iDaysLeft, dMT2YDaySpent, dRemainingBudget, dTargetDailySpend, vUser) VALUES \n"
                     + "                         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");      
             */
-            pstmt = connect.prepareStatement("insert into `tbl_goal_performance` (iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, vUser) VALUES \n"
-                    + "                         (?,?,?,?,?,?,?,?)");                  
+            pstmt = connect.prepareStatement("insert into `tbl_goal_performance` (iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, vUser, id_monthly) VALUES \n"
+                    + "                         (?,?,?,?,?,?,?,?,?,?)");                  
             pstmt.setInt(1, item.getiAnio());
             pstmt.setInt(2, item.getiMes());            
             pstmt.setString(3, item.getvAgency());
@@ -4809,7 +5087,9 @@ public class DAOFile implements Serializable  {
             pstmt.setString(5, item.getvCampaign());
             pstmt.setDouble(6, item.getdCPMGoal());
             pstmt.setDouble(7, item.getdCTRGoal());
-            pstmt.setString(8, (userSession != null) ? userSession.getvUser():"");
+            pstmt.setDouble(8, item.getdVCRGoal());            
+            pstmt.setString(9, (userSession != null) ? userSession.getvUser():"");
+            pstmt.setInt(10, item.getIdMontly());
             pstmt.executeUpdate();
                 
             pstmt.close(); 
@@ -4821,7 +5101,7 @@ public class DAOFile implements Serializable  {
         return false;
     }    
     
-    public List<TblDV360SPD> getRawDatabyDate(Integer iDaily, String vAgency){
+    public List<TblDV360SPD> getRawDatabyDate(Integer iMonthly, String vAgency){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
             
@@ -4830,7 +5110,7 @@ public class DAOFile implements Serializable  {
                                                             "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
                                                             "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
                                                             "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
-            pstmt.setInt(1, iDaily);
+            pstmt.setInt(1, iMonthly);
             pstmt.setString(2, vAgency);
             pstmt.setString(3, vAgency);
             ResultSet rs = pstmt.executeQuery();  
@@ -4841,7 +5121,7 @@ public class DAOFile implements Serializable  {
                 itemDaily.setdDate(rs.getDate("dateProcess"));                    
                 TblDV360SPD item = new TblDV360SPD();
 
-                item.setIdDaily(itemDaily);
+                item.setIdMontly(rs.getInt("id_monthly"));
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dateProcess"));
                 item.setdCPC(rs.getDouble("dCPC"));
@@ -4883,18 +5163,17 @@ public class DAOFile implements Serializable  {
         return null;
     }   
     
-    public List<TblDV360SPD> getRawDataPerfbyDate(Integer iYear, Integer Imonth, String vAgency){
+    public List<TblDV360SPD> getRawDataPerfbyDate(Integer iMonthly, String vAgency){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `dDate`, `vAdvertiser`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vDeviceType`, `dRevenueCPM`, `dClickRate`, `iImpressions`, `iClicks`, iCompleteViews, dVCR,\n" +
                                                             "	`vUser`, `iAnio`, `iMes`, `iWeek`, `iDia`, `vFileName`\n" +
                                                             "from `tbl_raw_perf_data`\n" +
-                                                            "where `tStatus` = 1 and `iAnio` = ? and `iMes` = ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, Imonth);
+                                                            "where `tStatus` = 1 and `id_monthly` = ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')"); 
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, vAgency);
             pstmt.setString(3, vAgency);
-            pstmt.setString(4, vAgency);
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {                               
@@ -4904,7 +5183,7 @@ public class DAOFile implements Serializable  {
                 item.setdRevenueCPM(rs.getDouble("dRevenueCPM"));                
                 item.setdClickRate(rs.getDouble("dClickRate"));
                 item.setdVCR(rs.getDouble("dVCR"));
-                item.setiAnio(iYear);
+                item.setiAnio(rs.getInt("iAnio"));
                 item.setvAgency(vAgency);
                 item.setiClicks(rs.getInt("iClicks"));
                 item.setVFileName(rs.getString("vFileName"));
@@ -4912,14 +5191,14 @@ public class DAOFile implements Serializable  {
                 item.setiDia(rs.getInt("iDia"));
                 item.setiImpressions(rs.getInt("iImpressions"));
                 item.setiCompleteViews(rs.getInt("iCompleteViews"));                                
-                item.setiMes(Imonth);
+                item.setiMes(rs.getInt("iMes"));
                 item.setvUser(rs.getString("vUser"));
                 item.setvCampaign(rs.getString("vCampaign"));
                 item.setvClient(rs.getString("vAdvertiser"));
                 item.setvDeviceType(rs.getString("vDeviceType"));
                 item.setvInsertionOrder(rs.getString("vInsertionOrder"));
                 item.setvLineItem(rs.getString("vLineItem"));
-                
+                item.setIdMontly(iMonthly);
                 itemsLocalDV360.add(item);
             }
             rs.close();
@@ -4933,13 +5212,13 @@ public class DAOFile implements Serializable  {
         return null;
     }      
     
-    public List<String> getRawDatabyDateDistinctbyPattern(String lsSource, Integer iDaily, String pattern){
+    public List<String> getRawDatabyDateDistinctbyPattern(String lsSource, Integer iMonthly, String pattern){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             String lsStatement = (lsSource.compareTo("DSP") == 0) ? "select distinct " + pattern +" from tbl_raw_data where `tStatus` = 1 and `id_monthly` = ?" : "select distinct " + pattern +" from tbl_raw_ssp_data where `tEstado` = 1 and `id_monthly` = ?";
             PreparedStatement pstmt = connect.prepareStatement(lsStatement); 
-            pstmt.setInt(1, iDaily);
+            pstmt.setInt(1, iMonthly);
             ResultSet rs = pstmt.executeQuery();  
             List<String> itemsString = new ArrayList();
             while (rs.next()) {             
@@ -4956,14 +5235,13 @@ public class DAOFile implements Serializable  {
         return null;
     }     
 
-    public List<String> getRawDataPerfbyDateDistinctbyPattern(Integer iYear, Integer iMonth, String vPartnerSelected, String pattern){
+    public List<String> getRawDataPerfbyDateDistinctbyPattern(Integer iMonthly, String vPartnerSelected, String pattern){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select distinct " + pattern +" from tbl_raw_perf_data where `tStatus` = 1 and `iAnio` = ? and `iMes` = ? and vAgency = ? and " + pattern +" is not null" ); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
-            pstmt.setString(3, vPartnerSelected);
+            PreparedStatement pstmt = connect.prepareStatement("select distinct " + pattern +" from tbl_raw_perf_data where `tStatus` = 1 and `id_monthly` = ? and vAgency = ? and " + pattern +" is not null" ); 
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, vPartnerSelected);
             ResultSet rs = pstmt.executeQuery();  
             List<String> itemsString = new ArrayList();
             while (rs.next()) {             
@@ -4981,26 +5259,23 @@ public class DAOFile implements Serializable  {
         return null;
     }         
     
-    public List<TblDVXANDRSPD> getRawSSPDatabyMonth(Integer iYear, Integer iMonth){
+    public List<TblDVXANDRSPD> getRawSSPDatabyMonth(Integer iMonthly){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`,  `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_daily_process`.`iYear`, `tbl_daily_process`.`iMonth`, `tbl_daily_process`.`iDay`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_daily`, `tbl_daily_process`.`dDate` as dateProcess, `tEstado`\n" +
-                                                                "from `tbl_raw_ssp_data` , `tbl_daily_process`\n" +
-                                                                "where `tbl_raw_ssp_data`.`id_daily` = `tbl_daily_process`.`id_daily` and\n" +
-                                                                "`tbl_raw_ssp_data`.`tEstado` = 1 and `tbl_daily_process`.`iYear` =  ? and `tbl_daily_process`.`iMonth` = ?"); 
-            pstmt.setInt(1, iYear);
-            pstmt.setInt(2, iMonth);
+            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_monthly`, `tbl_raw_ssp_data`.`dDate` as dateProcess, `tEstado`\n" +
+                                                                "from `tbl_raw_ssp_data` , `tbl_monthlyprocess`\n" +
+                                                                "where `tbl_raw_ssp_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                                "`tbl_raw_ssp_data`.`tEstado` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ?"); 
+            pstmt.setInt(1, iMonthly);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblDVXANDRSPD> itemsXandr = new ArrayList();
             while (rs.next()) {             
-                TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_daily"));
-                itemDaily.setdDate(rs.getDate("dateProcess"));                    
+               
                 TblDVXANDRSPD item = new TblDVXANDRSPD();
 
-                item.setIdDaily(itemDaily);
+                item.setIdMonthly(rs.getInt("id_monthly"));
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dateProcess"));
                 item.setdCPM(rs.getDouble("dCPM"));                
@@ -5017,7 +5292,6 @@ public class DAOFile implements Serializable  {
                 item.setdGrossRevenue(rs.getDouble("dGrossRevenue"));
                 item.setdNetRevenue(rs.getDouble("dNetRevenue"));
                 item.setiYear(rs.getInt("iYear"));
-                item.setiDay(rs.getInt("iDay"));
                 item.setiImpressions(rs.getInt("iImpressions"));
                 item.setiMonth(rs.getInt("iMonth"));
                 item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");
@@ -5098,24 +5372,22 @@ public class DAOFile implements Serializable  {
         return null;
     }   
     
-    public List<TblDVXANDRSPD> getRawSSPDatabyDate(Integer iDaily){
+    public List<TblDVXANDRSPD> getRawSSPDatabyDate(Integer iMonthly){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`,  `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_monthly`, `tbl_raw_ssp_data`.`dDate` as dateProcess, `tEstado`\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_ssp_data`.`dDate`, `vAdvertiser`, `vBrand`, `vDeal`, `vDevice`, `dGrossMargin`, `iImpressions`, `dSalesRevenue`, `dTechFee`, `dMediaCost`, `dTotalCost`, `dCPM`, `dMlFee`, `dMarginFee`, `dDspFee`, `dGrossRevenue`, `dNetRevenue`,	`vClient`, `vChannel`, `vDsp`, `vAgency`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vSeat`, `vExchange`, `dMargin`, `dNetMargin`, `tbl_raw_ssp_data`.`vUser`, `dSystemDate`, `dModifiedDate`, `vFileName`, `tbl_raw_ssp_data`.`id_monthly`, `tbl_raw_ssp_data`.`dDate` as dateProcess, `tEstado`\n" +
                                                                 "from `tbl_raw_ssp_data` , `tbl_monthlyprocess`\n" +
                                                                 "where `tbl_raw_ssp_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
                                                                 "`tbl_raw_ssp_data`.`tEstado` = 1 and `tbl_monthlyprocess`.`id_monthly` = ?"); 
-            pstmt.setInt(1, iDaily);
+            pstmt.setInt(1, iMonthly);
             ResultSet rs = pstmt.executeQuery();  
             List<TblDVXANDRSPD> itemsXandr = new ArrayList();
             while (rs.next()) {             
-                TblDailyProcess itemDaily = new TblDailyProcess();
-                itemDaily.setId_daily(rs.getInt("id_monthly"));
-                itemDaily.setdDate(rs.getDate("dateProcess"));                    
+                   
                 TblDVXANDRSPD item = new TblDVXANDRSPD();
 
-                item.setIdDaily(itemDaily);
+                item.setIdMonthly(rs.getInt("id_monthly"));
                 item.setId(rs.getInt("Id_raw"));
                 item.setdDate(rs.getDate("dateProcess"));
                 item.setdCPM(rs.getDouble("dCPM"));                
@@ -5416,7 +5688,7 @@ public class DAOFile implements Serializable  {
         return lsRet;
     }
     
-    public boolean refactorRawSSPData(Integer idDaily, TblCatalogo editCatalog, String[] selectedrawColumns){
+    public boolean refactorRawSSPData(TblCatalogo editCatalog, String[] selectedrawColumns){
 
         try (Connection connect = DatabaseConnector.getConnection()) { 
             
@@ -5703,7 +5975,7 @@ public class DAOFile implements Serializable  {
         return false;
     }    
     
-    public boolean refactorRawData(Integer idDaily, TblCatalogo editCatalog, String[] selectedrawColumns){
+    public boolean refactorRawData(TblCatalogo editCatalog, String[] selectedrawColumns){
 
         try (Connection connect = DatabaseConnector.getConnection()) { 
             
@@ -5842,14 +6114,14 @@ public class DAOFile implements Serializable  {
             try (Connection connect = DatabaseConnector.getConnection()) { 
                  
                 PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_data` "
-                                        + "(`dDate`,`iDia`,`iMes`,`iAnio`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`dSystemDate`,`vFileName`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor` ,`vVendorSource`, `dCPM`, `dCTR`, `dCPC`, `id_daily`, `vUser`)"
+                                        + "(`dDate`,`iDia`,`iMes`,`iAnio`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`dSystemDate`,`vFileName`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor` ,`vVendorSource`, `dCPM`, `dCTR`, `dCPC`, `id_monthly`, `vUser`)"
                                         + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
                 for (TblDV360SPD item : localitemsDV360) {                                    
-                    pstmt.setDate(1, item.getIdDaily().getdDate());
-                    pstmt.setLong(2, item.getIdDaily().getiDay());
-                    pstmt.setLong(3, item.getIdDaily().getiMonth());
-                    pstmt.setLong(4, item.getIdDaily().getiYear());
+                    pstmt.setString(1, item.getvDate());
+                    pstmt.setLong(2, item.getiDia());
+                    pstmt.setLong(3, item.getiMes());
+                    pstmt.setLong(4, item.getiAnio());
                     pstmt.setString(5, item.getvPartner());
                     pstmt.setString(6, item.getvCampaign());
                     pstmt.setString(7, item.getvInsertionOrder());
@@ -5887,7 +6159,7 @@ public class DAOFile implements Serializable  {
                     num = item.getdCPC();
                     bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                                                                                  
                     pstmt.setDouble(25, bd.doubleValue());
-                    pstmt.setInt(26, item.getIdDaily().getId_daily());                                        
+                    pstmt.setInt(26, item.getIdMontly());                                        
                     pstmt.setString(27, (userSession != null) ? userSession.getvUser():"");
                     pstmt.executeUpdate();
                 }                
@@ -5911,14 +6183,14 @@ public class DAOFile implements Serializable  {
             try (Connection connect = DatabaseConnector.getConnection()) { 
                  
                 PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_data` "
-                                        + "(`dDate`,`iDia`,`iMes`,`iAnio`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`dSystemDate`,`vFileName`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor` ,`vVendorSource`, `dCPM`, `dCTR`, `dCPC`, `id_daily`, `vUser`)"
+                                        + "(`dDate`,`iDia`,`iMes`,`iAnio`,`vPartner`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vExchange`,`vDealName`,`iImpressions`,`iClicks`,`dMediaCost`,`dTotalMediaCost`,`dSystemDate`,`vFileName`,`vDSP`,`vClient`,`vAgency`,`vChannel`,`vAlias`,`vVendor` ,`vVendorSource`, `dCPM`, `dCTR`, `dCPC`, `id_monthly`, `vUser`)"
                                         + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?,?,?,?,?,?,?,?,?,?,?);");
 
                 for (TblDV360SPD item : localitemsDV360) {                                    
                     pstmt.setString(1, item.getvDate());
-                    pstmt.setLong(2, item.getIdDaily().getiDay());
-                    pstmt.setLong(3, item.getIdDaily().getiMonth());
-                    pstmt.setLong(4, item.getIdDaily().getiYear());
+                    pstmt.setLong(2, item.getiDia());
+                    pstmt.setLong(3, item.getiMes());
+                    pstmt.setLong(4, item.getiAnio());
                     pstmt.setString(5, item.getvPartner());
                     pstmt.setString(6, item.getvCampaign());
                     pstmt.setString(7, item.getvInsertionOrder());
@@ -5956,7 +6228,7 @@ public class DAOFile implements Serializable  {
                     num = item.getdCPC();
                     bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);                                                                                  
                     pstmt.setDouble(25, bd.doubleValue());
-                    pstmt.setInt(26, item.getIdDaily().getId_daily());                                        
+                    pstmt.setInt(26, item.getIdMontly());                                        
                     pstmt.setString(27, (userSession != null) ? userSession.getvUser():"");
                     pstmt.executeUpdate();
                 }                
@@ -5972,7 +6244,6 @@ public class DAOFile implements Serializable  {
         }
         return false;
     }        
-
 
     protected boolean save_ItemsPerfMassive(String lsFileName, List<TblDV360SPD> localitemsDV360, Integer iWeek){
 
@@ -6202,13 +6473,6 @@ public class DAOFile implements Serializable  {
         String lsFileName="";
         if (itemFile != null && idDaily != null){  
 
-            if(idDaily.getId_daily() == 0){
-                idDaily.setId_daily(getItemDailybyDate(idDaily));
-                if(idDaily.getId_daily() == 0){
-                    idDaily.setId_daily(createItemDaily(idDaily));
-                }
-            }
-
             lsFileName = itemFile.getFileName();
             if (lsSource.contains("DSP")){                
                 if (lsFileName.contains("DV360")){
@@ -6224,7 +6488,7 @@ public class DAOFile implements Serializable  {
                 }                        
             }else{//SSP
                 if (lsFileName.contains("Equativ")){//CSV                    
-                    save_ItemsSSP(lsFileName, scrap_SSP_Equative_Format(itemFile, idDaily));
+                    save_ItemsSSPDeleteFisrt(lsFileName, scrap_SSP_Equative_Format(itemFile, idDaily), idDaily);
                 }else if (lsFileName.contains("PubMatic")){//CSV
                     save_ItemsSSP(lsFileName, scrap_SSP_PubMatic_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("Triton")){//CSV                    
@@ -6242,41 +6506,21 @@ public class DAOFile implements Serializable  {
         }
         
     }
-    
-    public void ScanFileMassiveData(String lsSource, UploadedFile itemFile) throws IOException, ClassNotFoundException, Exception{                 
-        String lsFileName="";
+
+
+    public void ScanFileMassiveData(String lsSource, UploadedFile itemFile, TblDailyProcess idDaily) throws IOException, ClassNotFoundException, Exception{                 
         if (itemFile != null){  
-            lsFileName = itemFile.getFileName();
+            String lsFileName = itemFile.getFileName();
             if (lsSource.contains("DSP")){                
-                /*if (lsFileName.contains("DV360")){
-                    save_Items(lsFileName, scrap_DV360_Format(itemFile));
-                }else if (lsFileName.contains("Basis")){
-                    save_Items(lsFileName, scrap_BASIS_Format(itemFile));                          
-                }else if (lsFileName.contains("Domain-Detailed")){
-                    save_Items(lsFileName, scrap_PPOINT_Format(itemFile));                  
-                }else */if (lsFileName.contains("PP Spend Pacing")){
-                    save_ItemsMassive(lsFileName, scrap_PPOINT_MassiveData(itemFile));                  
+                if (lsFileName.contains("PP Spend Pacing")){
+                    save_ItemsMassive(lsFileName, scrap_PPOINT_MassiveData(itemFile, idDaily));                  
                 }                        
-            }/*else{//SSP
-                if (lsFileName.contains("Equativ")){//CSV                    
-                    save_ItemsSSP(lsFileName, scrap_SSP_Equative_Format(itemFile));
-                }else if (lsFileName.contains("PubMatic")){//CSV
-                    save_ItemsSSP(lsFileName, scrap_SSP_PubMatic_Format(itemFile));
-                }else if (lsFileName.contains("Triton")){//CSV                    
-                    save_ItemsSSP(lsFileName, scrap_SSP_Triton_Format(itemFile));                
-                }else if (lsFileName.contains("Xandr_")){        //("Xandr_MLM")            
-                    save_ItemsSSP(lsFileName, scrap_SSP_Xandr_MLM_Format(itemFile));                   
-                }else if (lsFileName.contains("DPX")){
-                    save_ItemsSSP(lsFileName, scrap_SSP_OpenX_Format(itemFile));                    
-                }else if (lsFileName.contains("DP-SSP-OPX")){
-                    save_ItemsSSP(lsFileName, scrap_SSP_OpenX_Format(itemFile));                    
-                }                         
-            }*/                
+            }
         }else{
             JsfUtil.addErrorMessage("No Date seleted");
         }        
     }
-    
+      
     public void uploadFilePerfMassiveData(UploadedFile itemFile, String vAgency, Integer iWeek) throws IOException, ClassNotFoundException, Exception{                 
         if (itemFile != null && iWeek > 0){  
             String lsFileName = itemFile.getFileName();

@@ -710,9 +710,9 @@ public class TblRawDataController implements Serializable {
     }
 
     public List<TblPacing> getPacingItems() {
-        if(pacingItems == null || pacingItems.isEmpty()){
+        if((pacingItems == null || pacingItems.isEmpty()) && dMonthSelected != null){
             DAOFile dbCon = new DAOFile();
-            pacingItems = dbCon.getMonthPacingData(iYear, iMonth);
+            pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly());
         }
         return pacingItems;
     }
@@ -775,7 +775,7 @@ public class TblRawDataController implements Serializable {
     public void onRenameCampaign() {
         if (budgetSelected != null && !budgetSelected.getvCampaign().isEmpty() && !vCampaignSelected.isEmpty()){
             DAOFile dbCon = new DAOFile();
-            if(dbCon.updateCampaign(iYear, iMonth, vPartnerSelected, budgetSelected.getvCampaign().trim(), vCampaignSelected)){
+            if(dbCon.updateCampaign(idDailySelected.getId_monthly(), vPartnerSelected, budgetSelected.getvCampaign().trim(), vCampaignSelected)){
                 JsfUtil.addSuccessMessage("Campaign updated successfully");
             }                                    
         }
@@ -784,7 +784,7 @@ public class TblRawDataController implements Serializable {
     public void onRenameIO() {
         if (budgetSelected != null && !budgetSelected.getvInsertionOrder().isEmpty() && !vIOSelected.isEmpty()){
             DAOFile dbCon = new DAOFile();
-            if(dbCon.updateInsertionOrder(iYear, iMonth, vPartnerSelected, budgetSelected.getvInsertionOrder().trim(), vIOSelected)){
+            if(dbCon.updateInsertionOrder(idDailySelected.getId_monthly(), vPartnerSelected, budgetSelected.getvInsertionOrder().trim(), vIOSelected)){
                 JsfUtil.addSuccessMessage("Insertion Order updated successfully");
             }                                    
         }
@@ -825,7 +825,7 @@ public class TblRawDataController implements Serializable {
         if ((monthlyItems == null || monthlyItems.isEmpty()) && dMonthSelected != null) {
             LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(dMonthSelected));
             DAOFile dbCon = new DAOFile();
-            monthlyItems = dbCon.getRawDatabyMonth(localDate.getYear(), localDate.getMonthValue());
+            monthlyItems = dbCon.getRawDatabyMonth(idDailySelected.getId_monthly());
             if (monthlyItems != null && !monthlyItems.isEmpty()){
                 setLbDataFound(true);
             }else{
@@ -851,36 +851,38 @@ public class TblRawDataController implements Serializable {
         vCampaignSelected = "";
         vIOSelected = "";
         setLbDataFound(false);
-        DAOFile dbCon = new DAOFile();
-        budgetTrackerItems = dbCon.getBudgetTrackerData(iYear, iMonth, vPartnerSelected);
-        if (budgetTrackerItems != null && !budgetTrackerItems.isEmpty()){
-            vInitialCampaign = (budgetSelected != null) ? budgetSelected.getvCampaign() : budgetTrackerItems.get(0).getvCampaign();
-            vCampaignSelected = vInitialCampaign;
+        if (dMonthSelected != null && idDailySelected != null){
+            DAOFile dbCon = new DAOFile();
+            budgetTrackerItems = dbCon.getBudgetTrackerData(idDailySelected.getId_monthly(), vPartnerSelected);
+            if (budgetTrackerItems != null && !budgetTrackerItems.isEmpty()){
+                vInitialCampaign = (budgetSelected != null) ? budgetSelected.getvCampaign() : budgetTrackerItems.get(0).getvCampaign();
+                vCampaignSelected = vInitialCampaign;
+            }            
         }
     }      
 
     public void getDataPerfSumary(){
         itemsPerfSummary = null;
         DAOFile dbCon = new DAOFile();
-        itemsPerfSummary = dbCon.getPerfDataSummary(iYear, iMonth, vPartnerSelected, vPerfSummary);
+        itemsPerfSummary = dbCon.getPerfDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, vPerfSummary);
     }      
 
     public void getDataPerGoals(){
         itemsPerfSummary = null;
         DAOFile dbCon = new DAOFile();
-        itemsPerfSummary = dbCon.getPerfDataGoals(iYear, iMonth, vPartnerSelected);
+        itemsPerfSummary = dbCon.getPerfDataGoals(idDailySelected.getId_monthly(), vPartnerSelected);
     }      
         
     public void getDataBudgetTrackerSumary(){
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();
-        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, vOptionSummary);
+        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, vOptionSummary);
     }     
     
     public void getDataBudgetTrackerSumaryChannelAll(){
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();
-        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummaryChannelAll(iYear, iMonth, vPartnerSelected, vOptionSummary, isShowAllChannelBT());
+        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummaryChannelAll(idDailySelected.getId_monthly(), vPartnerSelected, vOptionSummary, isShowAllChannelBT());
     }         
 
     public int getTotalChartGroups() {
@@ -897,7 +899,7 @@ public class TblRawDataController implements Serializable {
         groupedCharts.clear(); // <- Nueva lista agrupada
 
         DAOFile dbCon = new DAOFile();
-        List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
+        List<TblDV360SPD> items = dbCon.getPerfDataPivot(idDailySelected.getId_monthly(), vPartnerSelected);
 
         if (items != null) {
             Map<String, List<String>> chartsByMetric = new HashMap<>(); // "CPM" -> [chart1, chart2]
@@ -980,7 +982,7 @@ public class TblRawDataController implements Serializable {
         colorsMap.clear();        
         goalVal.clear();
         DAOFile dbCon = new DAOFile();
-        List<TblDV360SPD> items = dbCon.getPerfDataPivot(iYear, iMonth, vPartnerSelected);
+        List<TblDV360SPD> items = dbCon.getPerfDataPivot(idDailySelected.getId_monthly(), vPartnerSelected);
 
         if (items != null) {
             
@@ -1082,16 +1084,16 @@ public class TblRawDataController implements Serializable {
         colorsMap.clear();
         goalVal.clear();
         DAOFile dbCon = new DAOFile();
-        createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vInsertionOrder"));
-        createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign"));
-        createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vChannel"));
-        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient"));
+        createHorizontalBarModelInsertionOrder(dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vInsertionOrder"));
+        createHorizontalBarModelCampaign(dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vCampaign"));
+        createHorizontalBarModelChannel(dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vChannel"));
+        createHorizontalBarModel(dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vClient"));
     }      
     
     public void getDataBudgetTrackerSumaryGraph(){
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";
-        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vClient");
+        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vClient");
         if (budgetTrackerSummary != null && !budgetTrackerSummary.isEmpty()){
             createHorizontalBarModel(budgetTrackerSummary);
         }
@@ -1100,7 +1102,7 @@ public class TblRawDataController implements Serializable {
     public void getDataBudgetTrackerSumaryGraphCampaign(){
         budgetTrackerSummary = null;
         DAOFile dbCon = new DAOFile();//"vClient";//"vChannel, vCampaign";
-        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(iYear, iMonth, vPartnerSelected, "vCampaign");
+        budgetTrackerSummary = dbCon.getBudgetTrackerDataSummary(idDailySelected.getId_monthly(), vPartnerSelected, "vCampaign");
         if (budgetTrackerSummary != null && !budgetTrackerSummary.isEmpty()){
             createHorizontalBarModelCampaign(budgetTrackerSummary);
         }
@@ -1129,7 +1131,7 @@ public class TblRawDataController implements Serializable {
         pacingItems = null;
         setLbDataFound(false);
         DAOFile dbCon = new DAOFile();
-        pacingItems = dbCon.getMonthPacingData(iYear, iMonth);
+        pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly());
         if (pacingItems != null && !pacingItems.isEmpty()){
             setLbDataFound(true);
         }
@@ -1262,7 +1264,7 @@ public class TblRawDataController implements Serializable {
             if (dbCon.createItemCatalogColumnsRelated(editCatalog,selectedrawColumns)){
                 dbCon.setItemsCatalogo(itemsCatalogo);                 
                 dbCon.setItemsDV360Refactor((filteredItems !=null && !filteredItems.isEmpty()) ? filteredItems:items);                   
-                if (dbCon.refactorRawData(idDailySelected.getId_daily(), editCatalog, selectedrawColumns)){
+                if (dbCon.refactorRawData(editCatalog, selectedrawColumns)){
                     selected = null;
                     items =  null;
                     filteredItems = null;
@@ -1396,9 +1398,9 @@ public class TblRawDataController implements Serializable {
                 JsfUtil.addSuccessMessage("Items deleted successfully");
             }
         }else{
-            if (idDailySelected != null && idDailySelected.getId_daily() > 0){
+            if (idDailySelected != null && idDailySelected.getId_monthly() > 0){
                 DAOFile dbCon = new DAOFile();
-                if (dbCon.cleanRawDataByDaily(idDailySelected.getId_daily(), "DSP")){
+                if (dbCon.cleanRawDataByDaily(idDailySelected.getId_monthly(), "DSP")){
                     itemsCatalogo = dbCon.getCatalogoItems("D");
                     rawColumns = dbCon.getItemsColumnNames("D");
                     items = null;
@@ -1457,13 +1459,13 @@ public class TblRawDataController implements Serializable {
         selectedPerf = null;
         itemsPerf = null;
         DAOFile dbCon = new DAOFile();
-        itemsPerf = dbCon.getRawDataPerfbyDate(iYear, iMonth, vPartnerSelected);          
+        itemsPerf = dbCon.getRawDataPerfbyDate(idDailySelected.getId_monthly(), vPartnerSelected);          
         if (itemsPerf != null && !itemsPerf.isEmpty()){
-            setRawCampaign(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vCampaign"));
-            setRawDeviceTypes(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vDeviceType"));
-            setRawClient(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vAdvertiser"));
-            setRawInsertionOrders(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vInsertionOrder"));
-            setRawLineItems(dbCon.getRawDataPerfbyDateDistinctbyPattern(iYear, iMonth, vPartnerSelected,"vLineItem"));
+            setRawCampaign(dbCon.getRawDataPerfbyDateDistinctbyPattern(idDailySelected.getId_monthly(), vPartnerSelected,"vCampaign"));
+            setRawDeviceTypes(dbCon.getRawDataPerfbyDateDistinctbyPattern(idDailySelected.getId_monthly(), vPartnerSelected,"vDeviceType"));
+            setRawClient(dbCon.getRawDataPerfbyDateDistinctbyPattern(idDailySelected.getId_monthly(), vPartnerSelected,"vAdvertiser"));
+            setRawInsertionOrders(dbCon.getRawDataPerfbyDateDistinctbyPattern(idDailySelected.getId_monthly(), vPartnerSelected,"vInsertionOrder"));
+            setRawLineItems(dbCon.getRawDataPerfbyDateDistinctbyPattern(idDailySelected.getId_monthly(), vPartnerSelected,"vLineItem"));
         }        
     } 
     
@@ -1510,8 +1512,6 @@ public class TblRawDataController implements Serializable {
     protected void getDateBounds(){
         Calendar cal = JsfUtil.getFechaSistema();
         LocalDate localDate = LocalDate.parse( new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()));
-        cal.add(Calendar.DATE, -1);
-        setMaxDate(cal.getTime());
         setDDateSelected(cal.getTime());        
         setIYear(localDate.getYear());
         setIMonth(localDate.getMonthValue()); 
@@ -1520,7 +1520,7 @@ public class TblRawDataController implements Serializable {
     }    
     
     public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {            
-        if( dDateSelected != null){
+        if( dMonthSelected != null){
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
                 dbCon.setItemsCatalogo(itemsCatalogo);
@@ -1565,7 +1565,7 @@ public class TblRawDataController implements Serializable {
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();
                 dbCon.setItemsCatalogo(itemsCatalogo);
-                dbCon.ScanFileMassiveData("DSP", event.getFile());
+                dbCon.ScanFileMassiveData("DSP", event.getFile(), idDailySelected);
                 JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
                 monthlyItems = null;
                 filteredItems = null;

@@ -36,7 +36,7 @@
                             <p:datePicker id="monthoption" value="#{tblRawDataController.DMonthSelected}"
                                   readonlyInput="true" view="month" pattern="MMM/yyyy" 
                                   yearNavigator="true" yearRange="2024:2026" size="10">                               
-                                <p:ajax event="change" listener="#{tblRawDataController.getPerfCalendarByMonth()}"/>                                   
+                                <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByMonth()}"/>                                   
                             </p:datePicker>  
                             <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
                             <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">

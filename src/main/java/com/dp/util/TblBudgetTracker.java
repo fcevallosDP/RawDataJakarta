@@ -18,6 +18,7 @@ public class TblBudgetTracker {
     private Integer Id;
     private Integer IdBudget;
     private Integer iYear;
+    private Integer iMonthly;
     private Integer iDay;
     private Integer iFlightDays;
     private Integer iRemainingDays;
@@ -62,6 +63,14 @@ public class TblBudgetTracker {
     
     public Integer getId() {
         return Id;
+    }
+
+    public Integer getiMonthly() {
+        return iMonthly;
+    }
+
+    public void setiMonthly(Integer iMonthly) {
+        this.iMonthly = iMonthly;
     }
 
     public Boolean getbUnderYestCTR() {

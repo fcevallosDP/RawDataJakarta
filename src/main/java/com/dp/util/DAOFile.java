@@ -1919,7 +1919,7 @@ public class DAOFile implements Serializable  {
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
                                             if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setvDealId(nextCell.getStringCellValue());
+                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
                                             }
                                         }
                                     }catch (IllegalStateException e) {
@@ -2148,7 +2148,7 @@ public class DAOFile implements Serializable  {
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
                                             if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setvDealId(nextCell.getStringCellValue());
+                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
                                             }
                                         }
                                     }catch (IllegalStateException e) {
@@ -2894,8 +2894,8 @@ public class DAOFile implements Serializable  {
                                 case 1://deal id
                                     try{
                                         if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setvDealId(nextCell.getStringCellValue());
+                                            if (!nextCell.getStringCellValue().isEmpty()){     
+                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
                                             }
                                         }
                                     }catch (IllegalStateException e) {
@@ -4398,6 +4398,42 @@ public class DAOFile implements Serializable  {
         }
         return null;
     }   
+
+
+    public List<TblRawDataNotifications> getDealsLowMargin(String vAgency){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+             
+            PreparedStatement pstmt = connect.prepareStatement("SELECT vAgency, vDeal, vDealId\n" +
+                                                                "FROM tbl_raw_ssp_data\n" +
+                                                                "WHERE dMargin <= coalesce((select dvalue from tbl_parameters where vDescription like 'Base%Margin%' limit 1), 0) \n" +
+                                                                "		and (vAgency not like 'OTRO%' and vExchange not like 'OTRO%')\n" +
+                                                                "		 and (vAgency = ? or ? = 'ALL')\n" +
+                                                                "group by vAgency, vDeal, vDealId;"); 
+            pstmt.setString(1, vAgency);
+            pstmt.setString(2, vAgency);
+            
+            ResultSet rs = pstmt.executeQuery();  
+            List<TblRawDataNotifications> itemsNotifications = new ArrayList();
+            while (rs.next()) {     
+                TblRawDataNotifications item = new TblRawDataNotifications();
+                item.setMessage("Deal with low margin detected");
+                item.setvAgency(rs.getString("vAgency"));
+                item.setvDeal(rs.getString("vDeal"));
+                item.setvDealId(rs.getString("vDealId"));
+                
+                itemsNotifications.add(item);
+            }
+            rs.close();
+            pstmt.close();   
+            return itemsNotifications;
+        } catch (Exception ex) {            
+            System.out.println("getDealsLowMargin");
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();                
+        }
+        return null;
+    }
     
     public List<String> getVPartnersFromBudgetTracker(String vAgency){
 
@@ -4431,7 +4467,7 @@ public class DAOFile implements Serializable  {
              
             
             PreparedStatement pstmt = connect.prepareStatement("select idBudget, id_monthly, iYear, iMonth, vUser, dSystemDate,vPartner, vClient, vAgency, vPlatform, vCampaign, vInsertionOrder, vChannel, dBudget, dStartDate, dEndDate, dYesterdaySpend, MediaSpend, FlightDays, RemainingDays, ProjDailySpend, MtdCtr, YestCtr\n" +
-                                                                "from budget_tracker_materialized\n" +
+                                                                "from vwbudgettracker\n" +
                                                                 "where id_monthly = ? and vAgency = ?"); 
             pstmt.setInt(1, iMonthly);
             pstmt.setString(2, lsPartNer);
@@ -4726,7 +4762,7 @@ public class DAOFile implements Serializable  {
             if (lbAll){
 
             pstmt = connect.prepareStatement("select vAgency, "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
-                                                                "from budget_tracker_materialized\n" +
+                                                                "from vwbudgettracker\n" +
                                                                 "where id_monthly = ? and dBudget > 0\n" +
                                                                 "group by vAgency, " + vByGroup + "\n"+
                                                                 "order by vAgency, vCampaign, " + vByGroup); 
@@ -4811,7 +4847,7 @@ public class DAOFile implements Serializable  {
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
             PreparedStatement pstmt = connect.prepareStatement("select "+vByGroup+", avg(((case when (FlightDays - RemainingDays) < 0 then 0 else (FlightDays - RemainingDays) end) * ProjDailySpend) / cast(dBudget as decimal(18,2))) as ProjBudgPerc, avg( cast(MediaSpend as decimal(18,2)) / cast(dBudget as decimal(18,2))) as BudgetPacing, cast(sum(dBudget) as double) as TotalBudget, cast(sum(MediaSpend) as double) as TotalSpend\n" +
-                                                                "from budget_tracker_materialized\n" +
+                                                                "from vwbudgettracker\n" +
                                                                 "where id_monthly = ? and vAgency = ? and dBudget > 0\n" +
                                                                 "group by " + vByGroup + "\n"+
                                                                 "order by vCampaign, " + vByGroup); 

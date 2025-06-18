@@ -82,7 +82,7 @@
                                              placeholder="Search all fields" />                                
                         </f:facet>        
                         <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Date">
-                            <h:outputText value="#{item.dDate}"/>
+                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
                         </p:column>                        
                         <p:column field="vPartner" width="80" style="text-align: center" headerText="Partner" filterMatchMode="exact">  
                             <f:facet name="filter">
@@ -198,15 +198,6 @@
                         <p:column width="50" style="text-align: center" headerText="CPC">
                             <h:outputText value="#{item.dCPC}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
                         </p:column>
-                        <p:column width="50" style="text-align: center" headerText="Year">
-                            <h:outputText value="#{item.iAnio}"/>
-                        </p:column>
-                        <p:column width="50" style="text-align: center" headerText="Month">
-                            <h:outputText value="#{item.iMes}"/>
-                        </p:column>
-                        <p:column width="50" style="text-align: center" headerText="Day">
-                            <h:outputText value="#{item.iDia}" title="#{item.VFileName}"/>
-                        </p:column>   
                     </p:dataTable>
                     <p:contextMenu for="datalist">
                         <p:menuitem value="Edit Tag" icon="pi pi-file-edit" actionListener="#{tblRawDataController.prepareEdit()}" update=":RawEditForm" oncomplete="PF('RawEditDialog').show()"/>

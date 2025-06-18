@@ -91,7 +91,7 @@
                                          placeholder="Search all fields" />
                         </f:facet>          
                         <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Date">
-                            <h:outputText value="#{item.dDate}"/>
+                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
                         </p:column>                         
                         <p:column width="80" style="text-align: center" headerText="Advertiser" field="vAdvertiser" filterMatchMode="exact">                    
                             <f:facet name="filter">
@@ -231,24 +231,6 @@
                             </f:facet>    
                             <h:outputText value="#{item.vAgency}"/>
                         </p:column>
-                        <p:column width="50"  style="text-align: center" filterBy="#{item.iYear}" filterMatchMode="contains" filterStyle="display:none">
-                            <f:facet name="header">
-                                <h:outputText value="Year"/>
-                            </f:facet>
-                            <h:outputText value="#{item.iYear}"/>
-                        </p:column>
-                        <p:column width="50"  style="text-align: center" filterBy="#{item.iMonth}" filterMatchMode="contains" filterStyle="display:none">
-                            <f:facet name="header">
-                                <h:outputText value="Month"/>
-                            </f:facet>
-                            <h:outputText value="#{item.iMonth}"/>
-                        </p:column>
-                        <p:column width="50"  style="text-align: center" filterBy="#{item.iDay}" filterMatchMode="contains" filterStyle="display:none">
-                            <f:facet name="header">
-                                <h:outputText value="Day"/>
-                            </f:facet>
-                            <h:outputText value="#{item.iDay}" title="#{item.VFileName}"/>
-                        </p:column>   
                         <p:column width="100"  style="text-align: center" field="vSeat" filterMatchMode="exact" headerText="Seat">
                             <f:facet name="filter">
                                 <p:selectOneMenu id="idseat" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">

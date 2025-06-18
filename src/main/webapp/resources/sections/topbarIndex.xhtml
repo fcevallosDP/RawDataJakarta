@@ -13,11 +13,49 @@
             <div class="layout-topbar-left">
                 <a href="#" class="layout-topbar-logo">
                     <p:graphicImage id="app-logo" name="datapoint-logo-black-background.svg" library="layout" style="height: 3.5rem" />
-                </a>
+                </a>            
             </div>            
+
+            
             <div class="layout-topbar-right">               
                 <div class="layout-topbar-actions-right">
-                    <ul class="layout-topbar-items">                                              
+                    <ul class="layout-topbar-items">   
+                        
+                        <li class="layout-topbar-item notifications">
+                            
+                            <a class="layout-topbar-action rounded-circle" data-p-ripple="true"
+                                data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
+                                <span class="p-overlay-badge">
+                                    <i class="pi pi-bell fs-large"></i>
+                                    <span class="p-badge p-badge-warning p-badge-dot"></span>
+                                </span>
+                            </a>
+
+                            <ul class="layout-topbar-action-panel shadow-6 hidden" style="max-height: 300px; overflow-y: auto;">
+                                <li class="mb-3">
+                                    <span class="px-3 fs-small">You have <b>#{loginBean.notificaciones.size()}</b> new notifications</span>
+                                </li>
+                                <ui:repeat value="#{loginBean.notificaciones}" var="n" rendered="#{not empty loginBean.notificaciones}">
+                                    <li class="layout-topbar-action-item" data-p-styleclass-hide="true">
+                                        <div class="flex flex-row align-items-center gap-3">
+
+                                            <div class="flex flex-column flex-grow-1">
+                                                <div class="flex align-items-center justify-content-between mb-1">
+                                                    <span class="fs-small font-bold">#{n.message}</span>
+                                                    <small>#{n.getvDealId()}</small>
+                                                </div>
+                                                <span class="fs-small">#{n.getvDeal()}</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ui:repeat>
+
+                            </ul>
+                        </li>
+
+                        
+                        
+                        
                         <li class="layout-topbar-item">                                                       
                             <p:menubar style="border: none;">                            
                                 <p:submenu label="#{loginBean.getLoggedInUser().getFullName()}" icon="pi pi-user" >
@@ -29,6 +67,8 @@
                                 </p:submenu>
                             </p:menubar>
                         </li>
+                        
+                        
                     </ul>
                 </div>
             </div>

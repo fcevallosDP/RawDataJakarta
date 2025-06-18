@@ -7,6 +7,7 @@ package com.dp.controller.util;
 import java.io.Serializable;
 import com.dp.util.DAOFile;
 import com.dp.util.TblProfiles;
+import com.dp.util.TblRawDataNotifications;
 import com.dp.util.TblUsers;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.enterprise.inject.Produces;
@@ -20,6 +21,11 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import javax.management.Notification;
 
 /**
  *
@@ -38,12 +44,20 @@ public class LoginBean implements Serializable {
     private String notificationTitle;
     private boolean lbIfAdmin = false;
     private String ipaddress;
-    
+    private List<TblRawDataNotifications> notificaciones;
     private List<String> notifications = new ArrayList<String>();
     private List<String> rutas = new ArrayList<String>();
 
     public String getHostname() {
         return hostname;
+    }
+
+    public List<TblRawDataNotifications> getNotificaciones() {
+        return notificaciones;
+    }
+
+    public void setNotificaciones(List<TblRawDataNotifications> notificaciones) {
+        this.notificaciones = notificaciones;
     }
 
     public void setHostname(String hostname) {
@@ -155,9 +169,38 @@ public class LoginBean implements Serializable {
         return password;
     }
     public LoginBean() {
+      
     }
     //private int countReload = 0;
 
+/*    public static class SimpleNotification {
+        private String message;
+        private LocalDateTime timestamp;
+
+        public SimpleNotification(String message, LocalDateTime timestamp) {
+            this.message = message;
+            this.timestamp = timestamp;
+        }
+
+        public SimpleNotification(String message) {
+            this.message = message;            
+        }
+        
+        
+        public String getMessage() {
+            return message;
+        }
+
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+
+        public String getFormattedTimestamp() {
+            return timestamp.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        }    
+        
+    }            
+*/    
     public void triggerIdle() {
         try {
             //System.out.println("countReload: " + String.valueOf(countReload++));  
@@ -191,7 +234,8 @@ public class LoginBean implements Serializable {
     {
         try
         {
-           DAOFile dbCon = new DAOFile(); 
+           DAOFile dbCon = new DAOFile();
+           notificaciones = new ArrayList();
            this.setLoggedInUser(dbCon.getItemUserByUserAndPass(username,JsfUtil.generateHash(password)));
 
            if(this.LoggedInUser==null)
@@ -216,6 +260,9 @@ public class LoginBean implements Serializable {
                     if (perfil.getVDescription().toUpperCase().contains("ADMIN")){
                         lbIfAdmin = true;                        
                     }
+                    
+                    notificaciones = dbCon.getDealsLowMargin(this.LoggedInUser.getvAgency());                                        
+                    
                     externalContext.redirect(externalContext.getRequestContextPath() + "/index.xhtml");
                     return "index";
                 }         

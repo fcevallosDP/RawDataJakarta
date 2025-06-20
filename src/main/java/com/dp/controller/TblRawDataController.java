@@ -391,6 +391,7 @@ public class TblRawDataController implements Serializable {
         if(itemsVPartners == null || itemsVPartners.isEmpty()){
             DAOFile dbCon = new DAOFile();
             itemsVPartners = dbCon.getVPartnersFromBudgetTracker(JsfUtil.getUsuarioSesion().getvAgency());
+            vPartnerSelected = (!itemsVPartners.isEmpty() ? itemsVPartners.get(0) : "");
         }        
         return itemsVPartners;
     }
@@ -1516,6 +1517,7 @@ public class TblRawDataController implements Serializable {
         setIYear(localDate.getYear());
         setIMonth(localDate.getMonthValue()); 
         setDMonthSelected(cal.getTime());
+        getItemCalendarByMonth();
         setiWeek(1);
     }    
     
@@ -1550,9 +1552,9 @@ public class TblRawDataController implements Serializable {
     }  
 
     public void handleFilePerfUploadWeeklyData(FileUploadEvent event) throws ClassNotFoundException, Exception {            
-        if (event != null && event.getFile() != null){
+        if (event != null && event.getFile() != null && idDailySelected != null){
             DAOFile dbCon = new DAOFile();
-            dbCon.uploadFilePerfMassiveData(event.getFile(), vPartnerSelected, iWeek);
+            dbCon.uploadFilePerfMassiveData(event.getFile(), vPartnerSelected, iWeek, idDailySelected.getId_monthly());
             JsfUtil.addSuccessMessage(event.getFile().getFileName() + " uploaded successfully");
             itemsPerf = null;
             selectedPerf = null;

@@ -27,30 +27,15 @@ import java.util.Random;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.faces.view.ViewScoped;
-import java.util.Arrays;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.model.charts.ChartData;
-import org.primefaces.model.charts.axes.cartesian.CartesianScales;
-import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearAxes;
-import org.primefaces.model.charts.axes.cartesian.linear.CartesianLinearTicks;
-import org.primefaces.model.charts.bar.BarChartDataSet;
-import org.primefaces.model.charts.bar.BarChartModel;
-import org.primefaces.model.charts.bar.BarChartOptions;
-import org.primefaces.model.charts.hbar.HorizontalBarChartDataSet;
-import org.primefaces.model.charts.hbar.HorizontalBarChartModel;
-import org.primefaces.model.charts.optionconfig.title.Title;
 import org.primefaces.util.LangUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Named("tblRawDataController")
 @ViewScoped
@@ -119,10 +104,45 @@ public class TblRawDataController implements Serializable {
     private final Map<String, Number> goalVal = new HashMap<>();
     private final Map<String, List<String>> colorsMap = new HashMap<>();
     private List<ChartGroup> groupedCharts = new ArrayList<>();
+    private String filterPartner;    
+    private String globalFilterText;
+    private String confirmMessage;
 
+    public String getConfirmMessage() {
+        return confirmMessage;
+    }
+
+    public void prepareClean() {
+        int total = (filteredItems != null && !filteredItems.isEmpty()) ? filteredItems.size() : items.size();
+        confirmMessage = "Are you sure you want to clean the " + total + " items?";
+    }    
+    
+    public void setConfirmMessage(String confirmMessage) {
+        this.confirmMessage = confirmMessage;
+    }
+    
     public List<ChartGroup> getGroupedCharts() {
         return groupedCharts;
     }    
+
+    public String getFilterPartner() {
+        return filterPartner;
+    }
+    protected void logFilteredItems() {
+        System.out.println("Tamaño filtrado: " + (filteredItems != null ? filteredItems.size() : 0));
+    }
+    
+    public void setFilterPartner(String filterPartner) {
+        this.filterPartner = filterPartner;
+    }
+
+    public String getGlobalFilterText() {
+        return globalFilterText;
+    }
+
+    public void setGlobalFilterText(String globalFilterText) {
+        this.globalFilterText = globalFilterText;
+    }
     
     public List<String> getRawDeviceTypes() {
         return rawDeviceTypes;
@@ -1212,7 +1232,7 @@ public class TblRawDataController implements Serializable {
         
         return item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvAlias().toLowerCase().contains(filterText)
-                || item.getIdDaily().getdDate().toString().toLowerCase().contains(filterText)
+               /* || item.getvDate().toLowerCase().contains(filterText)*/
                 || item.getvCampaign().toLowerCase().contains(filterText)
                 || item.getvChannel().toLowerCase().contains(filterText)
                 || item.getvClient().toLowerCase().contains(filterText)

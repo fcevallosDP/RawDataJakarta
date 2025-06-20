@@ -50,17 +50,28 @@
                             
                                 <p:commandButton title="Upload files" type="button" id="btnFilesUpload" 
                                                  disabled="#{empty tblRawDataController.DDateSelected}" 
-                                                 icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 10px;"/>                                                                                                                                                
-                                <p:commandButton id="idunlock" title="Reprocess data"
-                                                 actionListener="#{tblRawDataController.complexLimpiar()}"
-                                                 disabled="#{empty tblRawDataController.items}" style="margin-left: 2px;"
-                                                 icon="pi pi-trash" update="TblRawDataListForm:datalist, btnFilesUpload">
-                                    <p:confirm header="Confirmation" message="Are you sure you want to upload new data?" icon="pi pi-sync"/>                                                                                
-                                </p:commandButton>   
-                                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
-                                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
-                                    <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
-                                </p:confirmDialog>                                                              
+                                                 icon="pi pi-file-import" onclick="PF('dlg2').show()" style="margin-left: 10px;"/>    
+                                
+                                <p:commandButton id="idunlock" title="Remove data"
+                                                 action="#{tblRawDataController.prepareClean()}"
+                                                 icon="pi pi-trash" style="margin-left: 2px;"
+                                                 disabled="#{empty tblRawDataController.items}" 
+                                                 update="confirmDialog"
+                                                 oncomplete="PF('confirmDialogWidget').show()"
+                                                 process="@this"/> 
+                                
+                                <p:dialog id="confirmDialog" widgetVar="confirmDialogWidget" header="Confirmation"
+                                          modal="true" closable="false" resizable="false" draggable="false">
+                                    <h:outputText value="#{tblRawDataController.confirmMessage}" />
+                                    <p:separator />
+                                    <p:commandButton value="Yes" icon="pi pi-check" 
+                                                     actionListener="#{tblRawDataController.complexLimpiar()}"
+                                                     update="datalist, btnFilesUpload" style="margin-left: 2px;"
+                                                     oncomplete="PF('confirmDialogWidget').hide()" />
+                                    <p:commandButton value="No" icon="pi pi-times" style="margin-left: 2px;"
+                                                     onclick="PF('confirmDialogWidget').hide(); return false;" type="button"/>
+                                </p:dialog>
+                                                         
                                 
                                 <p:commandButton id="btnExpor" icon="pi pi-file-excel" style="margin-left: 2px;" ajax="false" title="Export as excel file" disabled="#{( empty tblRawDataController.items)}">
                                     <p:dataExporter type="xls" target="TblRawDataListForm:datalist" fileName="RawData_DSP_#{tblRawDataController.todayAsString}" exportHeader="true" />
@@ -86,7 +97,7 @@
                         </p:column>                        
                         <p:column field="vPartner" width="80" style="text-align: center" headerText="Partner" filterMatchMode="exact">  
                             <f:facet name="filter">
-                                <p:selectOneMenu id="partners" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
+                                <p:selectOneMenu id="partners" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter" >
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawPartners}" />
                                 </p:selectOneMenu>

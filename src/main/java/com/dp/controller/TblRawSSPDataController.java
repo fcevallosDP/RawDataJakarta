@@ -56,7 +56,20 @@ public class TblRawSSPDataController implements Serializable {
     private List<String> rawDsp;
     private List<String> rawSeat;
     private List<String> rawExchange;
+    private String confirmMessage;
 
+    public String getConfirmMessage() {
+        return confirmMessage;
+    }
+
+    public void prepareClean() {
+        int total = (filteredItems != null && !filteredItems.isEmpty()) ? filteredItems.size() : items.size();
+        confirmMessage = "Are you sure you want to clean the " + total + " items?";
+    }    
+    
+    public void setConfirmMessage(String confirmMessage) {
+        this.confirmMessage = confirmMessage;
+    }
     
     public TblRawSSPDataController() {
         internalLimpiar();
@@ -277,7 +290,7 @@ public class TblRawSSPDataController implements Serializable {
         
         return item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvAdvertiser().toLowerCase().contains(filterText)
-                || item.getIdDaily().getdDate().toString().toLowerCase().contains(filterText)
+                /*|| item.getvDate().toLowerCase().contains(filterText)*/
                 || item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvChannel().toLowerCase().contains(filterText)
                 || item.getvClient().toLowerCase().contains(filterText)
@@ -546,17 +559,31 @@ public class TblRawSSPDataController implements Serializable {
         //PrimeFaces.current().executeScript("$('#TblRawSSPDataListForm\\:datalist\\:globalFilter').val('').keyup(); return false;");
     }
 
+    
     public void complexLimpiar(){
-        if (idDailySelected != null && idDailySelected.getId_monthly() > 0){
+        if (filteredItems != null && !filteredItems.isEmpty()){
             DAOFile dbCon = new DAOFile();
-            if (dbCon.cleanRawDataByDaily(idDailySelected.getId_monthly(), "SSP")){
+            if (dbCon.cleanMonthlySSPRawData(filteredItems)){
                 itemsCatalogo = dbCon.getCatalogoItems("S");
-                //itemsCatalogoColumn = dbCon.getCatalogoColumnItems("S");
-                rawColumns = dbCon.getItemsColumnNames("S");                
+                rawColumns = dbCon.getItemsColumnNames("S");
                 items = null;
                 monthlyItems = null;
                 filteredItems = null;
                 selected = null;                
+                JsfUtil.addSuccessMessage("Items deleted successfully");
+            }
+        }else{        
+            if (idDailySelected != null && idDailySelected.getId_monthly() > 0){
+                DAOFile dbCon = new DAOFile();
+                if (dbCon.cleanRawDataByDaily(idDailySelected.getId_monthly(), "SSP")){
+                    itemsCatalogo = dbCon.getCatalogoItems("S");
+                    //itemsCatalogoColumn = dbCon.getCatalogoColumnItems("S");
+                    rawColumns = dbCon.getItemsColumnNames("S");                
+                    items = null;
+                    monthlyItems = null;
+                    filteredItems = null;
+                    selected = null;                
+                }
             }
         }
     }

@@ -94,9 +94,6 @@
                         <p:column width="80" filterBy="#{item.vChannel}" style="text-align: center; white-space: wrap;text-wrap: wrap;" headerText="Channel" filterMatchMode="contains" filterStyle="display:none">
                             <h:outputText value="#{item.vChannel}"/>
                         </p:column>
-                        <p:column width="250" style="text-align: right" headerText="Deal">
-                            <h:outputText value="#{item.vDeal}"/>
-                        </p:column>
                         <p:column width="80" style="white-space: nowrap; text-align: right" headerText="Impressions">
                             <h:outputText value="#{item.iImpressions}"><f:convertNumber pattern="#0.00" locale="en_US"/></h:outputText>
                         </p:column>   

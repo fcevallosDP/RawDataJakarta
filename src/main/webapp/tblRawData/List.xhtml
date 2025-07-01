@@ -80,12 +80,24 @@
                                 <p:commandButton id="excelButton" icon="pi pi-sync" ajax="false" title="Clear" style="margin-left: 2px;" type="button" onclick="location.reload();"/>                                                                     
                                 
                                 <p:commandButton title="Move to Historical" id="btnTransfer" 
-                                                 rendered="#{tblRawDataController.lbDataTransfer}" update=":TblRawDataListForm:messages"
-                                                 actionListener="#{tblRawDataController.transferToHistorical()}"
+                                                 disabled="#{empty tblRawDataController.items}"
+                                                 update="confirmHistDialog"
                                                  icon="pi pi-window-maximize" style="margin-left: 2px; background: #0097A7;"
-                                                 onstart="PF('buiDatatable').show()" oncomplete="PF('buiDatatable').hide()">
-                                    <p:confirm header="Confirmation" message="Are you sure you want to transfer all month's data to Historical?" icon="pi pi-window-maximize"/>
-                                </p:commandButton>                        
+                                                 oncomplete="PF('confirmHistDialogWidget').show()"/>
+
+                                <p:dialog id="confirmHistDialog" widgetVar="confirmHistDialogWidget" header="Confirmation"
+                                          modal="true" closable="false" resizable="false" draggable="false">
+                                    <h:outputText value="Are you sure you want to transfer all month's data to Historical?" />
+                                    <p:separator />
+                                    <p:commandButton value="Yes" icon="pi pi-window-maximize" 
+                                                     actionListener="#{tblRawDataController.transferToHistorical()}"
+                                                     update="datalist" style="margin-left: 2px;"
+                                                     oncomplete="PF('confirmHistDialogWidget').hide()" />
+                                    <p:commandButton value="No" icon="pi pi-times" style="margin-left: 2px;"
+                                                     onclick="PF('confirmHistDialogWidget').hide(); return false;" type="button"/>
+                                </p:dialog>
+                                                
+                                
                         </f:facet>  
                         <f:facet name="paginatorTopRight">  
                              

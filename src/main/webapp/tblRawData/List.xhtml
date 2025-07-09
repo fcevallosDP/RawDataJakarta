@@ -104,8 +104,10 @@
                                 <p:inputText id="globalFilter" onkeyup="PF('WdataList').filter()" style="width:150px;margin-right:5px;"
                                              placeholder="Search all fields" />                                
                         </f:facet>        
-                        <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Date">
-                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
+                        <p:column filterBy="#{item.dDate}" width="60" style="white-space: nowrap;text-align: center" headerText="Date" filterMatchMode="contains">
+
+                                <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
+
                         </p:column>                        
                         <p:column field="vPartner" width="80" style="text-align: center" headerText="Partner" filterMatchMode="exact">  
                             <f:facet name="filter">

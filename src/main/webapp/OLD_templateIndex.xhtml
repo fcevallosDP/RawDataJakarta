@@ -57,7 +57,7 @@
                             <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-sign-out" />
                     </p:confirmDialog>   
                     <p:poll listener="#{LoginBean.keepUserSessionAlive()}" interval="900000"/>  
-                    <p:idleMonitor timeout="900000">
+                    <p:idleMonitor timeout="3600000">
                        <p:ajax event="idle" listener="#{LoginBean.logout}" oncomplete="PF('idleDialog').show()" />
                        <p:ajax event="active" update="@none"/>
                    </p:idleMonitor>   

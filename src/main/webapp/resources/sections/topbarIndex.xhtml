@@ -73,7 +73,7 @@
                 </div>
             </div>
         </div>     
-        <p:idleMonitor timeout="900000"><!-- 15 minutos de inactividad -->
+        <p:idleMonitor timeout="3600000"><!-- 15 minutos de inactividad -->
            <p:ajax event="idle" oncomplete="PF('idleDialog').show()" />
            <p:ajax event="active" update="@none"/>
        </p:idleMonitor>   

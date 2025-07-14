@@ -1232,7 +1232,7 @@ public class TblRawDataController implements Serializable {
         
         return item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvAlias().toLowerCase().contains(filterText)
-               /* || item.getvDate().toLowerCase().contains(filterText)*/
+                || item.getvDate().toLowerCase().contains(filterText)
                 || item.getvCampaign().toLowerCase().contains(filterText)
                 || item.getvChannel().toLowerCase().contains(filterText)
                 || item.getvClient().toLowerCase().contains(filterText)

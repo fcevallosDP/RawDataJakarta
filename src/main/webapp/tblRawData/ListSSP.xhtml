@@ -113,10 +113,15 @@
                         <f:facet name="paginatorTopRight">                                                        
                             <p:inputText id="globalFilter" onkeyup="PF('WSSPdataList').filter()" style="width:150px;margin-right:5px;"
                                          placeholder="Search all fields" />
-                        </f:facet>          
-                        <p:column width="60" style="white-space: nowrap;text-align: center" headerText="Date">
-                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
-                        </p:column>                         
+                        </f:facet>     
+                        <p:column filterBy="#{item.dDate}" width="30" style="white-space: nowrap;text-align: center" headerText="Day" filterMatchMode="contains">
+
+                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}">
+                                <f:convertDateTime pattern="dd" />
+                            </h:outputText>
+
+                        </p:column>                              
+                        
                         <p:column width="80" style="text-align: center" headerText="Advertiser" field="vAdvertiser" filterMatchMode="exact">                    
                             <f:facet name="filter">
                                 <p:selectOneMenu id="idadvertiser" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">

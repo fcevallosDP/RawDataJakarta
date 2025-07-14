@@ -10,7 +10,7 @@
         <ui:define name="title"><h:outputText value="RawData"/></ui:define>
         
         <ui:define name="content">  
-            
+           
             <h:form id="TblRawDataListForm">               
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      
@@ -30,13 +30,13 @@
                                  scrollRows="15" rows="15" stripedRows="true" paginatorPosition="top"   
                                  >                                                
                         <f:facet name="paginatorTopLeft">
-                            <p:outputLabel for="monthoption" value="Month"/>
+                            <p:outputLabel for="monthoption" value="Month" style="font-weight: bolder"/>
                             <p:datePicker id="monthoption" value="#{tblRawDataController.DMonthSelected}"
                                   readonlyInput="true" view="month" pattern="MMM/yyyy" 
-                                  yearNavigator="true" yearRange="2025:2026" size="10">                               
+                                  yearNavigator="true" yearRange="2025:2026" size="10" style="margin-left: 5px;width: 80px">                               
                                 <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByMonth()}"/>                                   
                             </p:datePicker>                              
-                            <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
+                            <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;font-weight: bolder"/>
                             <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">
                                 <f:selectItems value="#{tblRawDataController.itemsVPartners}" itemLabel="#{itemPartner}" itemValue="#{itemPartner}"/>
                                 <p:ajax update="barsButton" process="@this" partialSubmit="true"/>
@@ -78,7 +78,14 @@
                             <div class="ui-datatable-header ui-widget-header ui-corner-top title-rightClass">
                                 <h:outputText value="PERFORMANCE" style="font-size: large"/>
                             </div>
-                        </f:facet>                    
+                        </f:facet>               
+                        <p:column filterBy="#{item.dDate}" width="30" style="white-space: nowrap;text-align: center" headerText="Day" filterMatchMode="contains">
+
+                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}">
+                                <f:convertDateTime pattern="dd" />
+                            </h:outputText>
+
+                        </p:column>                        
                         <p:column field="iSemana" width="60" headerText="Week" style="text-align: center;" filterMatchMode="exact" sortable="false">                     
                             <f:facet name="filter">
                                 <p:selectOneMenu id="idweeks" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
@@ -90,9 +97,9 @@
                                     <f:selectItem itemLabel="W5" itemValue="5"/>
                                 </p:selectOneMenu>
                             </f:facet>                                                          
-                            <h:outputText value="#{item.iSemana}"/>
+                            <h:outputText value="W#{item.iSemana}"/>
                         </p:column> 
-                        <p:column width="90" field="vClient" headerText="Advertiser" filterMatchMode="exact">
+                        <p:column width="150" field="vClient" headerText="Advertiser" filterMatchMode="exact">
                             <f:facet name="filter">
                                 <p:selectOneMenu id="idclients" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
@@ -101,7 +108,7 @@
                             </f:facet>                             
                             <h:outputText value="#{item.vClient}"/>
                         </p:column>                        
-                        <p:column field="vCampaign" width="200" headerText="Campaign" filterMatchMode="exact">                      
+                        <p:column field="vCampaign" width="160" headerText="Campaign" filterMatchMode="exact">                      
                             <f:facet name="filter">
                                 <p:selectOneMenu id="campaigns" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
@@ -110,7 +117,7 @@
                             </f:facet>                              
                             <h:outputText value="#{item.vCampaign}"/>
                         </p:column>
-                        <p:column width="300" field="vInsertionOrder" headerText="Insertion Order" filterMatchMode="exact">   
+                        <p:column width="200" field="vInsertionOrder" headerText="Insertion Order" filterMatchMode="exact">   
                             <f:facet name="filter">
                                 <p:selectOneMenu id="insertionOrders" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
@@ -119,10 +126,10 @@
                             </f:facet>                            
                             <h:outputText value="#{item.vInsertionOrder}"/>
                         </p:column>
-                        <p:column width="300" filterBy="#{item.vLineItem}" headerText="Line Item" filterMatchMode="contains">                           
+                        <p:column width="200" filterBy="#{item.vLineItem}" headerText="Line Item" filterMatchMode="contains">                           
                             <h:outputText value="#{item.vLineItem}"/>
                         </p:column>
-                        <p:column field="vDeviceType" width="200" headerText="Device Type" filterMatchMode="exact">
+                        <p:column field="vDeviceType" width="100" headerText="Device Type" filterMatchMode="exact">
                             <f:facet name="filter">
                                 <p:selectOneMenu id="exchanges" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />

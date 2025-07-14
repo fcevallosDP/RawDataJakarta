@@ -119,3 +119,6 @@ body .ui-accordion .ui-accordion-header.ui-state-hover, body .ui-accordion .ui-a
 body .ui-datatable .ui-datatable-header {
     text-align: center;
 }
+.ui-datatable-scrollable-header .ui-column-customfilter span {
+  font-size: smaller;
+}

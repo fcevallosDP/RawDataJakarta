@@ -290,7 +290,7 @@ public class TblRawSSPDataController implements Serializable {
         
         return item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvAdvertiser().toLowerCase().contains(filterText)
-                /*|| item.getvDate().toLowerCase().contains(filterText)*/
+                || item.getvDate().toLowerCase().contains(filterText)
                 || item.getvAgency().toLowerCase().contains(filterText)
                 || item.getvChannel().toLowerCase().contains(filterText)
                 || item.getvClient().toLowerCase().contains(filterText)

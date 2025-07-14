@@ -104,11 +104,13 @@
                                 <p:inputText id="globalFilter" onkeyup="PF('WdataList').filter()" style="width:150px;margin-right:5px;"
                                              placeholder="Search all fields" />                                
                         </f:facet>        
-                        <p:column filterBy="#{item.dDate}" width="60" style="white-space: nowrap;text-align: center" headerText="Date" filterMatchMode="contains">
+                        <p:column filterBy="#{item.dDate}" width="30" style="white-space: nowrap;text-align: center" headerText="Day" filterMatchMode="contains">
 
-                                <h:outputText value="#{item.dDate}" title="#{item.VFileName}"/>
+                            <h:outputText value="#{item.dDate}" title="#{item.VFileName}">
+                                <f:convertDateTime pattern="dd" />
+                            </h:outputText>
 
-                        </p:column>                        
+                        </p:column>                                       
                         <p:column field="vPartner" width="80" style="text-align: center" headerText="Partner" filterMatchMode="exact">  
                             <f:facet name="filter">
                                 <p:selectOneMenu id="partners" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter" >

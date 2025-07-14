@@ -385,3 +385,35 @@ body .ui-menu .ui-menu-list .ui-menu-child {
     background-color: #546E7A !important;
     color: #ffffff !important;
 }
+            /* Aplica a todos los selectOneMenu usados como filtros */
+            .ui-custom-filter.ui-selectonemenu {
+              min-width: 80px !important; /* Ajusta si necesitas más espacio */
+              max-width: 100% !important; /* que no se rompa el layout */
+              position: relative !important;
+              overflow: visible !important;
+            }
+
+            /* Icono del dropdown (trigger) */
+            .ui-custom-filter .ui-selectonemenu-trigger {
+              position: absolute !important;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              width: 2rem; /* espacio reservado para el ícono */
+              display: flex !important;
+              align-items: center;
+              justify-content: center;
+              pointer-events: none; /* evita que tape el click, si es necesario */
+            }
+
+            /* El label no debe tapar el trigger */
+            .ui-custom-filter .ui-selectonemenu-label {
+              padding-right: 2.2rem !important; /* espacio para que no solape el ícono */
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: block;
+            }
+            .ui-selectonemenu-trigger {
+              display: flex !important;
+            }

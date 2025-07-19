@@ -9,6 +9,7 @@ import com.dp.util.TblBudgetTracker;
 import com.dp.util.TblDV360SPD;
 import com.dp.util.TblDailyProcess;
 import com.dp.util.TblCatalogo;
+import com.dp.util.TblDiaEstado;
 import com.dp.util.TblHistoricalDSP;
 import com.dp.util.TblLineItems;
 import com.dp.util.TblPacing;
@@ -27,6 +28,7 @@ import java.util.Random;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.faces.view.ViewScoped;
+import java.time.YearMonth;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
@@ -35,6 +37,7 @@ import org.primefaces.util.LangUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Named("tblRawDataController")
@@ -107,6 +110,40 @@ public class TblRawDataController implements Serializable {
     private String filterPartner;    
     private String globalFilterText;
     private String confirmMessage;
+    private List<TblDiaEstado> diaEstadoItems;
+            
+    public List<TblDiaEstado> getDiaEstadoItems() {
+    
+        if(this.items != null && !this.items.isEmpty()){
+                              
+            Set<Integer> diasConDatos = items.stream()
+                .map(r -> {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(r.getdDate());
+                    return cal.get(Calendar.DAY_OF_MONTH);
+                })
+                .collect(Collectors.toSet());
+            
+            diaEstadoItems = new ArrayList<>();
+            LocalDate now = LocalDate.now();
+            int diasMes = now.getDayOfMonth();
+
+            for (int i = 1; i <= diasMes; i++) {
+                LocalDate dia = now.withDayOfMonth(i);
+                String estado;
+                if (!diasConDatos.contains(i) && dia.isBefore(now)) {
+                    estado = "vencido";
+                    diaEstadoItems.add(new TblDiaEstado(i, estado));
+                }
+            }
+            
+        }        
+        return diaEstadoItems;                
+    }
+
+    public void setDiaEstadoItems(List<TblDiaEstado> diaEstadoItems) {
+        this.diaEstadoItems = diaEstadoItems;
+    }    
 
     public String getConfirmMessage() {
         return confirmMessage;
@@ -712,6 +749,7 @@ public class TblRawDataController implements Serializable {
 
     protected void cleanInternalFilters(){
         rawPartners = new ArrayList();
+        diaEstadoItems = new ArrayList();
         rawExchanges = new ArrayList();
         rawDeviceTypes = new ArrayList();
         rawCampaign = new ArrayList();

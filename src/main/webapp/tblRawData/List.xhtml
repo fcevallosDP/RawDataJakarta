@@ -36,6 +36,12 @@
                                  >
                         <f:facet name="header">
                             <h:outputText value="DSP Daily DATA" style="font-size: larger"/>
+                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" rendered="#{!(empty tblRawDataController.diaEstadoItems)}"/>
+                            <ui:repeat value="#{tblRawDataController.diaEstadoItems}" var="dia">
+                                <p:badge value="#{dia.iDia}"
+                                         severity="danger"
+                                         style="margin: 0.25rem;" />
+                            </ui:repeat>                            
                         </f:facet>
                         <f:facet name="paginatorTopLeft">             
                                 <p:datePicker id="disabledDD" value="#{tblRawDataController.DMonthSelected}"

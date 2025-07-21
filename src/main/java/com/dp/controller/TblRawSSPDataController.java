@@ -9,6 +9,7 @@ import com.dp.util.TblCatalogo;
 import com.dp.util.TblCatalogoColumn;
 import com.dp.util.TblDVXANDRSPD;
 import com.dp.util.TblDailyProcess;
+import com.dp.util.TblDiaEstado;
 import com.dp.util.TblHistoricalSSP;
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import jakarta.inject.Named;
 import jakarta.faces.view.ViewScoped;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.util.LangUtils;
 
@@ -57,7 +60,42 @@ public class TblRawSSPDataController implements Serializable {
     private List<String> rawSeat;
     private List<String> rawExchange;
     private String confirmMessage;
+    private List<TblDiaEstado> diaEstadoItems;
 
+    public List<TblDiaEstado> getDiaEstadoItems() {
+    
+        if(this.items != null && !this.items.isEmpty()){
+                              
+            Set<Integer> diasConDatos = items.stream()
+                .map(r -> {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(r.getdDate());
+                    return cal.get(Calendar.DAY_OF_MONTH);
+                })
+                .collect(Collectors.toSet());
+            
+            diaEstadoItems = new ArrayList<>();
+            LocalDate now = LocalDate.now();
+            int diasMes = now.getDayOfMonth();
+
+            for (int i = 1; i <= diasMes; i++) {
+                LocalDate dia = now.withDayOfMonth(i);
+                String estado;
+                if (!diasConDatos.contains(i) && dia.isBefore(now)) {
+                    estado = "vencido";
+                    diaEstadoItems.add(new TblDiaEstado(i, estado));
+                }
+            }
+            
+        }        
+        return diaEstadoItems;                
+    }
+
+    public void setDiaEstadoItems(List<TblDiaEstado> diaEstadoItems) {
+        this.diaEstadoItems = diaEstadoItems;
+    }    
+
+    
     public String getConfirmMessage() {
         return confirmMessage;
     }
@@ -173,6 +211,7 @@ public class TblRawSSPDataController implements Serializable {
 
     protected void cleanInternalFilters(){
         rawChannel = new ArrayList();
+        diaEstadoItems = new ArrayList();
         rawDsp = new ArrayList();
         rawClient = new ArrayList();
         rawAgency = new ArrayList();

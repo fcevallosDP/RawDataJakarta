@@ -10,12 +10,19 @@
 
         <ui:define name="title"><h:outputText value="RawData"/></ui:define>
 
-        <ui:define name="content">       
-                <style>
-                    body .ui-inputfield {
-                        width: 100%;
-                    }
-                </style>          
+        <ui:define name="content">           
+	    <style>
+                .ui-filter-column .ui-column-customfilter .custom-filter {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .ui-datatable thead th {
+                    text-align: center !important;
+                }
+                body .ui-inputfield {
+                    width: 100%;
+                }                
+            </style>                
             <h:form id="TblRawDataListForm" enctype="multipart/form-data">
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      

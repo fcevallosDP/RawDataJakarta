@@ -751,8 +751,7 @@ public class DAOFile implements Serializable  {
 
         return localitemsDV360;
     }
-    
-    
+        
     protected List<TblDV360SPD> scrap_PPOINT_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
         System.out.println("scrap_PPOINT_Format");
         List<TblDV360SPD> localitemsDV360 = new ArrayList();
@@ -1237,79 +1236,78 @@ public class DAOFile implements Serializable  {
         return localitemsDV360;
     }    
 
-	protected List<TblDV360SPD> scrap_Perf_PP_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
-		System.out.println("scrap_Perf_PP_Data");
-		List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
+    protected List<TblDV360SPD> scrap_Perf_PP_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
+            System.out.println("scrap_Perf_PP_Data");
+            List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
 
-		if (itemFile != null && itemFile.getFileName().endsWith(".xlsx")) {
-			try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-				Sheet sheet = workbook.getSheetAt(0);
-				Iterator<Row> rows = sheet.iterator();
+            if (itemFile != null && itemFile.getFileName().endsWith(".xlsx")) {
+                    try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
+                            Sheet sheet = workbook.getSheetAt(0);
+                            Iterator<Row> rows = sheet.iterator();
 
-				if (rows.hasNext()) rows.next(); // skip header
+                            if (rows.hasNext()) rows.next(); // skip header
 
-				while (rows.hasNext()) {
-					Row row = rows.next();
-					TblDV360SPD item = new TblDV360SPD();
+                            while (rows.hasNext()) {
+                                    Row row = rows.next();
+                                    TblDV360SPD item = new TblDV360SPD();
 
-					item.setvAgency(vAgency);
-					item.setIdDaily(new TblDailyProcess(0, 0, 0, ""));
-					item.setIdMontly(iMonthly);
-					item.setvCampaign(""); item.setvInsertionOrder(""); item.setvLineItem("");
-					item.setvExchange(""); item.setvDealName(""); item.setvClient("");
-					item.setdMediaCosts(0.0); item.setdTotalMediaCosts(0.0); item.setdCPC(0.0);
-					item.setdCPM(0.0); item.setdCTR(0.0); item.setdVCR(0.0);
-					item.setiImpressions(0); item.setiClicks(0); item.setiCompleteViews(0);
+                                    item.setvAgency(vAgency);
+                                    item.setIdDaily(new TblDailyProcess(0, 0, 0, ""));
+                                    item.setIdMontly(iMonthly);
+                                    item.setvCampaign(""); item.setvInsertionOrder(""); item.setvLineItem("");
+                                    item.setvExchange(""); item.setvDealName(""); item.setvClient("");
+                                    item.setdMediaCosts(0.0); item.setdTotalMediaCosts(0.0); item.setdCPC(0.0);
+                                    item.setdCPM(0.0); item.setdCTR(0.0); item.setdVCR(0.0);
+                                    item.setiImpressions(0); item.setiClicks(0); item.setiCompleteViews(0);
 
-					int blankCount = 0;
+                                    int blankCount = 0;
 
-					for (Cell cell : row) {
-						int col = cell.getColumnIndex();
-						if (isCellEffectivelyBlank(cell)) {
-							blankCount++;
-							if (blankCount > 4) break;
-						}
+                                    for (Cell cell : row) {
+                                            int col = cell.getColumnIndex();
+                                            if (isCellEffectivelyBlank(cell)) {
+                                                    blankCount++;
+                                                    if (blankCount > 4) break;
+                                            }
 
-						try {
-							switch (col) {
-								case 0:
-									String dateStr = getCellString(cell);
-									item.setvDate(dateStr);
-									String[] parts = dateStr.contains("-") ? dateStr.split("-") : dateStr.split("/");
-									if (parts.length == 3) {
-										item.setiAnio(Integer.parseInt(parts[0]));
-										item.setiMes(Integer.parseInt(parts[1]));
-										item.setiDia(Integer.parseInt(parts[2]));
-									}
-									break;
-								case 1: item.setvClient(getCellString(cell)); break;
-								case 2: item.setvCampaign(getCellString(cell)); break;
-								case 3: item.setvInsertionOrder(getCellString(cell)); break;
-								case 4: item.setvLineItem(getCellString(cell)); break;
-								case 5: item.setvDeviceType(getCellString(cell)); break;
-								case 9: item.setdClickRate(getCellNumeric(cell)); break;
-								case 10: item.setiImpressions((int) getCellNumeric(cell)); break;
-								case 11: item.setiClicks((int) getCellNumeric(cell)); break;
-								case 12: item.setiCompleteViews((int) getCellNumeric(cell)); break;
-								case 16: item.setdRevenueCPM(getCellNumeric(cell)); break;
-							}
-						} catch (Exception e) {
-							e.printStackTrace(); // puedes registrar más fino si quieres
-							blankCount = 10; // fuerza el corte
-							break;
-						}
-					}
+                                            try {
+                                                    switch (col) {
+                                                            case 0:
+                                                                    String dateStr = getCellString(cell);
+                                                                    item.setvDate(dateStr);
+                                                                    String[] parts = dateStr.contains("-") ? dateStr.split("-") : dateStr.split("/");
+                                                                    if (parts.length == 3) {
+                                                                            item.setiAnio(Integer.parseInt(parts[0]));
+                                                                            item.setiMes(Integer.parseInt(parts[1]));
+                                                                            item.setiDia(Integer.parseInt(parts[2]));
+                                                                    }
+                                                                    break;
+                                                            case 1: item.setvClient(getCellString(cell)); break;
+                                                            case 2: item.setvCampaign(getCellString(cell)); break;
+                                                            case 3: item.setvInsertionOrder(getCellString(cell)); break;
+                                                            case 4: item.setvLineItem(getCellString(cell)); break;
+                                                            case 5: item.setvDeviceType(getCellString(cell)); break;
+                                                            case 9: item.setdClickRate(getCellNumeric(cell)); break;
+                                                            case 10: item.setiImpressions((int) getCellNumeric(cell)); break;
+                                                            case 11: item.setiClicks((int) getCellNumeric(cell)); break;
+                                                            case 12: item.setiCompleteViews((int) getCellNumeric(cell)); break;
+                                                            case 16: item.setdRevenueCPM(getCellNumeric(cell)); break;
+                                                    }
+                                            } catch (Exception e) {
+                                                    e.printStackTrace(); // puedes registrar más fino si quieres
+                                                    blankCount = 10; // fuerza el corte
+                                                    break;
+                                            }
+                                    }
 
-					if (blankCount > 4) continue;
+                                    if (blankCount > 4) continue;
 
-					localitemsDV360.add(item);
-				}
-			}
-		}
+                                    localitemsDV360.add(item);
+                            }
+                    }
+            }
 
-		return localitemsDV360;
-	}
-
+            return localitemsDV360;
+    }
 
     protected List<TblDV360SPD> scrap_Perf_PP_Data_OLD(UploadedFile itemFile, String vAgency, Integer iMonthly) throws FileNotFoundException, IOException{
         System.out.println("scrap_Perf_PP_Data");
@@ -1543,87 +1541,87 @@ public class DAOFile implements Serializable  {
         return localitemsDV360;
     } 
 
-	protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
-		System.out.println("scrap_Perf_ABTDV360_Data");
-		List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
+    protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
+            System.out.println("scrap_Perf_ABTDV360_Data");
+            List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
 
-		if (itemFile != null && itemFile.getFileName().endsWith(".xlsx")) {
-			try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-				Sheet sheet = workbook.getSheetAt(0);
-				Iterator<Row> rows = sheet.iterator();
+            if (itemFile != null && itemFile.getFileName().endsWith(".xlsx")) {
+                    try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
+                            Sheet sheet = workbook.getSheetAt(0);
+                            Iterator<Row> rows = sheet.iterator();
 
-				if (rows.hasNext()) rows.next(); // Saltar encabezado
+                            if (rows.hasNext()) rows.next(); // Saltar encabezado
 
-				while (rows.hasNext()) {
-					Row row = rows.next();
-					TblDV360SPD item = new TblDV360SPD();
+                            while (rows.hasNext()) {
+                                    Row row = rows.next();
+                                    TblDV360SPD item = new TblDV360SPD();
 
-					item.setvAgency(vAgency);
-					item.setIdDaily(new TblDailyProcess(0, 0, 0, ""));
-					item.setIdMontly(iMonthly);
-					item.setvCampaign("");
-					item.setvInsertionOrder("");
-					item.setvLineItem("");
-					item.setvExchange("");
-					item.setvDealName("");
-					item.setvClient("");
-					item.setdMediaCosts(0.0);
-					item.setdTotalMediaCosts(0.0);
-					item.setdCPC(0.0);
-					item.setdCPM(0.0);
-					item.setdCTR(0.0);
-					item.setdVCR(0.0);
-					item.setiImpressions(0);
-					item.setiClicks(0);
-					item.setiCompleteViews(0);
+                                    item.setvAgency(vAgency);
+                                    item.setIdDaily(new TblDailyProcess(0, 0, 0, ""));
+                                    item.setIdMontly(iMonthly);
+                                    item.setvCampaign("");
+                                    item.setvInsertionOrder("");
+                                    item.setvLineItem("");
+                                    item.setvExchange("");
+                                    item.setvDealName("");
+                                    item.setvClient("");
+                                    item.setdMediaCosts(0.0);
+                                    item.setdTotalMediaCosts(0.0);
+                                    item.setdCPC(0.0);
+                                    item.setdCPM(0.0);
+                                    item.setdCTR(0.0);
+                                    item.setdVCR(0.0);
+                                    item.setiImpressions(0);
+                                    item.setiClicks(0);
+                                    item.setiCompleteViews(0);
 
-					int blankCount = 0;
+                                    int blankCount = 0;
 
-					for (Cell cell : row) {
-						int col = cell.getColumnIndex();
-						if (isCellEffectivelyBlank(cell)) {
-							blankCount++;
-							if (blankCount > 4) break;
-						}
+                                    for (Cell cell : row) {
+                                            int col = cell.getColumnIndex();
+                                            if (isCellEffectivelyBlank(cell)) {
+                                                    blankCount++;
+                                                    if (blankCount > 4) break;
+                                            }
 
-						try {
-							switch (col) {
-								case 0: // Date
-									String dateStr = getCellString(cell);
-									item.setvDate(dateStr);
-									String[] parts = dateStr.contains("-") ? dateStr.split("-") : dateStr.split("/");
-									if (parts.length == 3) {
-										item.setiAnio(Integer.parseInt(parts[0]));
-										item.setiMes(Integer.parseInt(parts[1]));
-										item.setiDia(Integer.parseInt(parts[2]));
-									}
-									break;
-								case 1: item.setvClient(getCellString(cell)); break;
-								case 2: item.setvCampaign(getCellString(cell)); break;
-								case 3: item.setvInsertionOrder(getCellString(cell)); break;
-								case 4: item.setvLineItem(getCellString(cell)); break;
-								case 5: item.setvDeviceType(getCellString(cell)); break;
-								case 6: item.setdRevenueCPM(getCellNumeric(cell)); break;
-								case 8: item.setdClickRate(getCellNumeric(cell)); break;
-								case 9: item.setiImpressions((int) getCellNumeric(cell)); break;
-								case 10: item.setiClicks((int) getCellNumeric(cell)); break;
-								case 11: item.setiCompleteViews((int) getCellNumeric(cell)); break;
-							}
-						} catch (Exception e) {
-							e.printStackTrace(); // puedes registrar mejor si prefieres
-							blankCount = 10;
-							break;
-						}
-					}
+                                            try {
+                                                    switch (col) {
+                                                            case 0: // Date
+                                                                    String dateStr = getCellString(cell);
+                                                                    item.setvDate(dateStr);
+                                                                    String[] parts = dateStr.contains("-") ? dateStr.split("-") : dateStr.split("/");
+                                                                    if (parts.length == 3) {
+                                                                            item.setiAnio(Integer.parseInt(parts[0]));
+                                                                            item.setiMes(Integer.parseInt(parts[1]));
+                                                                            item.setiDia(Integer.parseInt(parts[2]));
+                                                                    }
+                                                                    break;
+                                                            case 1: item.setvClient(getCellString(cell)); break;
+                                                            case 2: item.setvCampaign(getCellString(cell)); break;
+                                                            case 3: item.setvInsertionOrder(getCellString(cell)); break;
+                                                            case 4: item.setvLineItem(getCellString(cell)); break;
+                                                            case 5: item.setvDeviceType(getCellString(cell)); break;
+                                                            case 6: item.setdRevenueCPM(getCellNumeric(cell)); break;
+                                                            case 8: item.setdClickRate(getCellNumeric(cell)); break;
+                                                            case 9: item.setiImpressions((int) getCellNumeric(cell)); break;
+                                                            case 10: item.setiClicks((int) getCellNumeric(cell)); break;
+                                                            case 11: item.setiCompleteViews((int) getCellNumeric(cell)); break;
+                                                    }
+                                            } catch (Exception e) {
+                                                    e.printStackTrace(); // puedes registrar mejor si prefieres
+                                                    blankCount = 10;
+                                                    break;
+                                            }
+                                    }
 
-					if (blankCount > 4) continue;
-					localitemsDV360.add(item);
-				}
-			}
-		}
+                                    if (blankCount > 4) continue;
+                                    localitemsDV360.add(item);
+                            }
+                    }
+            }
 
-		return localitemsDV360;
-	}
+            return localitemsDV360;
+    }
 
     protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data_OLD(UploadedFile itemFile, String vAgency, Integer iMonthly) throws FileNotFoundException, IOException{
         System.out.println("scrap_Perf_ABTDV360_Data");
@@ -3045,52 +3043,35 @@ public class DAOFile implements Serializable  {
                     }
 
                     try {
-                        item.setdGrossMargin(Double.parseDouble(stripQuotes(line[14])));
+                        item.setdCPM(Double.parseDouble(stripQuotes(line[8])));
                     } catch (Exception ex) {
-                        item.setdGrossMargin(0.0);
+                        item.setdCPM(0.00);
                     }
-
-                    // Cálculos
-                    item.setdTechFee(item.getdSalesRevenue() * 0.10);
-                    item.setdCPM(item.getiImpressions() > 0 ? 1000.0 * (item.getdSalesRevenue() / item.getiImpressions()) : 0.0);
-
-                    if (item.getvDeal().contains("-PP-")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.20);
-                    } else if (item.getvDeal().contains("-DV360-")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.19);
-                    } else if (item.getvSeat().contains("-BAS")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.15);
-                    } else if (item.getvDeal().contains("-TTD")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.15);
-                    } else if (item.getvAdvertiser().contains("MRM") || item.getvAdvertiser().contains("MR1")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.19);
-                    } else if (item.getvDeal().contains("Pulsepoint") || item.getvDeal().contains("-DV-")) {
-                        item.setdDspFee(item.getdSalesRevenue() * 0.20);
+                    
+                    try {
+                        item.setdMediaCost(Double.parseDouble(stripQuotes(line[9])));
+                    } catch (Exception ex) {
+                        item.setdMediaCost(0.00);
                     }
-
+                    
+                    try {
+                        item.setdMargin(Double.parseDouble(stripQuotes(line[14])));
+                    } catch (Exception ex) {
+                        item.setdMargin(0.00);
+                    }                    
+                    
                     if (item.getvSeat().contains("DATAP-ML")) {
                         item.setdMlFee(item.getdSalesRevenue() * 0.10);
                     }
 
-                    item.setdMediaCost(item.getdSalesRevenue() - item.getdGrossMargin() - item.getdTechFee());
-
-                    if (item.getvSeat().contains("DPX-EQT")) {
-                        item.setdMarginFee(item.getdGrossMargin() * 0.08);
-                    } else if (item.getvSeat().contains("DPX-PUB")) {
-                        item.setdMarginFee(item.getdGrossMargin() * 0.10);
-                    } else if (item.getvSeat().contains("DPX-OPX")) {
-                        item.setdMarginFee(item.getdGrossMargin() * 0.06);
-                    } else if (item.getvSeat().contains("DPX-XAN")) {
-                        item.setdMarginFee(item.getdGrossMargin() * 0.07);
-                    }
-
+                    item.setdGrossMargin((item.getdSalesRevenue() * item.getdMargin()) / 100.00);
                     item.setdGrossRevenue(item.getdGrossMargin() - item.getdMlFee());
                     item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
-                    item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee() - item.getdDspFee());
+                    item.setdNetRevenue(item.getdGrossMargin() - item.getdMarginFee() );
 
                     if (item.getdSalesRevenue() > 0) {
-                        item.setdMargin(item.getdGrossMargin() / item.getdSalesRevenue());
-                        item.setdNetMargin(item.getdNetRevenue() / item.getdSalesRevenue());
+                        item.setdMargin((item.getdGrossMargin() / item.getdSalesRevenue()) * 1.00);
+                        item.setdNetMargin((item.getdNetRevenue() / item.getdSalesRevenue()) * 1.00);
                     }
 
                     if (item.getiImpressions() > 0 && item.getdSalesRevenue() > 0) {
@@ -8092,7 +8073,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
             }else{//SSP
                 if (lsFileName.contains("Equativ")){//CSV                    
                     save_ItemsSSPDeleteFisrt(lsFileName, scrap_SSP_Equative_Format(itemFile, idDaily), idDaily, "EQUATIV");
-                }else if (lsFileName.contains("Loopme")){//CSV                    
+                }else if (lsFileName.toUpperCase().contains("LOOPME")){//CSV                    
                     save_ItemsSSPDeleteFisrt(lsFileName, scrap_SSP_Loopme_Format(itemFile, idDaily), idDaily, "LOOPME");
                 }else if (lsFileName.contains("PubMatic")){//CSV
                     save_ItemsSSP(lsFileName, scrap_SSP_PubMatic_Format(itemFile, idDaily));

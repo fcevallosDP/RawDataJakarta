@@ -22,9 +22,6 @@
                 .ui-datatable thead th {
                     text-align: center !important;
                 }
-                /*.ui-menu {
-                    background: #607D8B !important;
-                }*/
             </style>             
             <h:form id="TblRawSSPDataListForm" enctype="multipart/form-data">
                 <p:growl id="messages"/>
@@ -47,6 +44,12 @@
                                  >
                         <f:facet name="header">
                             <h:outputText value="SSP Daily DATA" style="font-size: larger"/>
+                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" rendered="#{!(empty tblRawSSPDataController.diaEstadoItems)}"/>
+                            <ui:repeat value="#{tblRawSSPDataController.diaEstadoItems}" var="dia">
+                                <p:badge value="#{dia.iDia}"
+                                         severity="danger"
+                                         style="margin: 0.25rem;" />
+                            </ui:repeat>                             
                         </f:facet>                        
                         <f:facet name="paginatorTopLeft">
                                 <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DMonthSelected}"

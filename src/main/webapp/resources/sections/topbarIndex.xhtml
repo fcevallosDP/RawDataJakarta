@@ -42,9 +42,9 @@
                                             <div class="flex flex-column flex-grow-1">
                                                 <div class="flex align-items-center justify-content-between mb-1">
                                                     <span class="fs-small font-bold">#{n.message}</span>
-                                                    <small>#{n.getvDealId()}</small>
+                                                    <small>#{n.vKind.contains('MARGIN') ? n.vDealId : n.vDate }</small>
                                                 </div>
-                                                <span class="fs-small">#{n.getvDeal()}</span>
+                                                <span class="fs-small" title="#{n.vKind.contains('MARGIN') ? n.vDate : n.vFileName }">#{n.vDeal}</span>
                                             </div>
                                         </div>
                                     </li>

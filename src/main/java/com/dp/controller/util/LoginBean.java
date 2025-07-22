@@ -261,7 +261,7 @@ public class LoginBean implements Serializable {
                         lbIfAdmin = true;                        
                     }
                     
-                    notificaciones = dbCon.getDealsLowMargin(this.LoggedInUser.getvAgency());                                        
+                    notificaciones = dbCon.getNotificaciones(this.LoggedInUser.getvAgency());                                        
                     
                     externalContext.redirect(externalContext.getRequestContextPath() + "/index.xhtml");
                     return "index";

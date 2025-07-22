@@ -5946,11 +5946,54 @@ private double computeMarginFee(TblDVXANDRSPD item) {
     }   
 
 
-    public List<TblRawDataNotifications> getDealsLowMargin(String vAgency){
+    public List<TblRawDataNotifications> getNotificaciones(String vAgency) {
+        List<TblRawDataNotifications> todas = new ArrayList<>();
+
+        List<TblRawDataNotifications> tipoA = getDealsLowMargin(vAgency);
+        List<TblRawDataNotifications> tipoB = getDealsCriticalDataOtros();
+
+        if (tipoA !=null && !tipoA.isEmpty()) todas.addAll(tipoA);
+        if (tipoB !=null && !tipoB.isEmpty()) todas.addAll(tipoB);
+
+        return todas;
+    }
+
+    
+    
+    protected List<TblRawDataNotifications> getDealsCriticalDataOtros(){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("SELECT vAgency, vDeal, vDealId\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select vType, vDate, vDealName, vFileName from vwotros"); 
+            
+            ResultSet rs = pstmt.executeQuery();  
+            List<TblRawDataNotifications> itemsNotifications = new ArrayList();
+            while (rs.next()) {     
+                TblRawDataNotifications item = new TblRawDataNotifications();
+                item.setMessage("Deal with data missing");
+                item.setvDate(rs.getString("vDate"));
+                item.setvDeal(rs.getString("vDealName"));
+                item.setvFileName(rs.getString("vFileName"));
+                item.setvType(rs.getString("vType"));
+                item.setvKind("DATA");
+                itemsNotifications.add(item);
+            }
+            rs.close();
+            pstmt.close();   
+            return itemsNotifications;
+        } catch (Exception ex) {            
+            System.out.println("getDealsCriticalDataOtros");
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();                
+        }
+        return null;
+    }
+    
+    protected List<TblRawDataNotifications> getDealsLowMargin(String vAgency){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+             
+            PreparedStatement pstmt = connect.prepareStatement("SELECT 'SSP' as vType, vDate, vAgency, vDeal, vDealId, vFileName\n" +
                                                                 "FROM tbl_raw_ssp_data\n" +
                                                                 "WHERE dSalesRevenue > 0.01\n" +
                                                                 "	and dMargin <= coalesce((select dvalue from tbl_parameters where vDescription like 'Base%Margin%' limit 1), 0) \n" +
@@ -5965,9 +6008,12 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                 TblRawDataNotifications item = new TblRawDataNotifications();
                 item.setMessage("Deal with low margin detected");
                 item.setvAgency(rs.getString("vAgency"));
+                item.setvDate(rs.getString("vDate"));
                 item.setvDeal(rs.getString("vDeal"));
                 item.setvDealId(rs.getString("vDealId"));
-                
+                item.setvFileName(rs.getString("vFileName"));
+                item.setvType(rs.getString("vType"));
+                item.setvKind("MARGIN");
                 itemsNotifications.add(item);
             }
             rs.close();
@@ -6687,15 +6733,30 @@ private double computeMarginFee(TblDVXANDRSPD item) {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
             
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`vDate`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`, `iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
+            PreparedStatement pstmt;
+            
+            if(vAgency.contains("ALL")){
+                pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`vDate`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`, `iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
                                                             "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`, `tbl_raw_data`.`vUser`,	`dCPM`, `dCTR`, `dCPC`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vFileName`, `tbl_raw_data`.`id_monthly`, `tbl_raw_data`.`dDate` as dateProcess\n" +
                                                             "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
                                                             "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
-                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')\n"
+                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ? \n"
                                                             + "order by `tbl_raw_data`.`dDate` desc;"); 
-            pstmt.setInt(1, iMonthly);
-            pstmt.setString(2, vAgency);
-            pstmt.setString(3, vAgency);
+                pstmt.setInt(1, iMonthly);
+            }else{
+                pstmt = connect.prepareStatement("select `Id_raw`, `tbl_raw_data`.`vDate`, `tbl_raw_data`.`dDate`, `vPartner`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vExchange`, `vDealName`, `iImpressions`, `iClicks`, `dMediaCost`, `dTotalMediaCost`, `vDSP`,\n" +
+                                                            "	`vClient`, `vAgency`, `vChannel`, `vAlias`, `vVendor`, `vVendorSource`, `tbl_raw_data`.`vUser`,	`dCPM`, `dCTR`, `dCPC`, `tbl_monthlyprocess`.`iYear`, `tbl_monthlyprocess`.`iMonth`, `vFileName`, `tbl_raw_data`.`id_monthly`, `tbl_raw_data`.`dDate` as dateProcess\n" +
+                                                            "from `tbl_raw_data`, `tbl_monthlyprocess`\n" +
+                                                            "where `tbl_raw_data`.`id_monthly` = `tbl_monthlyprocess`.`id_monthly` and\n" +
+                                                            "	`tbl_raw_data`.`tStatus` = 1 and `tbl_monthlyprocess`.`id_monthly` =  ? and `vAgency` = ?\n"
+                                                            + "order by `tbl_raw_data`.`dDate` desc;"); 
+
+                pstmt.setInt(1, iMonthly);
+                pstmt.setString(2, vAgency);
+            }
+             
+            
+            
             ResultSet rs = pstmt.executeQuery();  
             List<TblDV360SPD> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
@@ -8074,7 +8135,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                 if (lsFileName.contains("Equativ")){//CSV                    
                     save_ItemsSSPDeleteFisrt(lsFileName, scrap_SSP_Equative_Format(itemFile, idDaily), idDaily, "EQUATIV");
                 }else if (lsFileName.toUpperCase().contains("LOOPME")){//CSV                    
-                    save_ItemsSSPDeleteFisrt(lsFileName, scrap_SSP_Loopme_Format(itemFile, idDaily), idDaily, "LOOPME");
+                    save_ItemsSSP(lsFileName, scrap_SSP_Loopme_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("PubMatic")){//CSV
                     save_ItemsSSP(lsFileName, scrap_SSP_PubMatic_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("Triton")){//CSV                                        

@@ -9,6 +9,10 @@ package com.dp.util;
  * @author ZAMBRED
  */
 public class TblRawDataNotifications {
+    private String vType;
+    private String vKind;
+    private String vDate;
+    private String vFileName;
     private String vDeal;
     private String vDealId;
     private String vAgency;        
@@ -19,6 +23,38 @@ public class TblRawDataNotifications {
 
     public void setvDeal(String vDeal) {
         this.vDeal = vDeal;
+    }
+
+    public String getvType() {
+        return vType;
+    }
+
+    public void setvType(String vType) {
+        this.vType = vType;
+    }
+
+    public String getvKind() {
+        return vKind;
+    }
+
+    public void setvKind(String vKind) {
+        this.vKind = vKind;
+    }
+
+    public String getvDate() {
+        return vDate;
+    }
+
+    public void setvDate(String vDate) {
+        this.vDate = vDate;
+    }
+
+    public String getvFileName() {
+        return vFileName;
+    }
+
+    public void setvFileName(String vFileName) {
+        this.vFileName = vFileName;
     }
 
     public String getvDealId() {

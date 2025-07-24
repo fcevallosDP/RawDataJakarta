@@ -27,7 +27,7 @@
                                 update="dataSummaryCampaign, @this, :TblRawDataListForm:messages" />
 
                         <p:headerRow field="vAdvertiser" expandable="false" expanded="true">
-                            <p:column colspan="7">
+                            <p:column colspan="8">
                                 <div class="inline-flex align-items-center" style="vertical-align: middle">
                                     <h:outputText value="#{summaryitemC.vAdvertiser}" />
                                 </div>
@@ -71,7 +71,19 @@
                                     <p:inputNumber id="inputvcr" value="#{summaryitemC.dVCRGoal}" style="width:100% !important;" label="VCR Goal" decimalPlaces="2" decimalSeparator="." minValue="0.00" symbol="%"/>
                                 </f:facet>
                             </p:cellEditor>                            
-                        </p:column>                                
+                        </p:column>     
+                        <p:column width="90" headerText="ACR Goal" style="text-align: right; background: rgb(218 239 221) !important;}">                     
+                            <p:cellEditor>
+                                <f:facet name="output">
+                                    <h:outputText value="#{summaryitemC.dACRGoal}">
+                                        <f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/>
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputNumber id="inputacr" value="#{summaryitemC.dACRGoal}" style="width:100% !important;" label="ACR Goal" decimalPlaces="2" decimalSeparator="." minValue="0.00" symbol="%"/>
+                                </f:facet>
+                            </p:cellEditor>                            
+                        </p:column>                          
                         <p:column width="60" headerText="Edit" style="text-align: center; background: rgba(0, 0, 0, 0.03) !important;}">                     
                             <p:rowEditor editTitle="Edit Row" cancelTitle="Cancel Edit" saveTitle="Save Row"/>
                         </p:column>                                                                                                                      

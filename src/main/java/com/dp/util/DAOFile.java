@@ -2074,7 +2074,7 @@ public class DAOFile implements Serializable  {
         return localitemsDV360;
     } 
 
-    protected List<TblDV360SPD> scrap_Perf_DV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
+    protected List<TblDV360SPD> scrap_Perf_MRMDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
             System.out.println("scrap_Perf_DV360_Data");
             List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
 
@@ -2104,6 +2104,7 @@ public class DAOFile implements Serializable  {
                                     item.setdCPM(0.0);
                                     item.setdCTR(0.0);
                                     item.setdVCR(0.0);
+                                    item.setdACR(0.0);
                                     item.setiImpressions(0);
                                     item.setiClicks(0);
                                     item.setiCompleteViews(0);
@@ -2139,6 +2140,7 @@ public class DAOFile implements Serializable  {
                                                             case 7: item.setdClickRate(getCellNumeric(cell)); break;
                                                             case 8: item.setiImpressions((int) getCellNumeric(cell)); break;
                                                             case 9: item.setiClicks((int) getCellNumeric(cell)); break;
+
                                                     }
                                             } catch (Exception e) {
                                                     e.printStackTrace();
@@ -2155,6 +2157,91 @@ public class DAOFile implements Serializable  {
 
             return localitemsDV360;
     }
+    
+    protected List<TblDV360SPD> scrap_Perf_HLKDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
+            System.out.println("scrap_Perf_DV360_Data");
+            List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
+
+            if (itemFile != null && itemFile.getFileName().endsWith(".xlsx")) {
+                    try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
+                            Sheet sheet = workbook.getSheetAt(0);
+                            Iterator<Row> rows = sheet.iterator();
+
+                            if (rows.hasNext()) rows.next(); // Saltar encabezado
+
+                            while (rows.hasNext()) {
+                                    Row row = rows.next();
+                                    TblDV360SPD item = new TblDV360SPD();
+
+                                    item.setvAgency(vAgency);
+                                    item.setIdDaily(new TblDailyProcess(0, 0, 0, ""));
+                                    item.setIdMontly(iMonthly);
+                                    item.setvCampaign("");
+                                    item.setvInsertionOrder("");
+                                    item.setvLineItem("");
+                                    item.setvExchange("");
+                                    item.setvDealName("");
+                                    item.setvClient("");
+                                    item.setdMediaCosts(0.0);
+                                    item.setdTotalMediaCosts(0.0);
+                                    item.setdCPC(0.0);
+                                    item.setdCPM(0.0);
+                                    item.setdCTR(0.0);
+                                    item.setdVCR(0.0);
+                                    item.setdACR(0.0);
+                                    item.setiImpressions(0);
+                                    item.setiClicks(0);
+                                    item.setiCompleteViews(0);
+
+                                    int blankCount = 0;
+
+                                    for (Cell cell : row) {
+                                            int col = cell.getColumnIndex();
+
+                                            if (isCellEffectivelyBlank(cell)) {
+                                                    blankCount++;
+                                                    if (blankCount > 4) break;
+                                            }
+
+                                            try {
+                                                    switch (col) {
+                                                            case 0: // Date
+                                                                    String dateStr = getCellString(cell);
+                                                                    item.setvDate(dateStr);
+                                                                    String[] parts = dateStr.contains("-") ? dateStr.split("-") : dateStr.split("/");
+                                                                    if (parts.length == 3) {
+                                                                            item.setiAnio(Integer.parseInt(parts[0]));
+                                                                            item.setiMes(Integer.parseInt(parts[1]));
+                                                                            item.setiDia(Integer.parseInt(parts[2]));
+                                                                    }
+                                                                    break;
+                                                            case 1: item.setvClient(getCellString(cell)); break;
+                                                            case 2: item.setvCampaign(getCellString(cell)); break;
+                                                            case 3: item.setvInsertionOrder(getCellString(cell)); break;
+                                                            case 4: item.setvLineItem(getCellString(cell)); break;
+                                                            case 5: item.setvDeviceType(getCellString(cell)); break;
+                                                            case 6: item.setdRevenueCPM(getCellNumeric(cell)); break;
+                                                            case 7: item.setdClickRate(getCellNumeric(cell)); break;
+                                                            case 8: item.setiImpressions((int) getCellNumeric(cell)); break;
+                                                            case 9: item.setiClicks((int) getCellNumeric(cell)); break;
+                                                            case 11: item.setdACR(getCellNumeric(cell)); break;
+                                                            case 12: item.setdVCR(getCellNumeric(cell)); break;
+                                                    }
+                                            } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                    blankCount = 10;
+                                                    break;
+                                            }
+                                    }
+
+                                    if (blankCount > 4) continue;
+                                    localitemsDV360.add(item);
+                            }
+                    }
+            }
+
+            return localitemsDV360;
+    }    
     
     protected List<TblDV360SPD> scrap_BASIS_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
         System.out.println("scrap_BASIS_Format");
@@ -4071,100 +4158,100 @@ public class DAOFile implements Serializable  {
         item.setvExchange("");
     }
     
-private void parseDate(Cell cell, TblDVXANDRSPD item) {
-    String string;
-    if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-        string = new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
-    } else {
-        string = getStringValue(cell);
+    private void parseDate(Cell cell, TblDVXANDRSPD item) {
+        String string;
+        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+            string = new SimpleDateFormat("yyyy-MM-dd").format(cell.getDateCellValue());
+        } else {
+            string = getStringValue(cell);
+        }
+        item.setvDate(string);
+
+        String[] parts = string.split("-");
+        if (parts.length == 3) {
+            item.setiYear(Integer.parseInt(parts[0]));
+            item.setiMonth(Integer.parseInt(parts[1]));
+            item.setiDay(Integer.parseInt(parts[2]));
+        }
     }
-    item.setvDate(string);
 
-    String[] parts = string.split("-");
-    if (parts.length == 3) {
-        item.setiYear(Integer.parseInt(parts[0]));
-        item.setiMonth(Integer.parseInt(parts[1]));
-        item.setiDay(Integer.parseInt(parts[2]));
+    private void parseDealData(Cell cell, TblDVXANDRSPD item) {
+        String deal = getStringValue(cell);
+        item.setvDeal(deal);
+        item.setvBrand(getValueBetweenColumnsPredefined(item, "BRAND"));
+        item.setvAdvertiser(getValueBetweenColumnsPredefined(item, "ADVERTISER"));
+        item.setvClient(item.getvBrand());
+        item.setvAgency(item.getvAdvertiser());//getValueBetweenColumnsPredefined(item, "AGENCY"));
+        item.setvDsp(getValueBetweenColumnsPredefined(item, "DSP"));
+        item.setvChannel(getValueBetweenColumnsPredefined(item, "CHANNEL"));
+        item.setvSeat(getValueBetweenColumnsPredefined(item, "SEAT"));
+        item.setvExchange(getValueBetweenColumnsPredefined(item, "EXCHANGE"));
     }
-}
 
-private void parseDealData(Cell cell, TblDVXANDRSPD item) {
-    String deal = getStringValue(cell);
-    item.setvDeal(deal);
-    item.setvBrand(getValueBetweenColumnsPredefined(item, "BRAND"));
-    item.setvAdvertiser(getValueBetweenColumnsPredefined(item, "ADVERTISER"));
-    item.setvClient(item.getvBrand());
-    item.setvAgency(item.getvAdvertiser());//getValueBetweenColumnsPredefined(item, "AGENCY"));
-    item.setvDsp(getValueBetweenColumnsPredefined(item, "DSP"));
-    item.setvChannel(getValueBetweenColumnsPredefined(item, "CHANNEL"));
-    item.setvSeat(getValueBetweenColumnsPredefined(item, "SEAT"));
-    item.setvExchange(getValueBetweenColumnsPredefined(item, "EXCHANGE"));
-}
-
-private void parseSalesRevenue(Cell cell, TblDVXANDRSPD item) {
-    double revenue = getDoubleValue(cell);
-    item.setdSalesRevenue(revenue);
-    item.setdTechFee(revenue * 0.10);
-    item.setdCPM(item.getiImpressions() > 0 ? 1000.0 * revenue / item.getiImpressions() : 0.0);
-    item.setdDspFee(computeDspFee(item));
-    if (item.getvSeat() != null && item.getvSeat().contains("DATAP-ML")) {
-        item.setdMlFee(revenue * 0.10);
+    private void parseSalesRevenue(Cell cell, TblDVXANDRSPD item) {
+        double revenue = getDoubleValue(cell);
+        item.setdSalesRevenue(revenue);
+        item.setdTechFee(revenue * 0.10);
+        item.setdCPM(item.getiImpressions() > 0 ? 1000.0 * revenue / item.getiImpressions() : 0.0);
+        item.setdDspFee(computeDspFee(item));
+        if (item.getvSeat() != null && item.getvSeat().contains("DATAP-ML")) {
+            item.setdMlFee(revenue * 0.10);
+        }
     }
-}
 
-private void parseGrossMargin(Cell cell, TblDVXANDRSPD item) {
-    double margin = getDoubleValue(cell);
-    item.setdGrossMargin(margin);
-    item.setdMediaCost(item.getdSalesRevenue() - margin - item.getdTechFee());
-    item.setdMarginFee(computeMarginFee(item));
-    item.setdGrossRevenue(margin - item.getdMlFee());
-    item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
-    item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee() - item.getdDspFee());
-    if (item.getdSalesRevenue() > 0) {
-        item.setdMargin(margin / item.getdSalesRevenue());
-        item.setdNetMargin(item.getdNetRevenue() / item.getdSalesRevenue());
+    private void parseGrossMargin(Cell cell, TblDVXANDRSPD item) {
+        double margin = getDoubleValue(cell);
+        item.setdGrossMargin(margin);
+        item.setdMediaCost(item.getdSalesRevenue() - margin - item.getdTechFee());
+        item.setdMarginFee(computeMarginFee(item));
+        item.setdGrossRevenue(margin - item.getdMlFee());
+        item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
+        item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee() - item.getdDspFee());
+        if (item.getdSalesRevenue() > 0) {
+            item.setdMargin(margin / item.getdSalesRevenue());
+            item.setdNetMargin(item.getdNetRevenue() / item.getdSalesRevenue());
+        }
     }
-}
 
-private void parseImpressions(Cell cell, TblDVXANDRSPD item) {
-    item.setiImpressions((int) getDoubleValue(cell));
-}
+    private void parseImpressions(Cell cell, TblDVXANDRSPD item) {
+        item.setiImpressions((int) getDoubleValue(cell));
+    }
 
-private String getStringValue(Cell cell) {
-    return cell == null ? "" : cell.toString().replace("\"", "").trim();
-}
+    private String getStringValue(Cell cell) {
+        return cell == null ? "" : cell.toString().replace("\"", "").trim();
+    }
 
-private double getDoubleValue(Cell cell) {
-    try {
-        if (cell == null) return 0.0;
-        if (cell.getCellType() == CellType.NUMERIC) return cell.getNumericCellValue();
-        return Double.parseDouble(cell.getStringCellValue().replace("\"", "").trim());
-    } catch (Exception e) {
+    private double getDoubleValue(Cell cell) {
+        try {
+            if (cell == null) return 0.0;
+            if (cell.getCellType() == CellType.NUMERIC) return cell.getNumericCellValue();
+            return Double.parseDouble(cell.getStringCellValue().replace("\"", "").trim());
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    private double computeDspFee(TblDVXANDRSPD item) {
+        String deal = item.getvDeal() == null ? "" : item.getvDeal();
+        String seat = item.getvSeat() == null ? "" : item.getvSeat();
+        String adv = item.getvAdvertiser() == null ? "" : item.getvAdvertiser();
+
+        if (deal.contains("-PP-") || deal.contains("Pulsepoint")) return item.getdSalesRevenue() * 0.20;
+        if (deal.contains("-DV360-") || deal.contains("-DV-")) return item.getdSalesRevenue() * 0.19;
+        if (deal.contains("-TTD")) return item.getdSalesRevenue() * 0.15;
+        if (seat.contains("-BAS")) return item.getdSalesRevenue() * 0.15;
+        if (adv.contains("MRM") || adv.contains("MR1")) return item.getdSalesRevenue() * 0.19;
         return 0.0;
     }
-}
 
-private double computeDspFee(TblDVXANDRSPD item) {
-    String deal = item.getvDeal() == null ? "" : item.getvDeal();
-    String seat = item.getvSeat() == null ? "" : item.getvSeat();
-    String adv = item.getvAdvertiser() == null ? "" : item.getvAdvertiser();
-
-    if (deal.contains("-PP-") || deal.contains("Pulsepoint")) return item.getdSalesRevenue() * 0.20;
-    if (deal.contains("-DV360-") || deal.contains("-DV-")) return item.getdSalesRevenue() * 0.19;
-    if (deal.contains("-TTD")) return item.getdSalesRevenue() * 0.15;
-    if (seat.contains("-BAS")) return item.getdSalesRevenue() * 0.15;
-    if (adv.contains("MRM") || adv.contains("MR1")) return item.getdSalesRevenue() * 0.19;
-    return 0.0;
-}
-
-private double computeMarginFee(TblDVXANDRSPD item) {
-    String seat = item.getvSeat() == null ? "" : item.getvSeat();
-    if (seat.contains("DPX-EQT")) return item.getdGrossMargin() * 0.08;
-    if (seat.contains("DPX-PUB")) return item.getdGrossMargin() * 0.10;
-    if (seat.contains("DPX-OPX")) return item.getdGrossMargin() * 0.06;
-    if (seat.contains("DPX-XAN")) return item.getdGrossMargin() * 0.07;
-    return 0.0;
-}
+    private double computeMarginFee(TblDVXANDRSPD item) {
+        String seat = item.getvSeat() == null ? "" : item.getvSeat();
+        if (seat.contains("DPX-EQT")) return item.getdGrossMargin() * 0.08;
+        if (seat.contains("DPX-PUB")) return item.getdGrossMargin() * 0.10;
+        if (seat.contains("DPX-OPX")) return item.getdGrossMargin() * 0.06;
+        if (seat.contains("DPX-XAN")) return item.getdGrossMargin() * 0.07;
+        return 0.0;
+    }
 
     
     protected List<TblDVXANDRSPD> scrap_SSP_OpenX_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
@@ -5945,7 +6032,6 @@ private double computeMarginFee(TblDVXANDRSPD item) {
         return null;
     }   
 
-
     public List<TblRawDataNotifications> getNotificaciones(String vAgency) {
         List<TblRawDataNotifications> todas = new ArrayList<>();
 
@@ -5957,9 +6043,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
 
         return todas;
     }
-
-    
-    
+        
     protected List<TblRawDataNotifications> getDealsCriticalDataOtros(){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
@@ -6188,7 +6272,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                          
-            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, id_monthly, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select IdPerf, id_monthly, iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, dACRGoal, avg_cpm, sum_imp, sum_cli, dSystemDate, vUser\n" +
                                                                 "from vwperfgoals\n" +
                                                                 "where id_monthly = ? and vAgency = ?;"); 
             pstmt.setInt(1, iMonthly);
@@ -6216,6 +6300,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                 item.setdCPMGoal(rs.getDouble("dCPMGoal"));
                 item.setdCTRGoal(rs.getDouble("dCTRGoal"));
                 item.setdVCRGoal(rs.getDouble("dVCRGoal"));
+                item.setdACRGoal(rs.getDouble("dACRGoal"));
 
                 double num = rs.getDouble("avg_cpm");
                 BigDecimal bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
@@ -6235,7 +6320,7 @@ private double computeMarginFee(TblDVXANDRSPD item) {
             pstmt.close();   
             return itemsLocalDV360;
         } catch (Exception ex) {            
-            System.out.println("getPerfDataSummary");
+            System.out.println("getPerfDataGoals");
             System.out.println(ex.getMessage());
             ex.printStackTrace();                
         }
@@ -6275,6 +6360,11 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                     item.setdVCRGoal(rs.getDouble("dVCRGoal"));
                 } catch (Exception e) {
                     item.setdVCRGoal(0.00);
+                }                
+                try {
+                    item.setdACRGoal(rs.getDouble("dACRGoal"));
+                } catch (Exception e) {
+                    item.setdACRGoal(0.00);
                 }                
                 try {
                     item.setdCPM_W1(rs.getDouble("dW1"));
@@ -6639,6 +6729,15 @@ private double computeMarginFee(TblDVXANDRSPD item) {
             pstmt.setString(4, vPartner);
             pstmt.setString(5, lsOldCampaign);                                
             pstmt.executeUpdate();
+            
+            
+            pstmt = connect.prepareStatement("update tbl_raw_perf_data set vCampaign = ?, dSystemDate = now(), vUser = ? where id_monthly = ? and vAgency = ? and vCampaign = ?");                  
+            pstmt.setString(1, lsNewCampaign);
+            pstmt.setString(2, (userSession != null) ? userSession.getvUser():"");
+            pstmt.setInt(3, iMonthly);  
+            pstmt.setString(4, vPartner);
+            pstmt.setString(5, lsOldCampaign);                                
+            pstmt.executeUpdate();            
                 
             pstmt.close(); 
             return true;            
@@ -6702,12 +6801,9 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                 pstmt.setInt(1, item.getiDPerf());        
                 pstmt.executeUpdate();
             }
-            /*then add new data
-            pstmt = connect.prepareStatement("insert into `tbl_budget_pacing` (iYear, iMonth, vAgency, vClient, vChannel, dBudget, dPMPBudget, dCampaignSpend, dPMPSpend, dConsumeRate, dPMPRate, dSucessRate, dPMPNetSplit, dStartDate, dEndDate, iDaysLeft, dMT2YDaySpent, dRemainingBudget, dTargetDailySpend, vUser) VALUES \n"
-                    + "                         (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");      
-            */
-            pstmt = connect.prepareStatement("insert into `tbl_goal_performance` (iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, vUser, id_monthly) VALUES \n"
-                    + "                         (?,?,?,?,?,?,?,?,?,?)");                  
+
+            pstmt = connect.prepareStatement("insert into `tbl_goal_performance` (iYear, iMonth, vAgency, vAdvertiser, vCampaign, dCPMGoal, dCTRGoal, dVCRGoal, dACRGoal, vUser, id_monthly) VALUES \n"
+                    + "                         (?,?,?,?,?,?,?,?,?,?,?)");                  
             pstmt.setInt(1, item.getiAnio());
             pstmt.setInt(2, item.getiMes());            
             pstmt.setString(3, item.getvAgency());
@@ -6715,9 +6811,10 @@ private double computeMarginFee(TblDVXANDRSPD item) {
             pstmt.setString(5, item.getvCampaign());
             pstmt.setDouble(6, item.getdCPMGoal());
             pstmt.setDouble(7, item.getdCTRGoal());
-            pstmt.setDouble(8, item.getdVCRGoal());            
-            pstmt.setString(9, (userSession != null) ? userSession.getvUser():"");
-            pstmt.setInt(10, item.getIdMontly());
+            pstmt.setDouble(8, item.getdVCRGoal());  
+            pstmt.setDouble(9, item.getdACRGoal());  
+            pstmt.setString(10, (userSession != null) ? userSession.getvUser():"");
+            pstmt.setInt(11, item.getIdMontly());
             pstmt.executeUpdate();
                 
             pstmt.close(); 
@@ -7952,6 +8049,66 @@ private double computeMarginFee(TblDVXANDRSPD item) {
         return false;
     }            
 
+    protected boolean save_ItemsPerfMassiveDV360(String lsFileName, List<TblDV360SPD> localitemsDV360, Integer iWeek){
+
+        System.out.println("save_ItemsPerfMassive "+lsFileName);
+        if (localitemsDV360 != null && !localitemsDV360.isEmpty() && !lsFileName.isEmpty()){
+            try (Connection connect = DatabaseConnector.getConnection()) { 
+                 
+                PreparedStatement pstmt = connect.prepareStatement("INSERT into `tbl_raw_perf_data` "
+                                        + "(`dDate`,`iWeek`,`iDia`,`iMes`,`iAnio`, `vAgency`, `vAdvertiser`,`vCampaign`,`vInsertionOrder`,`vLineItem`,`vDeviceType`,`dRevenueCPM`, `dClickRate`, `iImpressions`,`iClicks`,`dVCR`,`dACR`,`dSystemDate`,`vFileName`, `vUser`, `id_monthly`)"
+                                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now(),?,?,?);");
+
+                for (TblDV360SPD item : localitemsDV360) {                                    
+                    pstmt.setString(1, item.getvDate());
+                    pstmt.setInt(2, iWeek);
+                    pstmt.setLong(3, item.getiDia());
+                    pstmt.setLong(4, item.getiMes());
+                    pstmt.setLong(5, item.getiAnio());
+                    pstmt.setString(6, item.getvAgency());
+                    pstmt.setString(7, item.getvClient());
+                    pstmt.setString(8, item.getvCampaign());
+                    pstmt.setString(9, item.getvInsertionOrder());
+                    pstmt.setString(10, item.getvLineItem());
+                    pstmt.setString(11, item.getvDeviceType());
+
+                    double num = item.getdRevenueCPM();
+                    BigDecimal bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);                                                              
+                    pstmt.setDouble(12, bd.doubleValue());
+
+                    
+                    num = (item.getiImpressions() != null && item.getiClicks() != null && item.getiImpressions() > 0) ? (double) ((item.getiClicks() / item.getiImpressions()) * 100.00) : 0.00;
+                    bd = new BigDecimal(num).setScale(6, RoundingMode.HALF_UP);                     
+                    pstmt.setDouble(13, bd.doubleValue());
+                    
+                    pstmt.setInt(14, item.getiImpressions());                
+                    pstmt.setInt(15, item.getiClicks());  
+                    
+                    num = item.getdVCR();
+                    bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);                                                              
+                    pstmt.setDouble(16, bd.doubleValue());                                        
+
+                    num = item.getdACR();
+                    bd = new BigDecimal(num).setScale(5, RoundingMode.HALF_UP);                                                              
+                    pstmt.setDouble(17, bd.doubleValue());                                        
+                    
+                    pstmt.setString(18, lsFileName.trim());                                       
+                    pstmt.setString(19, (userSession != null) ? userSession.getvUser():"");
+                    pstmt.setInt(20, item.getIdMontly());  
+                    pstmt.executeUpdate();
+                }                
+                pstmt.close(); 
+                System.out.println("save_ItemsPerfMassive saved: " + String.valueOf(localitemsDV360.size()));
+                return true;
+            } catch (Exception ex) {
+            
+                System.out.println("in save_ItemsPerfMassive");
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();                
+            }          
+        }
+        return false;
+    }  
     
     protected static SXSSFWorkbook convertCsvToXlsx(UploadedFile itemFile) throws Exception {
         try (CSVReader csvReader = new CSVReader(new InputStreamReader(itemFile.getInputStream(), StandardCharsets.UTF_8))) {
@@ -8175,8 +8332,10 @@ private double computeMarginFee(TblDVXANDRSPD item) {
                 save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_PP_Data(itemFile, vAgency, iMonthly), iWeek);                                  
             }else if (lsFileName.contains("ABT")){
                 save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_ABTDV360_Data(itemFile, vAgency, iMonthly), iWeek);                  
-            }else/* if (lsFileName.contains("HLK"))*/{
-                save_ItemsPerfMassive(itemFile.getFileName(), scrap_Perf_DV360_Data(itemFile, vAgency, iMonthly), iWeek);                  
+            }else if (lsFileName.contains("HLK")){
+                save_ItemsPerfMassiveDV360(itemFile.getFileName(), scrap_Perf_HLKDV360_Data(itemFile, vAgency, iMonthly), iWeek);                  
+            }else{
+                save_ItemsPerfMassiveDV360(itemFile.getFileName(), scrap_Perf_MRMDV360_Data(itemFile, vAgency, iMonthly), iWeek);                  
             }
         }                        
     }    

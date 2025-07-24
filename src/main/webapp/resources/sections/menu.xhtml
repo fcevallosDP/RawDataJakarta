@@ -27,7 +27,7 @@
                         <p:menuitem id="m_buy" value="Daily Data" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
                         <p:menuitem id="m_doc" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml" />
                     </p:submenu>  
-                    <p:submenu id="m_utils" label="Settings" icon="pi pi-fw pi-cog">
+                    <p:submenu id="m_utils" label="Settings" icon="pi pi-fw pi-cog" rendered="#{loginBean.lbIfAdmin}">
                         <p:menuitem id="m_icons" value="Catalog" icon="pi pi-fw pi-wrench" url="/RawData/tblCatalog/List.xhtml" />                        
                     </p:submenu>                        
                     <p:submenu id="m_exits" label="Logout" icon="pi pi-fw pi pi-power-off">

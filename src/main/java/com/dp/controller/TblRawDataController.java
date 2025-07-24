@@ -968,11 +968,12 @@ public class TblRawDataController implements Serializable {
 
             for (TblDV360SPD item : items) {
                 if (item != null) {
-                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR" : "VCR");
+                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR" : ((item.getdVCRGoal() > 0) ? "VCR" : "ACR"));
                     Double ldGoal = item.getdCPMGoal() > 0 ? item.getdCPMGoal()
-                                 : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal());
+                                 : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() 
+                                 : (item.getdVCRGoal() > 0 ? item.getdVCRGoal() : item.getdACRGoal()));
 
-                    if (lsGoalType.equals("VCR")) {
+                    if (lsGoalType.contains("CR")) {
                         ldGoal *= 100.00;
                         item.setdCPM_W1(item.getdCPM_W1() * 100.00);
                         item.setdCPM_W2(item.getdCPM_W2() * 100.00);

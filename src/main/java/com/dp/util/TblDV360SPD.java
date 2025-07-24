@@ -47,9 +47,11 @@ public class TblDV360SPD {
     private Double dCPMGoal;
     private Double dCTRGoal;
     private Double dVCRGoal;
+    private Double dACRGoal;
     private Double dClickRate;
     private Double dCTR;
     private Double dVCR;
+    private Double dACR;
     private Double dCPC;
     private String vDSP;
     private String vUser;
@@ -69,8 +71,24 @@ public class TblDV360SPD {
         return id;
     }
 
+    public Double getdACR() {
+        return dACR;
+    }
+
+    public void setdACR(Double dACR) {
+        this.dACR = dACR;
+    }
+
     public Integer getiCompleteViews() {
         return iCompleteViews;
+    }
+
+    public Double getdACRGoal() {
+        return dACRGoal;
+    }
+
+    public void setdACRGoal(Double dACRGoal) {
+        this.dACRGoal = dACRGoal;
     }
 
     public void setiCompleteViews(Integer iCompleteViews) {

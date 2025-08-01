@@ -449,6 +449,8 @@ public class TblRawDataController implements Serializable {
             DAOFile dbCon = new DAOFile();
             itemsVPartners = dbCon.getVPartnersFromBudgetTracker(JsfUtil.getUsuarioSesion().getvAgency());
             vPartnerSelected = (!itemsVPartners.isEmpty() ? itemsVPartners.get(0) : "");
+        }else{
+            vPartnerSelected = (!itemsVPartners.isEmpty() ? itemsVPartners.get(0) : "");
         }        
         return itemsVPartners;
     }
@@ -638,6 +640,7 @@ public class TblRawDataController implements Serializable {
     }
 
     public String getvPartnerSelected() {
+        //if(vPartnerSelected.isEmpty()) JsfUtil.getUsuarioSesion().getvAgency();
         return vPartnerSelected;
     }
 
@@ -1655,7 +1658,7 @@ public class TblRawDataController implements Serializable {
     protected void internalClear(){      
         setLbDataFound(true);
         lbDataTransfer = false;
-        vPartnerSelected = "";
+        //vPartnerSelected = "";
         vOptionSummary = "vChannel, vCampaign";
         vPerfSummary = "vAdvertiser, vCampaign"; 
         vInitialCampaign = "";

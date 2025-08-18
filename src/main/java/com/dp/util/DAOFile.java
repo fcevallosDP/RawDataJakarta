@@ -50,6 +50,8 @@ import org.primefaces.model.file.UploadedFile;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -67,6 +69,8 @@ public class DAOFile implements Serializable  {
     private List<TblProcessStatus> itemsStatusProcess = null;
     private List<TblCatalogo> itemsCatalogo = null;
     private TblUsers userSession = null;
+    Pattern pattern = Pattern.compile("\\((\\d+)\\)\\s*$");
+
        
     public DAOFile() {
         userSession = com.dp.controller.util.JsfUtil.getUsuarioSesion();
@@ -3619,6 +3623,7 @@ public class DAOFile implements Serializable  {
                         int col = cell.getColumnIndex();
                         switch (col) {
                             case 0 -> handleDate(cell, item);
+                            case 1 -> item.setvDealId(getStringNumberFromStringValue(cell));
                             case 3 -> handleDeal(cell, item);
                             case 4 -> item.setvDevice(getString(cell));
                             case 5 -> handleGrossMargin(cell, item);
@@ -4221,6 +4226,23 @@ public class DAOFile implements Serializable  {
         return cell == null ? "" : cell.toString().replace("\"", "").trim();
     }
 
+
+    private String getStringNumberFromStringValue(Cell cell) {
+		if (cell == null) return "";
+
+		// Obtiene el texto del cell
+		String text = cell.toString();
+		
+                if (text == null) return "";
+		
+                text = text.trim();
+		
+                if (text.isEmpty()) return "";
+
+		Matcher m = pattern.matcher(text);
+		return m.find() ? m.group(1) : "";
+    }    
+    
     private double getDoubleValue(Cell cell) {
         try {
             if (cell == null) return 0.0;

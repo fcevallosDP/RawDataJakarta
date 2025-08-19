@@ -3623,7 +3623,7 @@ public class DAOFile implements Serializable  {
                         int col = cell.getColumnIndex();
                         switch (col) {
                             case 0 -> handleDate(cell, item);
-                            case 1 -> item.setvDealId(getStringNumberFromStringValue(cell));
+                            /*case 1 -> item.setvDealId(getStringNumberFromStringValue(cell));*/
                             case 3 -> handleDeal(cell, item);
                             case 4 -> item.setvDevice(getString(cell));
                             case 5 -> handleGrossMargin(cell, item);
@@ -3685,6 +3685,7 @@ public class DAOFile implements Serializable  {
     }
 
     private void handleDeal(Cell cell, TblDVXANDRSPD item) {
+        item.setvDealId(getStringNumberFromStringValue(cell));
         item.setvDeal(getString(cell));        
         item.setvBrand(getValueBetweenColumnsPredefined(item, "BRAND"));
         item.setvAdvertiser(getValueBetweenColumnsPredefined(item, "ADVERTISER"));

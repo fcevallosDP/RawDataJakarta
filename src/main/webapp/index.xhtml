@@ -6,29 +6,30 @@
       xmlns:p="http://primefaces.org/ui">
 
 <ui:composition template="templateIndex.xhtml">
+
     <ui:define name="content">
 
-        <h:form id="indexForm" prependId="false">
+        <h:form id="indexForm" prependId="false">                           
             <div class="card-grid">
 
                 <p:link outcome="/tblRawData/List.xhtml">
                     <div class="card">
-                        <h2>Data</h2>
+                        <h2>DSP</h2>
                         <i class="pi pi-database"></i>
                     </div>
                 </p:link>
 
-                <p:link outcome="/tblRawData/BudgetTracker.xhtml">
+                <p:link outcome="/tblRawData/ListSSP.xhtml">
                     <div class="card">
-                        <h2>Pacing</h2>
-                        <i class="pi pi-money-bill"></i>
+                        <h2>SSP</h2>
+                        <i class="pi pi-database"></i>
                     </div>
                 </p:link>
 
-                <p:link outcome="/tblRawData/Performance.xhtml">
-                    <div class="card">
-                        <h2>Performance</h2>
-                        <i class="pi pi-qrcode"></i>
+                <p:link outcome="/tblCatalog/List.xhtml" disabled="#{!loginBean.lbIfAdmin}">
+                    <div class="card" >
+                        <h2>Catalog</h2>
+                        <i class="pi pi-fw pi-wrench"></i>
                     </div>
                 </p:link>
 

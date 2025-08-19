@@ -1,0 +1,28 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutMenuForm">
+        
+        <p:tooltip globalSelector=".layout-menu-slim .layout-root-menuitem > a, .layout-menu-slim .layout-inline-menu-action-item > a, .layout-menu-slim .layout-inline-menu-action"
+            showEvent="mouseenter" hideEvent="mouseleave" styleClass="layout-menu-tooltip" />
+
+        <div class="layout-menu-wrapper">
+            <div class="layout-menu-container">                           
+                <p:menu widgetVar="layoutMenuWidget" styleClass="w-full" >
+                    <p:submenu id="m_budget" label="SSP Data" icon="pi pi-briefcase">
+                        <p:menuitem id="m_buy" value="Daily" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/ListSSP.xhtml"/>
+                        <p:menuitem id="m_doc" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/SSPReport.xhtml" />                       
+                    </p:submenu>         
+                    <p:submenu id="m_exits" label="Logout" icon="pi pi-fw pi pi-power-off">
+                        <p:menuitem id="m_logout" value="Logout" ajax="false" icon="pi pi-fw pi pi-power-off" actionListener="#{loginBean.logout}"/>
+                    </p:submenu>    
+                </p:menu>
+            </div>
+        </div>
+                 
+    </h:form>
+</ui:composition>

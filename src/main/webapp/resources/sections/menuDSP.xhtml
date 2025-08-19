@@ -1,0 +1,33 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="layoutMenuForm">
+        
+        <p:tooltip globalSelector=".layout-menu-slim .layout-root-menuitem > a, .layout-menu-slim .layout-inline-menu-action-item > a, .layout-menu-slim .layout-inline-menu-action"
+            showEvent="mouseenter" hideEvent="mouseleave" styleClass="layout-menu-tooltip" />
+
+        <div class="layout-menu-wrapper">
+            <div class="layout-menu-container">                           
+                <p:menu widgetVar="layoutMenuWidget" styleClass="w-full" >
+                    <p:submenu id="m_favorites" label="Favorites" icon="pi pi-fw pi-home">
+                        <p:menuitem id="m_tracker" value="Budget Tracker" icon="pi pi-money-bill" url="/RawData/tblRawData/BudgetTracker.xhtml" /> 
+                        <p:menuitem id="m_performace" value="Performance" icon="pi pi-qrcode" url="/RawData/tblRawData/Performance.xhtml" />                        
+                    </p:submenu>
+                    <p:submenu id="m_primeblocks" label="DSP Data" icon="pi pi-fw pi-check-square"  >
+                        <p:menuitem id="m_freeblocks" value="Daily" icon="pi pi-fw pi-check-square" url="/RawData/tblRawData/List.xhtml" />
+                        <p:menuitem id="m_allblocks" value="Monthly" icon="pi pi-fw pi-list" url="/RawData/tblRawData/MassiveList.xhtml" />
+                        <p:menuitem id="m_landing" value="Historical" icon="pi pi-fw pi-chart-bar" url="/RawData/tblRawData/DSPReport.xhtml" />
+                    </p:submenu>                        
+                    <p:submenu id="m_exits" label="Logout" icon="pi pi-fw pi pi-power-off">
+                        <p:menuitem id="m_logout" value="Logout" ajax="false" icon="pi pi-fw pi pi-power-off" actionListener="#{loginBean.logout}"/>
+                    </p:submenu>    
+                </p:menu>
+            </div>
+        </div>
+                 
+    </h:form>
+</ui:composition>

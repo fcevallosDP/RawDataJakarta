@@ -29,7 +29,7 @@ body .ui-menu .ui-menu-list .ui-menu-child {
     background: #546E7A;
     padding: .25rem 0;
 }
-
+/*
 .card-grid {
     display: flex;
     justify-content: center;
@@ -46,7 +46,7 @@ body .ui-menu .ui-menu-list .ui-menu-child {
     text-align: center;
     padding: 2rem;
     width: 300px;
-    color: #2196f3; /* color de ícono y texto */
+    color: #2196f3; //
     font-weight: 800;
     transition: transform 0.2s ease;
     text-decoration: none !important;
@@ -61,7 +61,7 @@ body .ui-menu .ui-menu-list .ui-menu-child {
     margin-bottom: 1rem;
     font-size: 2.2rem;
 }
-
+*/
 .card i {
     font-size: 6rem;
     color: #2196f3;
@@ -70,3 +70,50 @@ body .ui-menu .ui-menu-list .ui-menu-child {
 a {
     text-decoration: none !important;
 }
+
+        /* Contenedor con 3 columnas */
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 220px); /* 3 columnas de 220px */
+          gap: 2rem;                 /* espacio entre cards */
+          justify-content: center;   /* centra el bloque */
+          max-width: calc(3 * 220px + 2 * 2rem); /* ancho máximo del bloque */
+          margin: 2rem auto;
+        }
+
+        /* Los <p:link> se convierten en items del grid */
+        .card-grid > a {
+          display: block;
+          text-decoration: none;
+        }
+
+        /* Card ocupa todo el grid-item */
+        .card-grid .card {
+          height: 220px;             /* mismo alto que ancho → más cuadrado */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Responsivo: en pantallas medianas baja a 2 columnas */
+        @media (max-width: 1024px) {
+          .card-grid {
+            grid-template-columns: repeat(2, 220px);
+            max-width: calc(2 * 220px + 1 * 2rem);
+          }
+        }
+
+        /* Responsivo: en móviles baja a 1 columna */
+        @media (max-width: 640px) {
+          .card-grid {
+            grid-template-columns: 220px;
+            max-width: 220px;
+          }
+        }        
+        
+        .card:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+        

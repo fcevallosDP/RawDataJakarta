@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="mobile-web-app-capable" content="yes"/>
+            <meta name="theme-color" content="bluegray"/>
+            <link href="#{resource['layout/images/favicon-32x32.png']}" rel="icon" type="image/png" sizes="32x32"/>
+            <link href="#{resource['layout/images/favicon-16x16.png']}" rel="icon" type="image/png" sizes="16x16"/>
+        </f:facet>
+        <title>Datapoint Intranet</title>
+        <h:outputScript name="ripple/ripple.js" library="layout" rendered="#{app.ripple}" />
+        <h:outputScript name="js/layout.js" library="layout" />
+
+        <ui:insert name="head" />
+        
+    </h:head>
+    
+    <h:body styleClass="#{app.bodyClass}">
+        
+                <div class="layout-wrapper layout-menu-bluegrey layout-topbar-bluegrey layout-menu-static #{app.layoutClass}">   
+                    <ui:include src="/resources/sections/topbar.xhtml" />
+                    <ui:include src="/resources/sections/menuDSP.xhtml" />
+
+                    <div class="layout-main">
+
+                        <div class="layout-content">                       
+                            <ui:insert name="content"/>
+                        </div>
+
+                        <ui:include src="/resources/sections/footer.xhtml"/>  
+                        
+                    </div>                   
+
+                    <ui:include src="/resources/sections/loader.xhtml" />
+                </div>
+        
+        <!-- Estilos -->
+        <h:outputStylesheet name="styles/app.css" library="layout" />
+        <h:outputStylesheet name="styles/apptiny.css" library="layout" />
+        <h:outputStylesheet name="styles/formsData.css" library="layout" />
+        <h:outputStylesheet name="styles/layoutCharts.css" library="layout" />   
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>  
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    
+        <h:outputScript>
+            //<![CDATA[
+            function renderVisibleCharts() {
+                console.log("⚡ Ejecutando renderVisibleCharts()");
+                if (Array.isArray(window.chartInitFns)) {
+                    window.chartInitFns.forEach(fn => {
+                        try {
+                            fn();
+                        } catch (e) {
+                            console.error("❌ Error ejecutando función:", e);
+                        }
+                    });
+                }
+            }
+            
+            function fixAllDialogsAriaHidden() {
+                const dialogs = document.querySelectorAll('div.ui-dialog[aria-hidden="true"]');
+                dialogs.forEach(dialog => {
+                    dialog.removeAttribute('aria-hidden');
+                    console.log("🔧 aria-hidden eliminado de dialog:", dialog.id || dialog);
+                });
+            }
+
+            
+            let exclusiveToggleInProgress = false;
+            function handleExclusivePanelToggle(openedIndex, total) {
+                if (exclusiveToggleInProgress) {
+                    return;
+                }
+
+                exclusiveToggleInProgress = true;
+
+                setTimeout(() => {
+                    for (let i = 0; i < total; i++) {
+                        if (i === openedIndex) continue;
+                        const panelWidget = PF('panelWidget' + i);
+                        if (panelWidget && !panelWidget.cfg.collapsed) {
+                            panelWidget.toggle(true);
+                        }
+                    }
+
+                    // Liberar después de que todas las operaciones se completen
+                    setTimeout(() => {
+                        exclusiveToggleInProgress = false;
+                    }, 300); // margen de seguridad
+                }, 0);
+            }        
+
+            function renderTabbedCharts() {
+                //console.log("👉 renderTabbedCharts() fue llamada");
+
+                setTimeout(() => {
+                    const canvases = document.querySelectorAll('#barDialog canvas');
+                  //  console.log(`🎯 Canvases encontrados: ${canvases.length}`);
+
+                    canvases.forEach(canvas => {
+                    //    console.log(`🧪 Canvas ID: ${canvas.id}`);
+                        renderSingleChart(canvas);
+                    });
+                }, 300);
+            }
+
+
+            function onTabChangeRender(event) {
+                setTimeout(() => {
+                    const activePanelId = event.index;
+                    const tabPanels = document.querySelectorAll('#barDialog canvas');
+                    if (tabPanels[activePanelId]) {
+                        renderSingleChart(tabPanels[activePanelId]);
+                    }
+                }, 150);
+            }
+
+            const chartInstances = {};
+            function renderSingleChart(canvas) {
+                const ctx = canvas.getContext('2d');
+                const canvasId = canvas.id;
+
+                // 🔥 Destruir gráfico previo si existe
+                if (chartInstances[canvasId]) {
+                    chartInstances[canvasId].destroy();
+                    //console.log(`🧹 Chart destruido para ${canvasId}`);
+                }
+
+                const labels = JSON.parse(canvas.dataset.labels || "[]");
+                const valores = JSON.parse(canvas.dataset.valores || "[]");
+                const colores = JSON.parse(canvas.dataset.colores || "[]");
+
+                // 👉 Ajuste de altura dinámico
+                const numBars = labels.length;
+                const minBarHeight = 10;
+                const maxBarHeight = 14;
+                const pxPerBar = Math.min(maxBarHeight, Math.max(minBarHeight, 250 / numBars));
+                const dynamicHeight = Math.max(200, numBars * pxPerBar);
+                canvas.height = dynamicHeight;            
+                
+                const newChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: valores,
+                            backgroundColor: colores,
+                            borderColor: "rgb(222, 226, 230)",
+                            borderWidth: 1                            
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                barPercentage: 0.2,
+                                categoryPercentage: 0.4,
+                                ticks: { autoSkip: false },
+                                grid: { display: true },
+                                grace: 0.1                                                        
+                            },
+                            x: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                // 🧠 Guardar instancia nueva
+                chartInstances[canvasId] = newChart;
+            }
+
+            setInterval(function() {
+                fetch(window.location.href, {method: 'HEAD'}).catch(() => {
+                    window.location.href = '/login.xhtml';
+                });
+            }, 60000); // Cada 60 segundos            
+                        
+            //]]>
+        </h:outputScript>        
+
+    </h:body>
+</html>

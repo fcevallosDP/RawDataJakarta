@@ -37,6 +37,7 @@ import org.primefaces.util.LangUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -449,9 +450,9 @@ public class TblRawDataController implements Serializable {
             DAOFile dbCon = new DAOFile();
             itemsVPartners = dbCon.getVPartnersFromBudgetTracker(JsfUtil.getUsuarioSesion().getvAgency());
             vPartnerSelected = (!itemsVPartners.isEmpty() ? itemsVPartners.get(0) : "");
-        }else{
+        }/*else{
             vPartnerSelected = (!itemsVPartners.isEmpty() ? itemsVPartners.get(0) : "");
-        }        
+        }*/        
         return itemsVPartners;
     }
 
@@ -640,9 +641,14 @@ public class TblRawDataController implements Serializable {
     }
 
     public String getvPartnerSelected() {
-        //if(vPartnerSelected.isEmpty()) JsfUtil.getUsuarioSesion().getvAgency();
-        return vPartnerSelected;
+        return (vPartnerSelected != null && !vPartnerSelected.isEmpty())
+                ? vPartnerSelected
+                : Optional.ofNullable(itemsVPartners)
+                          .filter(list -> !list.isEmpty())
+                          .map(list -> list.get(0))
+                          .orElse("");
     }
+
 
     public void setvPartnerSelected(String vPartnerSelected) {
         this.vPartnerSelected = vPartnerSelected;

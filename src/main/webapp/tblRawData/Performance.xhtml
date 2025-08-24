@@ -7,11 +7,13 @@
       xmlns:p="http://primefaces.org/ui">
 
     <ui:composition template="/templateDSP.xhtml">
+        
         <ui:define name="title"><h:outputText value="RawData"/></ui:define>
         
         <ui:define name="content">  
            
-            <h:form id="TblRawDataListForm">               
+            <h:form id="TblRawDataListForm">   
+                
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      
                     <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">

@@ -340,7 +340,8 @@ public class TblRawDataController implements Serializable {
         getItemsCatalogo();
         getRawColumnsBySource();        
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        todayAsString = df.format(JsfUtil.getFechaSistema().getTime());               
+        todayAsString = df.format(JsfUtil.getFechaSistema().getTime());
+        vPartnerSelected = JsfUtil.getUsuarioSesion().getvAgency();
     }
 
     public String getColorsMap(String chartId) {        
@@ -434,6 +435,9 @@ public class TblRawDataController implements Serializable {
     }
 
     public List<TblBudgetTracker> getBudgetTrackerItems() {
+        if (budgetTrackerItems == null || budgetTrackerItems.isEmpty()){
+            getBudgetTrackerByParams();
+        }
         return budgetTrackerItems;        
     }
 
@@ -1008,7 +1012,7 @@ public class TblRawDataController implements Serializable {
                         getColor(item.getdCPM_W3(), minGoal, maxGoal, lsGoalType),
                         getColor(item.getdCPM_W4(), minGoal, maxGoal, lsGoalType),
                         getColor(item.getdCPM_W5(), minGoal, maxGoal, lsGoalType),
-                        "rgb(54, 162, 235, 0.2)",
+                        getColor(item.getdAVG_W(), minGoal, maxGoal, lsGoalType),//"rgb(54, 162, 235, 0.2)",
                         "rgb(54, 162, 235, 0.2)"
                     );
 

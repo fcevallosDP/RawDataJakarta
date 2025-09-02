@@ -34,35 +34,18 @@
                             <h:outputText value="DPT MASTER HISTORICAL" style="font-size: larger"/>
                         </f:facet>
                         <f:facet name="paginatorTopLeft">
-                            <p:outputLabel for="monthoption" value="Month"/>
-                            <p:selectOneMenu id="monthoption" value="#{tblRawDataController.IMonth}" style="margin-left: 5px;width: 100px;">
-                                <f:selectItem itemLabel="All" itemValue="0"/>
-                                <f:selectItem itemLabel="Jan" itemValue="1"/>
-                                <f:selectItem itemLabel="Feb" itemValue="2"/>
-                                <f:selectItem itemLabel="Mar" itemValue="3"/>
-                                <f:selectItem itemLabel="Apr" itemValue="4"/>
-                                <f:selectItem itemLabel="May" itemValue="5"/>
-                                <f:selectItem itemLabel="Jun" itemValue="6"/>
-                                <f:selectItem itemLabel="Jul" itemValue="7"/>
-                                <f:selectItem itemLabel="Aug" itemValue="8"/>
-                                <f:selectItem itemLabel="Sep" itemValue="9"/>
-                                <f:selectItem itemLabel="Oct" itemValue="10"/>
-                                <f:selectItem itemLabel="Nov" itemValue="11"/>
-                                <f:selectItem itemLabel="Dec" itemValue="12"/>
-                            </p:selectOneMenu>                                
-   
-                            <p:outputLabel for="yearoption" value="Year" style="margin-left: 5px;"/>
-                            <p:selectOneMenu id="yearoption" value="#{tblRawDataController.IYear}" style="margin-left: 5px;width: 80px;">
-                                <f:selectItem itemLabel="All" itemValue="0"/>
-                                <f:selectItem itemLabel="2021" itemValue="2021"/>
-                                <f:selectItem itemLabel="2022" itemValue="2022"/>
-                                <f:selectItem itemLabel="2023" itemValue="2023"/>
-                                <f:selectItem itemLabel="2024" itemValue="2024"/>
-                                <f:selectItem itemLabel="2025" itemValue="2025"/>
-                            </p:selectOneMenu>                                
-                            
+                                <p:datePicker id="disabledDD" value="#{tblRawDataController.DMonthSelected}"
+                                      readonlyInput="true" view="month" pattern="MMM/yyyy" 
+                                      yearNavigator="true" yearRange="2025:2026" size="10">                               
+                                    <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByMonth()}"
+                                            update="datalist,excelButton"
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"
+                                            />                                   
+                                </p:datePicker>                              
+                                                                                      
                             <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" title="SEARCH"
-                                             actionListener="#{tblRawDataController.getHistoricalByParams()}"
+                                             actionListener="#{tblRawDataController.getItemCalendarByMonth()}"
                                             onstart="PF('buiDatatable').show()"
                                             oncomplete="PF('buiDatatable').hide()"                                                
                                              update="datalist,excelButton"/>

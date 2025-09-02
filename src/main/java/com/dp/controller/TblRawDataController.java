@@ -1220,7 +1220,15 @@ public class TblRawDataController implements Serializable {
         }
     }      
     
-    public List<TblHistoricalDSP> getHistoricalItems() {        
+    public List<TblHistoricalDSP> getHistoricalItems() {                
+        if ((historicalItems == null || historicalItems.isEmpty()) && dMonthSelected != null) {
+            setLbDataFound(false);
+            DAOFile dbCon = new DAOFile();
+            historicalItems = dbCon.getHistoricalbyMonth(iYear, iMonth);
+            if (historicalItems != null && !historicalItems.isEmpty()){
+                setLbDataFound(true);
+            }
+        }        
         return historicalItems;
     }
 
@@ -1487,7 +1495,7 @@ public class TblRawDataController implements Serializable {
     }    
     
     public void transferToHistorical(){
-        if (idDailySelected != null){
+        if( dMonthSelected != null){
             DAOFile dbCon = new DAOFile();
             if (dbCon.transferToHistorical("DSP", idDailySelected.getiYear(), idDailySelected.getiMonth() )){
                 items = null;
@@ -1551,11 +1559,8 @@ public class TblRawDataController implements Serializable {
                 idDailySelected = new TblDailyProcess();
                 iYear = localDate.getYear();
                 iMonth = localDate.getMonthValue();
-                //idDailySelected.setiDay(localDate.lengthOfMonth());
                 idDailySelected.setiMonth(iMonth);
                 idDailySelected.setiYear(iYear);
-                //idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
-                //idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
                 idDailySelected.setId_monthly(dbCon.getItemDailybyMonth(idDailySelected));
                 idDailySelected.setId_daily(idDailySelected.getId_monthly());
             }   
@@ -1678,6 +1683,7 @@ public class TblRawDataController implements Serializable {
         selectedPerf = null;        
         pacingItems = null;
         budgetTrackerItems = null;
+        historicalItems = null;
         filteredItems = null;
         selected = null;
         idDailySelected = null;

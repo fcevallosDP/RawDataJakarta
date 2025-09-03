@@ -14,10 +14,10 @@
             
             <h:form id="TblRawDataListForm">
                 <p:remoteCommand name="callButton2" action="#{tblRawDataController.getItemCalendarByMonth()}" update=":TblRawDataListForm:datalist"/>
-                <style>
-                    .ui-datatable .ui-datatable-grouped-row {
+                <style>             
+                    /*.ui-datatable .ui-datatable-grouped-row {
                         border-bottom: 2px solid #dee2e6;
-                    }
+                    }*/
                 </style>
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      
@@ -62,7 +62,7 @@
                             <p:commandButton id="excelButton" style="margin-left: 2px;" icon="pi pi-sync" ajax="false" title="Clear" type="button" onclick="PF('WdataList').clearFilters();"/>                        
                                 
                             <p:commandButton title="Move to Historical" id="btnTransfer" update="datalist,excelButton, :TblRawDataListForm:messages"
-                                             rendered="#{!( empty tblRawDataController.pacingItems)}"
+                                             rendered="false"
                                              actionListener="#{tblRawDataController.transferBudgetToHistorical()}"
                                              icon="pi pi-window-maximize" style="margin-left: 2px; background: #0097A7;"
                                              onstart="PF('buiDatatable').show()"

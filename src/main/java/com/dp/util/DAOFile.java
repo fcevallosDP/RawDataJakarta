@@ -6011,19 +6011,19 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `IdBudget`, `iYear`, `iMonth`, `vAgency`, `vClient`, `vChannel`, `dBudget`, `dPMPBudget`, `dCampaignSpend`, `dPMPSpend`, `dConsumeRate`, `dPMPRate`, `dSucessRate`, `PMPNetSplit`, `startDate`, `endDate`, `daysLeft`, `MT2YDaySpent`, `RemainingBudget`, `TargetDailySpend`\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `iYear`, `iMonth`, `vAgency`, `vClient`, `vChannel`, `dBudget`, `dPMPBudget`, `dCampaignSpend`, `dPMPSpend`, `dConsumeRate`, `dPMPRate`, `dSucessRate`, `PMPNetSplit`, `startDate`, `endDate`, `daysLeft`, `MT2YDaySpent`, `RemainingBudget`, `TargetDailySpend`\n" +
                                                                 "from vwspendpacing\n" +
-                                                                "where id_monthly = ? and (`vAgency` = ? or ? = 'ALL') order by `iYear`, `iMonth`, `vClient`, `vChannel`"); 
+                                                                "where id_monthly = ? and `vAgency` = ?" +
+                                                                "order by `vClient`, `vChannel`"); 
             pstmt.setInt(1, iMonthly);
             pstmt.setString(2, lsPartNer);
-            pstmt.setString(3, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblPacing> itemsLocalDV360 = new ArrayList();
             while (rs.next()) {             
                  
                 TblPacing item = new TblPacing();
-                item.setId(rs.getInt("IdBudget"));
+                item.setId(itemsLocalDV360.size() + 1);//rs.getInt("IdBudget"));
                 item.setiYear(rs.getInt("iYear"));
                 item.setiMonth(rs.getInt("iMonth"));
                 item.setdBudget(rs.getDouble("dBudget"));
@@ -6037,9 +6037,9 @@ public class DAOFile implements Serializable  {
                 item.setdMT2YDaySpend(rs.getDouble("MT2YDaySpent"));
                 item.setdRemainingBudget(rs.getDouble("RemainingBudget"));
                 item.setdTargetDailySpend(rs.getDouble("TargetDailySpend"));                                
-                item.setvAgency((rs.getString("vAgency") != null) ? rs.getString("vAgency") :"");
-                item.setvChannel((rs.getString("vChannel") != null) ? rs.getString("vChannel") :"");
-                item.setvClient((rs.getString("vClient") != null) ? rs.getString("vClient") :"");
+                item.setvAgency(rs.getString("vAgency"));
+                item.setvChannel(rs.getString("vChannel"));
+                item.setvClient(rs.getString("vClient"));
                 item.setStartDate(rs.getDate("startDate"));
                 item.setEndDate(rs.getDate("endDate"));
                 item.setiDaysLeft(rs.getInt("daysLeft"));

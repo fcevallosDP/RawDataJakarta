@@ -249,7 +249,15 @@ public class TblRawSSPDataController implements Serializable {
         }
     }  
     
-    public List<TblHistoricalSSP> getHistoricalItems() {              
+    public List<TblHistoricalSSP> getHistoricalItems() {        
+        if ((historicalItems == null || historicalItems.isEmpty()) && dMonthSelected != null) {
+            setLbDataFound(false);
+            DAOFile dbCon = new DAOFile();
+            historicalItems = dbCon.getHistoricalSSPbyMonth(iYear, iMonth);
+            if (historicalItems != null && !historicalItems.isEmpty()){
+                setLbDataFound(true);
+            }
+        }              
         return historicalItems;
     }
 
@@ -492,11 +500,8 @@ public class TblRawSSPDataController implements Serializable {
                 idDailySelected = new TblDailyProcess();
                 iYear = localDate.getYear();
                 iMonth = localDate.getMonthValue();
-                //idDailySelected.setiDay(localDate.lengthOfMonth());
                 idDailySelected.setiMonth(iMonth);
                 idDailySelected.setiYear(iYear);
-                //idDailySelected.setdDate(new java.sql.Date(dMonthSelected.getTime()));
-                //idDailySelected.setdDate(java.sql.Date.valueOf(LocalDate.of(localDate.getYear(), localDate.getMonthValue(), localDate.lengthOfMonth())));
                 idDailySelected.setId_monthly(dbCon.getItemDailybyMonth(idDailySelected));
                 idDailySelected.setId_daily(idDailySelected.getId_monthly());
             }   
@@ -569,6 +574,7 @@ public class TblRawSSPDataController implements Serializable {
         lbDataTransfer = null;
         items = null;
         monthlyItems = null;
+        historicalItems = null;
         filteredItems = null;
         selected = null;
         idDailySelected = null;

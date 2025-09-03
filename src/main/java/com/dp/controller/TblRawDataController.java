@@ -782,9 +782,9 @@ public class TblRawDataController implements Serializable {
     }
 
     public List<TblPacing> getPacingItems() {
-        if((pacingItems == null || pacingItems.isEmpty()) && dMonthSelected != null){
+        if((pacingItems == null || pacingItems.isEmpty()) && dMonthSelected != null && idDailySelected != null){
             DAOFile dbCon = new DAOFile();
-            pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly());
+            pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly(), vPartnerSelected);
         }
         return pacingItems;
     }
@@ -1204,7 +1204,7 @@ public class TblRawDataController implements Serializable {
         pacingItems = null;
         setLbDataFound(false);
         DAOFile dbCon = new DAOFile();
-        pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly());
+        pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly(), vPartnerSelected);
         if (pacingItems != null && !pacingItems.isEmpty()){
             setLbDataFound(true);
         }

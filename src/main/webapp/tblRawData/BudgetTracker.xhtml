@@ -13,7 +13,7 @@
         <ui:define name="content">           
 
             <h:form id="TblRawDataListForm">             
-                <p:remoteCommand name="callButton2" action="#{tblRawDataController.getBudgetTrackerByParams()}" update=":TblRawDataListForm:datalist"/>
+                <p:remoteCommand name="callButton2" action="#{tblRawDataController.getItemCalendarByMonth()}" update=":TblRawDataListForm:datalist"/>
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      
                     <p:blockUI block="datalist" trigger="datalist" widgetVar="buiDatatable">
@@ -45,7 +45,7 @@
                             </p:selectOneMenu> 
                             
                             <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" 
-                                             title="SEARCH" action="#{tblRawDataController.getBudgetTrackerByParams()}"
+                                             title="SEARCH" action="#{tblRawDataController.getItemCalendarByMonth()}"
                                              onstart="PF('buiDatatable').show()" actionListener="#{tblRawDataController.setBudgetSelected(null)}"
                                              oncomplete="PF('buiDatatable').hide()"                                                
                                              update="datalist, btnTransfer"/>                       
@@ -84,10 +84,10 @@
                                 <h:outputText value="BUDGET TRACKER" style="font-size: large;"/>
                             </div>
                         </f:facet>
-                        <p:headerRow field="vCampaign" expandable="true">
+                        <p:headerRow field="vCampaign" expandable="true" expanded="#{item.vCampaign eq tblRawDataController.vInitialCampaign}">
                             
                             <div class="inline-flex align-items-center rowgroup-contentClass">
-                                <p:column colspan="26">                                        
+                                <p:column colspan="2">                                        
                                     <h:outputText value="#{item.vCampaign}" style="font-size: 1.1rem !important;"/>
                                     <p:commandButton id="btnCampaign" icon="pi pi-pencil" 
                                             oncomplete="PF('campaignDialog').show()"
@@ -98,7 +98,41 @@
                                         <f:setPropertyActionListener value="#{item}" target="#{tblRawDataController.budgetSelected}"/>
                                 
                                     </p:commandButton>                                                                                                            
-                                </p:column>        
+                                </p:column>    
+                                <p:column style="text-align:right">
+                                        <h:outputText value="#{tblRawDataController.getTotalBudget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>         
+                                <p:column colspan="5">
+
+                                </p:column>                                                            
+                                <p:column  style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalProjSpendPerct(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                                                            
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalMediaSpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>   
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalBalance(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>      
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalDailyTarget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                                
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalYesterdaySpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column> 
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalYesterdayCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column> 
+                                <p:column style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalMTDCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>  
+                                <p:column colspan="4" style="text-align:right">
+                                    <h:outputText value="#{tblRawDataController.getTotalBudgetPacing(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
+                                </p:column>                            
+                                <p:column colspan="8" style="text-align:right">
+
+                                </p:column>                            
+                            
                             </div> 
                             
                         </p:headerRow>                        
@@ -211,38 +245,7 @@
                         <p:column width="60" headerText="Updated By" style="text-align: center; white-space: wrap;">                     
                             <h:outputText value="#{item.vUser}" style="font-size: 0.8rem;"/>
                         </p:column>
-                        <p:summaryRow>
-                            <p:column colspan="3" style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalBudget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>
-                            <p:column colspan="6" style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalProjSpendPerct(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>                            
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalMediaSpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>   
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalBalance(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>      
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalDailyTarget(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>                                
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalYesterdaySpend(item.vCampaign)}"><f:convertNumber type="currency" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column> 
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalYesterdayCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column> 
-                            <p:column style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalMTDCTR(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" minFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>  
-                            <p:column colspan="4" style="text-align:right">
-                                <h:outputText value="#{tblRawDataController.getTotalBudgetPacing(item.vCampaign)}"><f:convertNumber type="percent" maxFractionDigits="2" locale="en_US"/></h:outputText>
-                            </p:column>                            
-                            <p:column colspan="8" style="text-align:right">
-
-                            </p:column>                            
-                        </p:summaryRow>                                       
+                          
                     </p:dataTable>            
                 </p:panel>
             </h:form>            

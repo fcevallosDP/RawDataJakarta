@@ -6,22 +6,17 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 
-    <ui:composition template="/template.xhtml">
-        <ui:define name="title">
-            <h:outputText value="RawData"/>            
-        </ui:define>
+    <ui:composition template="/templateDSP.xhtml">
+        
+        <ui:define name="title"><h:outputText value="RawData"/></ui:define>
 
         <ui:define name="content">        
             
             <h:form id="TblRawDataListForm">
-                <p:remoteCommand name="callButton2" action="#{tblRawDataController.getPacingByParams()}" update=":TblRawDataListForm:datalist"/>
+                <p:remoteCommand name="callButton2" action="#{tblRawDataController.getItemCalendarByMonth()}" update=":TblRawDataListForm:datalist"/>
                 <style>
-                    body .ui-inputfield {
-                        width: 100%;
-                    }
-                    .ui-grouped-column{
-                        border-color: #e4e4e4 !important;
-                        border-width: 1px !important;                    
+                    .ui-datatable .ui-datatable-grouped-row {
+                        border-bottom: 2px solid #dee2e6;
                     }
                 </style>
                 <p:growl id="messages"/>
@@ -34,44 +29,31 @@
                                  emptyMessage="No data found with given criteria"   
                                  rowKey="#{item.id}" paginator="true" paginatorPosition="top"
                                  rowsPerPageTemplate="{ShowAll|'All'}, 40, 30, 20, 10"
-                                 style="width:100% !important; overflow-x: auto;" styleClass="ui-datatable-sm ui-datatable-gridlines"  
-                                 scrollable="true" resizableColumns="true" scrollHeight="90%"
+                                 style="width:100% !important; overflow-x: auto; height: 100% !important;"
+                                 styleClass="ui-datatable-sm ui-datatable-gridlines"  
+                                 scrollable="true" resizableColumns="true" stripedRows="true" 
                                  >
-                                 
-                        <f:facet name="header">
-                            <h:outputText value="SPEND PACING" style="font-size: larger"/>
-                        </f:facet>
-                                 
+
                         <f:facet name="paginatorTopLeft">
-                            <p:outputLabel for="monthoption" value="Month"/>
-                            <p:selectOneMenu id="monthoption" value="#{tblRawDataController.IMonth}" style="margin-left: 5px;width: 100px;">
-                                <f:selectItem itemLabel="Jan" itemValue="1"/>
-                                <f:selectItem itemLabel="Feb" itemValue="2"/>
-                                <f:selectItem itemLabel="Mar" itemValue="3"/>
-                                <f:selectItem itemLabel="Apr" itemValue="4"/>
-                                <f:selectItem itemLabel="May" itemValue="5"/>
-                                <f:selectItem itemLabel="Jun" itemValue="6"/>
-                                <f:selectItem itemLabel="Jul" itemValue="7"/>
-                                <f:selectItem itemLabel="Aug" itemValue="8"/>
-                                <f:selectItem itemLabel="Sep" itemValue="9"/>
-                                <f:selectItem itemLabel="Oct" itemValue="10"/>
-                                <f:selectItem itemLabel="Nov" itemValue="11"/>
-                                <f:selectItem itemLabel="Dec" itemValue="12"/>
-                            </p:selectOneMenu>                                
-   
-                            <p:outputLabel for="yearoption" value="Year" style="margin-left: 5px;"/>
-                            <p:selectOneMenu id="yearoption" value="#{tblRawDataController.IYear}" style="margin-left: 5px;width: 80px;">
-                                <f:selectItem itemLabel="2021" itemValue="2021"/>
-                                <f:selectItem itemLabel="2022" itemValue="2022"/>
-                                <f:selectItem itemLabel="2023" itemValue="2023"/>
-                                <f:selectItem itemLabel="2024" itemValue="2024"/>
-                                <f:selectItem itemLabel="2025" itemValue="2025"/>
-                            </p:selectOneMenu>                                
+                                <p:datePicker id="disabledDD" value="#{tblRawDataController.DMonthSelected}"
+                                      readonlyInput="true" view="month" pattern="MMM/yyyy" 
+                                      yearNavigator="true" yearRange="2025:2026" size="10">                               
+                                    <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByMonth()}"
+                                            update="datalist,btnExpor"
+                                            onstart="PF('buiDatatable').show()"
+                                            oncomplete="PF('buiDatatable').hide()"
+                                            />                                   
+                                </p:datePicker>                           
+                            <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
+                            <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">
+                                <f:selectItems value="#{tblRawDataController.itemsVPartners}" itemLabel="#{itemPartner}" itemValue="#{itemPartner}"/>
+                                <p:ajax update="idBuscar" process="@this" partialSubmit="true"/>
+                            </p:selectOneMenu> 
                             
-                            <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" title="SEARCH" actionListener="#{tblRawDataController.getPacingByParams()}"
+                            <p:commandButton id="idBuscar" style="margin-left: 5px;" icon="pi pi-search" title="SEARCH" actionListener="#{tblRawDataController.getItemCalendarByMonth()}"
                                             onstart="PF('buiDatatable').show()"
                                             oncomplete="PF('buiDatatable').hide()"                                                
-                                            update="datalist,excelButton"/>
+                                            update="datalist,btnExpor"/>
                                                         
                             <p:commandButton id="btnExpor" style="margin-left: 2px;" icon="pi pi-file-excel" ajax="false" title="Export as excel file" disabled="#{( empty tblRawDataController.pacingItems)}">
                                 <p:dataExporter type="xls" target="TblRawDataListForm:datalist" fileName="MonthlySpendPacing_#{tblRawDataController.todayAsString}" exportHeader="true" />
@@ -92,14 +74,16 @@
                                 <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
                                 <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
                             </p:confirmDialog>   
-                        </f:facet>                                                                      
-                        <p:column width="100" headerText="Agency" style="text-align: center;" groupRow="true">                         
-                            <h:outputText value="#{item.vAgency}"/>
-                        </p:column>
-                        <p:column width="150" headerText="Client" groupRow="true">                      
+                        </f:facet>    
+                        <f:facet name="paginatorTopRight">
+                            <div class="ui-datatable-header ui-widget-header ui-corner-top title-rightClass">
+                                <h:outputText value="SPEND PACING" style="font-size: large;"/>
+                            </div>
+                        </f:facet>                        
+                        <p:column width="100" headerText="Client" style="text-align: center;" groupRow="true">                         
                             <h:outputText value="#{item.vClient}"/>
                         </p:column>
-                        <p:column width="100" headerText="Channel" style="text-align: center;">                         
+                        <p:column width="80" headerText="Channel" style="text-align: center;" groupRow="true">                      
                             <h:outputText value="#{item.vChannel}"/>
                         </p:column>
                         <p:column width="80" headerText="Budget" style="text-align: right">                     

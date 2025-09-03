@@ -6007,14 +6007,16 @@ public class DAOFile implements Serializable  {
         return null;
     }  
    
-    public List<TblPacing> getMonthPacingData(Integer iMonthly){
+    public List<TblPacing> getMonthPacingData(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
             PreparedStatement pstmt = connect.prepareStatement("select `IdBudget`, `iYear`, `iMonth`, `vAgency`, `vClient`, `vChannel`, `dBudget`, `dPMPBudget`, `dCampaignSpend`, `dPMPSpend`, `dConsumeRate`, `dPMPRate`, `dSucessRate`, `PMPNetSplit`, `startDate`, `endDate`, `daysLeft`, `MT2YDaySpent`, `RemainingBudget`, `TargetDailySpend`\n" +
                                                                 "from vwspendpacing\n" +
-                                                                "where id_monthly = ?"); 
+                                                                "where id_monthly = ? and (`vAgency` = ? or ? = 'ALL') order by `iYear`, `iMonth`, `vClient`, `vChannel`"); 
             pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
+            pstmt.setString(3, lsPartNer);
             
             ResultSet rs = pstmt.executeQuery();  
             List<TblPacing> itemsLocalDV360 = new ArrayList();
@@ -6652,7 +6654,7 @@ public class DAOFile implements Serializable  {
  
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            List<TblPacing> itemsPacingData = getMonthPacingData(iMonthly);
+            List<TblPacing> itemsPacingData = getMonthPacingData(iMonthly,"ALL");
             List<TblPacing> itemsSpendView = getMonthSpendNetSplitView(iMonthly);
 
             

@@ -784,7 +784,7 @@ public class TblRawDataController implements Serializable {
     public List<TblPacing> getPacingItems() {
         if((pacingItems == null || pacingItems.isEmpty()) && dMonthSelected != null && idDailySelected != null){
             DAOFile dbCon = new DAOFile();
-            pacingItems = dbCon.getMonthPacingData(idDailySelected.getId_monthly(), vPartnerSelected);
+            pacingItems = dbCon.getSpendPacingCurrentMonth(idDailySelected.getId_monthly(), vPartnerSelected);//getMonthPacingData
         }
         return pacingItems;
     }

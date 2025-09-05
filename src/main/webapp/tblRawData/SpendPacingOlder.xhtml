@@ -46,7 +46,6 @@
                                 </p:datePicker>                           
                             <p:outputLabel for="iVPartNers" value="Agency" style="margin-left: 15px;"/>
                             <p:selectOneMenu id="iVPartNers" value="#{tblRawDataController.VPartnerSelected}" widgetVar="itemPartner" style="margin-left: 5px;min-width: 80px;">
-                                <f:selectItem itemLabel="ALL" itemValue="ALL"/>
                                 <f:selectItems value="#{tblRawDataController.itemsVPartners}" itemLabel="#{itemPartner}" itemValue="#{itemPartner}"/>
                                 <p:ajax update="idBuscar" process="@this" partialSubmit="true"/>
                             </p:selectOneMenu> 
@@ -113,6 +112,25 @@
                         <p:column width="80" headerText="PMP Net Split" style="text-align: right">
                             <h:outputText value="#{item.dPMPNetSplit}"><f:convertNumber type="percent" pattern="#0.00%" locale="en_US"/></h:outputText>
                         </p:column>
+                        <p:column width="80" headerText="Start Date" style="text-align: center">
+                            <h:outputText value="#{item.startDate}">
+                                <f:convertDateTime pattern="MM/dd/yyyy" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column width="80" headerText="End Date" style="text-align: center">
+                            <h:outputText value="#{item.endDate}">
+                                <f:convertDateTime pattern="MM/dd/yyyy" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column width="50" headerText="Days Left" style="text-align: center">
+                            <h:outputText value="#{item.iDaysLeft}"/>
+                        </p:column>
+                        <p:column width="110" headerText="Remaining Budget" style="text-align: right">
+                            <h:outputText value="#{item.dRemainingBudget}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>      
+                        <p:column width="110" headerText="Target Daily Spend" style="text-align: right">
+                            <h:outputText value="#{item.dTargetDailySpend}"><f:convertNumber type="currency" locale="en_US"/></h:outputText>
+                        </p:column>      
                     </p:dataTable>                    
                 </p:panel>
             </h:form>

@@ -6007,6 +6007,72 @@ public class DAOFile implements Serializable  {
         return null;
     }  
    
+
+    public List<TblPacing> getSpendPacingCurrentMonth(Integer iMonthly, String lsPartNer){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+             
+            PreparedStatement pstmt = connect.prepareStatement("select `iYear`, `iMonth`, `vAgency`, `vClient`, `vChannel`, `Budget`, `dCampaignSpend`, `dPMPSpend`\n" +
+                                                                "from vwspendpacingcurrentmonth\n" +
+                                                                "where id_monthly = ? and (`vAgency` = ? or ? = 'ALL')" +
+                                                                "order by `vAgency`, `vClient`, `vChannel`"); 
+            pstmt.setInt(1, iMonthly);
+            pstmt.setString(2, lsPartNer);
+            pstmt.setString(3, lsPartNer);
+            
+            ResultSet rs = pstmt.executeQuery();  
+            List<TblPacing> itemsLocalDV360 = new ArrayList();
+            while (rs.next()) {             
+                 
+                TblPacing item = new TblPacing();
+                item.setId(itemsLocalDV360.size() + 1);//rs.getInt("IdBudget"));
+                item.setiYear(rs.getInt("iYear"));
+                item.setiMonth(rs.getInt("iMonth"));
+                item.setdBudget(rs.getDouble("Budget"));
+                item.setdCampaignSpend(rs.getDouble("dCampaignSpend"));
+                item.setdPMPSpend(rs.getDouble("dPMPSpend"));
+                item.setvAgency(rs.getString("vAgency"));
+                item.setvChannel(rs.getString("vChannel"));
+                item.setvClient(rs.getString("vClient"));
+
+
+                double num = 0;
+                BigDecimal bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                
+                num = item.getdCampaignSpend() / ((item.getdBudget() > 0.00) ? item.getdBudget(): 1.00); 
+                bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                item.setdConsumeRate(bd.doubleValue());                  
+                
+                num = item.getdPMPSpend() / ((item.getdBudget() > 0.00) ? item.getdBudget(): 1.00); 
+                bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                item.setdSuccessRate(bd.doubleValue());                  
+
+                num = item.getdPMPSpend() / ((item.getdCampaignSpend() > 0.00) ? item.getdCampaignSpend(): 1.00); 
+                bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                item.setdPMPNetSplit(bd.doubleValue());                  
+
+                num = item.getdBudget() * item.getdPMPNetSplit(); 
+                bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                item.setdPMPBudget(bd.doubleValue());                  
+                
+                num = item.getdPMPSpend() / ((item.getdPMPBudget()> 0.00) ? item.getdPMPBudget(): 1.00); 
+                bd = new BigDecimal(num).setScale(2, RoundingMode.HALF_UP);
+                item.setdPMPRate(bd.doubleValue());                                     
+                                
+                
+                itemsLocalDV360.add(item);
+            }
+            rs.close();
+            pstmt.close();   
+            return itemsLocalDV360;
+        } catch (Exception ex) {            
+            System.out.println("getSpendPacingCurrentMonth");
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();                
+        }
+        return null;
+    }   
+    
     public List<TblPacing> getMonthPacingData(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {

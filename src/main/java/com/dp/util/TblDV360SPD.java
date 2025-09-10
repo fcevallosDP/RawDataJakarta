@@ -43,6 +43,21 @@ public class TblDV360SPD {
     private Double dCPM_W3;
     private Double dCPM_W4;
     private Double dCPM_W5;
+    private Double dCTR_W1;
+    private Double dCTR_W2;
+    private Double dCTR_W3;
+    private Double dCTR_W4;
+    private Double dCTR_W5;
+    private Double dVCR_W1;
+    private Double dVCR_W2;
+    private Double dVCR_W3;
+    private Double dVCR_W4;
+    private Double dVCR_W5;
+    private Double dACR_W1;
+    private Double dACR_W2;
+    private Double dACR_W3;
+    private Double dACR_W4;
+    private Double dACR_W5;    
     private Double dAVG_W;
     private Double dCPMGoal;
     private Double dCTRGoal;
@@ -69,6 +84,126 @@ public class TblDV360SPD {
 
     public Integer getId() {
         return id;
+    }
+
+    public Double getdCTR_W1() {
+        return dCTR_W1;
+    }
+
+    public void setdCTR_W1(Double dCTR_W1) {
+        this.dCTR_W1 = dCTR_W1;
+    }
+
+    public Double getdCTR_W2() {
+        return dCTR_W2;
+    }
+
+    public void setdCTR_W2(Double dCTR_W2) {
+        this.dCTR_W2 = dCTR_W2;
+    }
+
+    public Double getdCTR_W3() {
+        return dCTR_W3;
+    }
+
+    public void setdCTR_W3(Double dCTR_W3) {
+        this.dCTR_W3 = dCTR_W3;
+    }
+
+    public Double getdCTR_W4() {
+        return dCTR_W4;
+    }
+
+    public void setdCTR_W4(Double dCTR_W4) {
+        this.dCTR_W4 = dCTR_W4;
+    }
+
+    public Double getdCTR_W5() {
+        return dCTR_W5;
+    }
+
+    public void setdCTR_W5(Double dCTR_W5) {
+        this.dCTR_W5 = dCTR_W5;
+    }
+
+    public Double getdVCR_W1() {
+        return dVCR_W1;
+    }
+
+    public void setdVCR_W1(Double dVCR_W1) {
+        this.dVCR_W1 = dVCR_W1;
+    }
+
+    public Double getdVCR_W2() {
+        return dVCR_W2;
+    }
+
+    public void setdVCR_W2(Double dVCR_W2) {
+        this.dVCR_W2 = dVCR_W2;
+    }
+
+    public Double getdVCR_W3() {
+        return dVCR_W3;
+    }
+
+    public void setdVCR_W3(Double dVCR_W3) {
+        this.dVCR_W3 = dVCR_W3;
+    }
+
+    public Double getdVCR_W4() {
+        return dVCR_W4;
+    }
+
+    public void setdVCR_W4(Double dVCR_W4) {
+        this.dVCR_W4 = dVCR_W4;
+    }
+
+    public Double getdVCR_W5() {
+        return dVCR_W5;
+    }
+
+    public void setdVCR_W5(Double dVCR_W5) {
+        this.dVCR_W5 = dVCR_W5;
+    }
+
+    public Double getdACR_W1() {
+        return dACR_W1;
+    }
+
+    public void setdACR_W1(Double dACR_W1) {
+        this.dACR_W1 = dACR_W1;
+    }
+
+    public Double getdACR_W2() {
+        return dACR_W2;
+    }
+
+    public void setdACR_W2(Double dACR_W2) {
+        this.dACR_W2 = dACR_W2;
+    }
+
+    public Double getdACR_W3() {
+        return dACR_W3;
+    }
+
+    public void setdACR_W3(Double dACR_W3) {
+        this.dACR_W3 = dACR_W3;
+    }
+
+    public Double getdACR_W4() {
+        return dACR_W4;
+    }
+
+    public void setdACR_W4(Double dACR_W4) {
+        this.dACR_W4 = dACR_W4;
+    }
+
+    public Double getdACR_W5() {
+        return dACR_W5;
+    }
+
+    public void setdACR_W5(Double dACR_W5) {
+        this.dACR_W5 = dACR_W5;
     }
 
     public Double getdACR() {

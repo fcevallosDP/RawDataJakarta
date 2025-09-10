@@ -961,6 +961,7 @@ public class TblRawDataController implements Serializable {
         return groupedCharts != null ? groupedCharts.size() : 0;
     }    
     
+    /*EN DESUSO DESDE QUE SE VOLVIÓ MULTIGOALS*/
     public void getDataBarListPerfGraphsGrouped() {
         labelsMap.clear();
         valoresMap.clear();
@@ -1036,6 +1037,129 @@ public class TblRawDataController implements Serializable {
         }
     }
 
+    public void getDataPerfGraphsGroupedPivotedData() {
+        labelsMap.clear();
+        valoresMap.clear();
+        chartTitles.clear();
+        goalType.clear();
+        colorsMap.clear();
+        goalVal.clear();
+        groupedCharts.clear();
+
+        DAOFile dbCon = new DAOFile();
+        List<TblDV360SPD> items =
+            dbCon.getPivotedData(idDailySelected.getId_monthly(), vPartnerSelected);
+
+        if (items == null || items.isEmpty()) return;
+
+        // Agrupación: "CPM" -> [chart1, chart2, ...]
+        Map<String, List<String>> chartsByMetric = new HashMap<>();
+        List<String> labels = List.of("W1", "W2", "W3", "W4", "W5", "AVG", "Goal");
+        int count = 1;
+
+        for (TblDV360SPD it : items) {
+            if (it.getvCampaign() == null || it.getvCampaign().trim().isEmpty()) continue;
+
+            // Repite segmento 2 PARA CADA GOAL > 0
+            for (String metric : new String[]{"CPM","CTR","VCR","ACR"}) {
+
+                double goal = goalOf(it, metric);
+                if (goal <= 0) continue;                 // si no hay goal, no se grafica
+
+                double[] weeks = weeksOf(it, metric);    // 5 semanas por métrica
+                double avg = averageIgnoringZeros(weeks);
+
+                // Si es tasa (CTR/VCR/ACR) convertir a %
+                boolean isRate = !metric.equals("CPM");
+                if (isRate) {
+                    goal *= 100;
+                    for (int i = 0; i < weeks.length; i++) weeks[i] *= 100;
+                    avg *= 100;
+                }
+
+                // Construcción del chart
+                String chartId = "chart" + (count++);
+                List<Number> dataPoints = List.of(
+                    weeks[0], weeks[1], weeks[2], weeks[3], weeks[4], avg, goal
+                );
+
+                double minGoal = goal * 0.90;
+                double maxGoal = goal * 1.10;
+
+                List<String> colors = List.of(
+                    getColor(weeks[0], minGoal, maxGoal, metric),
+                    getColor(weeks[1], minGoal, maxGoal, metric),
+                    getColor(weeks[2], minGoal, maxGoal, metric),
+                    getColor(weeks[3], minGoal, maxGoal, metric),
+                    getColor(weeks[4], minGoal, maxGoal, metric),
+                    getColor(avg,      minGoal, maxGoal, metric),
+                    "rgba(54, 162, 235, 0.2)" // Goal
+                );
+
+                // Mapas ya existentes
+                labelsMap.put(chartId, labels);
+                valoresMap.put(chartId, dataPoints);
+                chartTitles.put(chartId, it.getvCampaign());
+                goalType.put(chartId, metric);
+                goalVal.put(chartId, goal);
+                colorsMap.put(chartId, colors);
+
+                // Agregar al grupo por métrica
+                chartsByMetric.computeIfAbsent(metric, k -> new ArrayList<>()).add(chartId);
+            }
+        }
+
+        // Construir grupos finales
+        groupedCharts.clear();
+        for (Map.Entry<String, List<String>> e : chartsByMetric.entrySet()) {
+            groupedCharts.add(new ChartGroup(e.getKey(), e.getValue()));
+        }
+    }
+
+    /* ================== Helpers ================== */
+
+    // Devuelve el goal de la métrica
+    private static double goalOf(TblDV360SPD it, String metric) {
+        switch (metric) {
+            case "CPM": return nz(it.getdCPMGoal());
+            case "CTR": return nz(it.getdCTRGoal());
+            case "VCR": return nz(it.getdVCRGoal());
+            case "ACR": return nz(it.getdACRGoal());
+            default:    return 0.0;
+        }
+    }
+
+    // Devuelve las 5 semanas de la métrica
+    private static double[] weeksOf(TblDV360SPD it, String metric) {
+        switch (metric) {
+            case "CPM":
+                return new double[]{ nz(it.getdCPM_W1()), nz(it.getdCPM_W2()), nz(it.getdCPM_W3()),
+                                     nz(it.getdCPM_W4()), nz(it.getdCPM_W5()) };
+            case "CTR":
+                return new double[]{ nz(it.getdCTR_W1()), nz(it.getdCTR_W2()), nz(it.getdCTR_W3()),
+                                     nz(it.getdCTR_W4()), nz(it.getdCTR_W5()) };
+            case "VCR":
+                return new double[]{ nz(it.getdVCR_W1()), nz(it.getdVCR_W2()), nz(it.getdVCR_W3()),
+                                     nz(it.getdVCR_W4()), nz(it.getdVCR_W5()) };
+            case "ACR":
+                return new double[]{ nz(it.getdACR_W1()), nz(it.getdACR_W2()), nz(it.getdACR_W3()),
+                                     nz(it.getdACR_W4()), nz(it.getdACR_W5()) };
+            default:
+                return new double[]{0,0,0,0,0};
+        }
+    }
+
+    // Promedio ignorando ceros
+    private static double averageIgnoringZeros(double[] v) {
+        double sum = 0.0; int n = 0;
+        for (double x : v) { if (x > 0) { sum += x; n++; } }
+        if (n == 0) return 0.0;
+        return new java.math.BigDecimal(sum / n)
+                .setScale(6, java.math.RoundingMode.HALF_UP).doubleValue();
+    }
+
+    private static double nz(Double v) { return (v == null) ? 0.0 : v; }
+
     private String getColor(Double value, Double minGoal, Double maxGoal, String goalType) {
         if (goalType.equals("CPM")) {
             return value > maxGoal ? "rgb(217,134,134)" :
@@ -1043,71 +1167,6 @@ public class TblRawDataController implements Serializable {
         } else {
             return value > maxGoal ? "rgb(146,226,148)" :
                    value < minGoal ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)";
-        }
-    }
-    
-    
-    public void getDataBarListPerfGraphs() {
-        labelsMap.clear();
-        valoresMap.clear();
-        chartTitles.clear();
-        goalType.clear();
-        colorsMap.clear();        
-        goalVal.clear();
-        DAOFile dbCon = new DAOFile();
-        List<TblDV360SPD> items = dbCon.getPerfDataPivot(idDailySelected.getId_monthly(), vPartnerSelected);
-
-        if (items != null) {
-            
-            List<String> labels = List.of("W1", "W2", "W3", "W4", "W5", "AVG", "Goal");
-            int count = 1;
-
-            for (TblDV360SPD item : items) {                
-                if (item != null) {
-                    String lsGoalType = (item.getdCPMGoal() > 0) ? "CPM" : ((item.getdCTRGoal() > 0) ? "CTR":"VCR");
-                    Double ldGoal = item.getdCPMGoal() > 0 ? item.getdCPMGoal() : (item.getdCTRGoal() > 0 ? item.getdCTRGoal() : item.getdVCRGoal());
-                    if(lsGoalType.contains("VCR")){
-                        ldGoal = ldGoal * 100.00;
-                        item.setdCPM_W1(item.getdCPM_W1() * 100.00);
-                        item.setdCPM_W2(item.getdCPM_W2() * 100.00);
-                        item.setdCPM_W3(item.getdCPM_W3() * 100.00);
-                        item.setdCPM_W4(item.getdCPM_W4() * 100.00);
-                        item.setdCPM_W5(item.getdCPM_W5() * 100.00);
-                        item.setdAVG_W(item.getdAVG_W() * 100.00);                     
-                    }                                        
-                    
-                    Double minGoal = ldGoal * 0.90;
-                    Double maxGoal = ldGoal * 1.10;
-                    
-                    String chartId = "chart" + count++; // numérico incremental
-                    
-                    List<Number> dataPoints = List.of(
-                        item.getdCPM_W1(),
-                        item.getdCPM_W2(),
-                        item.getdCPM_W3(),
-                        item.getdCPM_W4(),
-                        item.getdCPM_W5(),
-                        item.getdAVG_W(),
-                        ldGoal
-                    );
-
-                    List<String> colors = List.of(
-                            (lsGoalType.contains("CPM") ? (item.getdCPM_W1() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W1() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W1() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W1() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")),                            
-                            (lsGoalType.contains("CPM") ? (item.getdCPM_W2() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W2() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W2() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W2() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
-                            (lsGoalType.contains("CPM") ? (item.getdCPM_W3() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W3() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W3() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W3() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")),                            
-                            (lsGoalType.contains("CPM") ? (item.getdCPM_W4() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W4() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W4() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W4() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
-                            (lsGoalType.contains("CPM") ? (item.getdCPM_W5() > maxGoal) ? "rgb(217,134,134)":((item.getdCPM_W5() < minGoal) ? "rgb(146, 226, 148)" : "rgb(245, 207, 110)") : (item.getdCPM_W5() > maxGoal) ? "rgb(146,226,148)":((item.getdCPM_W5() < minGoal) ? "rgb(217, 134, 134)" : "rgb(245, 207, 110)")), 
-                            "rgb(54, 162, 235, 0.2)", 
-                            "rgb(54, 162, 235, 0.2)");                    
-                    
-                    goalType.put(chartId, lsGoalType);
-                    labelsMap.put(chartId, labels);
-                    valoresMap.put(chartId, dataPoints);
-                    chartTitles.put(chartId, item.getvCampaign());
-                    goalVal.put(chartId, ldGoal);
-                    colorsMap.put(chartId, colors);
-                }
-            }
         }
     }
 

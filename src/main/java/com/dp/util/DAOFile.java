@@ -49,6 +49,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.primefaces.model.file.UploadedFile;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.sql.CallableStatement;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6418,6 +6419,7 @@ public class DAOFile implements Serializable  {
         return null;
     }     
     
+    /*EN DESUSO DESDE QUE SE VOLVIÓ MULTIGOALS*/
     public List<TblDV360SPD> getPerfDataPivot(Integer iMonthly, String lsPartNer){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
@@ -6527,6 +6529,106 @@ public class DAOFile implements Serializable  {
         }
         return null;
     }        
+
+    public List<TblDV360SPD> getPivotedData(Integer iMonthly, String lsPartner) {
+            List<TblDV360SPD> items = new ArrayList<>();
+
+            final String SQL = "{ call get_pivoted_data(?, ?) }";
+
+            try (Connection cn = DatabaseConnector.getConnection();
+                     CallableStatement cs = cn.prepareCall(SQL)) {
+
+                    cs.setInt(1, iMonthly);
+                    cs.setString(2, lsPartner);
+
+                    try (ResultSet rs = cs.executeQuery()) {
+                        while (rs.next()) {
+                            TblDV360SPD it = new TblDV360SPD();
+                            it.setId(items.size() + 1);
+                            it.setvPartner(lsPartner);
+                            it.setvAgency(lsPartner);
+
+                            it.setvCampaign(nvl(rs.getString("vCampaign"), ""));
+
+                            double cpmGoal = getDouble(rs, "dCPMGoal");
+                            double ctrGoal = getDouble(rs, "dCTRGoal");
+                            double vcrGoal = getDouble(rs, "dVCRGoal");
+                            double acrGoal = getDouble(rs, "dACRGoal");
+
+                            it.setdCPMGoal(cpmGoal);
+                            it.setdCTRGoal(ctrGoal);
+                            it.setdVCRGoal(vcrGoal);
+                            it.setdACRGoal(acrGoal);
+
+                            double cpm = getDouble(rs, "W1_CPM");
+                            double ctr = getDouble(rs, "W1_CTR");
+                            double vcr = getDouble(rs, "W1_VCR");
+                            double acr = getDouble(rs, "W1_ACR");
+
+                            it.setdCPM_W1(cpm);
+                            it.setdCTR_W1(ctr);
+                            it.setdVCR_W1(vcr);
+                            it.setdACR_W1(acr);
+
+                            cpm = getDouble(rs, "W2_CPM");
+                            ctr = getDouble(rs, "W2_CTR");
+                            vcr = getDouble(rs, "W2_VCR");
+                            acr = getDouble(rs, "W2_ACR");
+
+                            it.setdCPM_W2(cpm);
+                            it.setdCTR_W2(ctr);
+                            it.setdVCR_W2(vcr);
+                            it.setdACR_W2(acr);
+                            
+                            cpm = getDouble(rs, "W3_CPM");
+                            ctr = getDouble(rs, "W3_CTR");
+                            vcr = getDouble(rs, "W3_VCR");
+                            acr = getDouble(rs, "W3_ACR");
+
+                            it.setdCPM_W3(cpm);
+                            it.setdCTR_W3(ctr);
+                            it.setdVCR_W3(vcr);
+                            it.setdACR_W3(acr);
+
+                            cpm = getDouble(rs, "W4_CPM");
+                            ctr = getDouble(rs, "W4_CTR");
+                            vcr = getDouble(rs, "W4_VCR");
+                            acr = getDouble(rs, "W4_ACR");
+
+                            it.setdCPM_W4(cpm);
+                            it.setdCTR_W4(ctr);
+                            it.setdVCR_W4(vcr);
+                            it.setdACR_W4(acr);
+                            
+                            cpm = getDouble(rs, "W5_CPM");
+                            ctr = getDouble(rs, "W5_CTR");
+                            vcr = getDouble(rs, "W5_VCR");
+                            acr = getDouble(rs, "W5_ACR");
+
+                            it.setdCPM_W5(cpm);
+                            it.setdCTR_W5(ctr);
+                            it.setdVCR_W5(vcr);
+                            it.setdACR_W5(acr);
+
+                            items.add(it);
+                        }
+                    }
+            } catch (SQLException ex) {
+                    System.out.println("getPivotedData: " + ex.getMessage());
+                    ex.printStackTrace();
+            }
+            return items;
+    }
+
+    /* ---------- helpers ---------- */
+    private static String nvl(String s, String def) { return (s == null) ? def : s; }
+
+    private static double getDouble(ResultSet rs, String col) throws SQLException {
+            double v = rs.getDouble(col);
+            if (rs.wasNull()) v = 0.0; // por si llegara NULL, lo tratamos como 0.0
+            return v;
+    }
+    
     public List<TblBudgetTracker> getBudgetTrackerDataSummaryChannelAll(Integer iMonthly, String lsPartNer, String vByGroup, boolean lbAll){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
@@ -7000,7 +7102,7 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
              
-            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `dDate`, `vAdvertiser`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vDeviceType`, `dRevenueCPM`, `dClickRate`, `iImpressions`, `iClicks`, iCompleteViews, dVCR,\n" +
+            PreparedStatement pstmt = connect.prepareStatement("select `Id_raw`, `dDate`, `vAdvertiser`, `vCampaign`, `vInsertionOrder`, `vLineItem`, `vDeviceType`, `dRevenueCPM`, `dClickRate`, `iImpressions`, `iClicks`, iCompleteViews, dVCR, dACR,\n" +
                                                             "	`vUser`, `iAnio`, `iMes`, `iWeek`, `iDia`, `vFileName`\n" +
                                                             "from `tbl_raw_perf_data`\n" +
                                                             "where `tStatus` = 1 and `id_monthly` = ? and (`vAgency` = 'OTROS' or `vAgency` = ? or ? = 'ALL')\n"
@@ -7017,6 +7119,7 @@ public class DAOFile implements Serializable  {
                 item.setdRevenueCPM(rs.getDouble("dRevenueCPM"));                
                 item.setdClickRate(rs.getDouble("dClickRate"));
                 item.setdVCR(rs.getDouble("dVCR"));
+                item.setdACR(rs.getDouble("dACR"));
                 item.setiAnio(rs.getInt("iAnio"));
                 item.setvAgency(vAgency);
                 item.setiClicks(rs.getInt("iClicks"));

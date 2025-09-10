@@ -15,9 +15,9 @@
             <h:form id="TblRawDataListForm">
                 <p:remoteCommand name="callButton2" action="#{tblRawDataController.getItemCalendarByMonth()}" update=":TblRawDataListForm:datalist"/>
                 <style>             
-                    /*.ui-datatable .ui-datatable-grouped-row {
-                        border-bottom: 2px solid #dee2e6;
-                    }*/
+                    .ui-datatable tbody td {
+                        font-size: 0.9rem !important;
+                    }                                        
                 </style>
                 <p:growl id="messages"/>
                 <p:panel style="width: 100%;" id="idPanelCabecera">                      

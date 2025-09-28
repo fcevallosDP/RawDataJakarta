@@ -1,9 +1,7 @@
 package com.dp.util;
 
 import com.dp.entity.TblCatalog;
-import com.dp.entity.TblCatalogColumn;
 import com.dp.entity.TblTypeSources;
-import com.dp.facade.TblCatalogColumnFacade;
 import com.dp.facade.TblCatalogFacade;
 import com.dp.facade.util.JsfUtil;
 import java.io.FileNotFoundException;
@@ -15,24 +13,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-//import jakarta.faces.bean.ManagedBean;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.text.ParseException;
@@ -370,7 +362,120 @@ public class DAOFile implements Serializable  {
 
         return localitemsDV360;
     }
+    
+    protected List<TblDV360SPD> scrap_MRM_TTD_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws IOException, CsvValidationException {
+        System.out.println("scrap_MRM_TTD_Format");
+        List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
 
+        if (itemFile != null && itemFile.getFileName().endsWith(".csv")) {
+                try (
+                        InputStreamReader reader = new InputStreamReader(itemFile.getInputStream(), StandardCharsets.UTF_8);
+                        CSVReader csvReader = new CSVReader(reader)
+                ) {
+                        String[] line;
+                        boolean isFirstLine = true;
+                                                
+                        while ((line = csvReader.readNext()) != null) {
+                                if (isFirstLine) {
+                                        isFirstLine = false; // skip header
+                                        continue;
+                                }
+
+                                TblDV360SPD item = new TblDV360SPD();
+                                item.setIdMontly(idDaily.getId_monthly());
+                                item.setvPartner("");
+                                item.setvCampaign("");
+                                item.setvInsertionOrder("");
+                                item.setvLineItem("");
+                                item.setvExchange("");
+                                item.setvDealName("");
+                                item.setvClient("");
+                                item.setdMediaCosts(0.0);
+                                item.setdTotalMediaCosts(0.0);
+                                item.setdCPC(0.0);
+                                item.setdCPM(0.0);
+                                item.setdCTR(0.000);
+                                item.setiImpressions(0);
+                                item.setiClicks(0);
+                                
+                                
+                                if (line.length < 6) continue; // ignorar líneas incompletas
+
+                                                                                                                                       
+                                try {
+                                        item.setvDate(convertToMySQLFormat(line[0]));
+                                        String[] parts = item.getvDate().split("-|/");
+                                        if (parts.length == 3) {
+                                                item.setiAnio(Integer.parseInt(parts[0]));
+                                                item.setiMes(Integer.parseInt(parts[1]));
+                                                item.setiDia(Integer.parseInt(parts[2]));
+                                        }
+                                } catch (Exception ex) {
+                                        continue; // salta fila con fecha inválida
+                                }
+
+                                item.setvPartner(stripQuotes(line[1]));
+                                item.setvCampaign(stripQuotes(line[2]));
+                                item.setvInsertionOrder(stripQuotes(line[3]));
+                                item.setvLineItem(stripQuotes(line[4]));
+                                item.setvExchange(stripQuotes(line[5]));
+                                item.setvDealName(stripQuotes(line[6]));
+
+                                try {
+                                        item.setiImpressions(Integer.parseInt(stripQuotes(line[7])));
+                                } catch (Exception ex) {
+                                        item.setiImpressions(0);
+                                }
+                                try {
+                                        item.setiClicks(Integer.parseInt(stripQuotes(line[8])));
+                                } catch (Exception ex) {
+                                        item.setiClicks(0);
+                                }
+
+                                try {
+                                        item.setdMediaCosts(Double.parseDouble(stripQuotes(line[9])));
+                                } catch (Exception ex) {
+                                        item.setdMediaCosts(0.0);
+                                }
+
+                                try {
+                                        item.setdTotalMediaCosts(Double.parseDouble(stripQuotes(line[10])));
+                                } catch (Exception ex) {
+                                        item.setdTotalMediaCosts(0.0);
+                                }
+
+                                try {
+                                    item.setvDSP(getValueBetweenColumnsPredefined(item, "DSP"));
+                                    item.setvClient(getValueBetweenColumnsPredefined(item, "CLIENT"));
+                                    item.setvAgency(getValueBetweenColumnsPredefined(item, "AGENCY"));
+                                    item.setvChannel(getValueBetweenColumnsPredefined(item, "CHANNEL"));
+                                    item.setvVendor(getValueBetweenColumnsPredefined(item, "VENDOR"));
+
+                                    item.setvAlias((item.getvDealName() != null && item.getvDealName().length() >= 3)
+                                            ? item.getvDealName().substring(0, 3) : "");
+
+                                    item.setvVendorSource("OTROS".equalsIgnoreCase(item.getvVendor()) ? "EXTERNAL" : "INTERNAL");
+
+                                    if (item.getiImpressions() > 0) {
+                                        item.setdCPM((item.getdMediaCosts() * 1000.0) / item.getiImpressions());
+                                        item.setdCTR((double) item.getiClicks() / item.getiImpressions());
+                                    }
+                                    if (item.getiClicks() > 0) {
+                                        item.setdCPC(item.getdMediaCosts() / item.getiClicks());
+                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+
+                                localitemsDV360.add(item);
+                                
+                        }
+                }
+        }        
+
+        return localitemsDV360;
+    }    
+    
     private String getCellString(Cell cell) {
         return (cell.getCellType() == CellType.STRING) ? cell.getStringCellValue().trim() : "";
     }
@@ -395,253 +500,6 @@ public class DAOFile implements Serializable  {
        return false;
    }
     
-    protected List<TblDV360SPD> scrap_DV360_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{        
-        System.out.println("scrap_DV360_Format");
-        List<TblDV360SPD> localitemsDV360 = new ArrayList();
-        if (itemFile != null){
-            String lsFileName = itemFile.getFileName();            
-            if (lsFileName.endsWith(".xlsx")){                   
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {                     
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDV360SPD item;                    
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDV360SPD();
-                        item.setdMediaCosts(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalMediaCosts(0.00);
-                        item.setdCPC(0.00);
-                        item.setdCPM(0.00);
-                        item.setdCTR(0.000);
-                        item.setIdMontly(idDaily.getId_monthly());
-                        item.setvPartner("");
-                        item.setvCampaign("");
-                        item.setvInsertionOrder("");
-                        item.setvLineItem("");
-                        item.setvExchange("");
-                        item.setvDealName("");
-                        item.setvClient("");                     
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 1://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiAnio(Integer.valueOf(parts[0]));
-                                                    item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2])); 
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;                                    
-                                case 2://Partner
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvPartner(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://CAMPAIGN
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvCampaign(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Insertion Order
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvInsertionOrder(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();                                                                                      
-                                    }
-                                    break;
-                                case 5://Line Item
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvLineItem(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 6://Exchange
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvExchange(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 7://Inventory Source
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDealName(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 8://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiImpressions((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 9://Clicks
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiClicks((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 10://Media Costs
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdMediaCosts(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 11://Total Media Costs
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdTotalMediaCosts(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }else{
-                            try {
-                                item.setvDSP(getValueBetweenColumnsPredefined(item,"DSP"));                                
-                                item.setvClient(getValueBetweenColumnsPredefined(item,"CLIENT"));
-                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                item.setvVendor(getValueBetweenColumnsPredefined(item,"VENDOR"));
-                                
-                                item.setvAlias((item.getvDealName() !=null && !item.getvDealName().isEmpty() && item.getvDealName().length() > 2) ? item.getvDealName().substring(0, 3) : "");
-                                item.setvVendorSource((item.getvVendor() !=null && !item.getvVendor().isEmpty() && item.getvVendor().contentEquals("OTROS")) ? "EXTERNAL" : "INTERNAL");
-                                item.setdCPM((item.getiImpressions() > 0) ? (item.getdMediaCosts() * 1000.00) / item.getiImpressions() : 0.00);
-                                item.setdCTR((item.getiImpressions() > 0) ? ((float) item.getiClicks() / item.getiImpressions()) : 0.000);
-                                item.setdCPC((item.getiClicks() > 0) ? item.getdMediaCosts() / item.getiClicks() : 0.00);                          
-                            } catch (Exception exe) {
-                                    System.out.println(exe.getMessage());
-                                    exe.printStackTrace();
-                                }
-                        }
-                        // Append to list
-                        if (item != null){
-                            localitemsDV360.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }              
-        }
-       }
-        return localitemsDV360;
-    }
-
     protected List<TblDV360SPD> scrap_PPOINT_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws IOException {
         System.out.println("scrap_PPOINT_Format");
         List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
@@ -757,246 +615,6 @@ public class DAOFile implements Serializable  {
         return localitemsDV360;
     }
         
-    protected List<TblDV360SPD> scrap_PPOINT_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
-        System.out.println("scrap_PPOINT_Format");
-        List<TblDV360SPD> localitemsDV360 = new ArrayList();
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();
-            if (lsFileName.endsWith(".xlsx")){                                               
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDV360SPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDV360SPD();
-                        item.setIdMontly(idDaily.getId_monthly());
-                        item.setvPartner("");
-                        item.setvCampaign("");
-                        item.setvInsertionOrder("");
-                        item.setvLineItem("");
-                        item.setvExchange("");
-                        item.setvDealName("");
-                        item.setvClient("");         
-                        item.setdMediaCosts(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalMediaCosts(0.00);
-                        item.setdCPC(0.00);
-                        item.setdCPM(0.00);
-                        item.setdCTR(0.000);                        
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiAnio(Integer.valueOf(parts[0]));
-                                                    item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2])); 
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;                                      
-                                case 2://CAMPAIGN
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvCampaign(nextCell.getStringCellValue());
-                                                item.setvPartner("ATAYLOR");
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://Insertion Order
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvInsertionOrder(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Line Item
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvLineItem(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }                                           
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){                                                                                      
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 5://Exchange
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvExchange(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();                                                                                      
-                                    }
-                                    break;
-                                case 6://Deal Name
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDealName(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 7://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiImpressions((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 8://Clicks
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiClicks((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 9://Media Costs
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdMediaCosts(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 10://Total Media Costs
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdTotalMediaCosts(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 4){
-                            item = null;
-                            lbEndFile = true;
-                        }else{
-                            try {
-                                String lsDealName = item.getvDealName();
-                                item.setvDealName((item.getvDealName() != null && !item.getvDealName().isEmpty() && (item.getvDealName().contains("AT-PP-") || item.getvDealName().contains("AT1") || item.getvDealName().contains("-ABT-"))) ? item.getvDealName() : getValueBetweenColumnsPredefined(item,"DEALNAME"));
-                                if(item.getvDealName().contentEquals("OTROS")){
-                                    item.setvDealName(lsDealName);// si el proceso de equivalencias en PP no encontró catalogo deja como vino
-                                }                                    
-                                item.setvDSP(getValueBetweenColumnsPredefined(item,"DSP"));                                
-                                item.setvClient(getValueBetweenColumnsPredefined(item,"CLIENT"));
-                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                item.setvVendor(getValueBetweenColumnsPredefined(item,"VENDOR"));
-
-                                
-                                item.setvAlias((item.getvDealName() !=null && !item.getvDealName().isEmpty() && item.getvDealName().length() > 2) ? item.getvDealName().substring(0, 3) : "");
-                                item.setvVendorSource((item.getvVendor() !=null && !item.getvVendor().isEmpty() && item.getvVendor().contentEquals("OTROS")) ? "EXTERNAL" : "INTERNAL");
-                                item.setdCPM((item.getiImpressions() > 0) ? (item.getdMediaCosts() * 1000.00) / item.getiImpressions() : 0.00);
-                                item.setdCTR((item.getiImpressions() > 0) ? ((float) item.getiClicks() / item.getiImpressions()) : 0.000);
-                                item.setdCPC((item.getiClicks() > 0) ? item.getdMediaCosts() / item.getiClicks() : 0.00);                          
-                            } catch (Exception exe) {
-                                System.out.println(exe.getMessage());
-                                exe.printStackTrace();
-                            }
-                        }
-                        
-                        // Append to list
-                        if (item != null){
-                            localitemsDV360.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsDV360;
-    }
-
     protected TblDailyProcess getDailyByDate(TblDailyProcess idDaily){    
         idDaily.setId_daily(getItemDailybyDate(idDaily));                
         if(idDaily.getId_daily() == 0){
@@ -1314,238 +932,6 @@ public class DAOFile implements Serializable  {
             return localitemsDV360;
     }
 
-    protected List<TblDV360SPD> scrap_Perf_PP_Data_OLD(UploadedFile itemFile, String vAgency, Integer iMonthly) throws FileNotFoundException, IOException{
-        System.out.println("scrap_Perf_PP_Data");
-        TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
-        List<TblDV360SPD> localitemsDV360 = new ArrayList();
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();
-            if (lsFileName.endsWith(".xlsx")){                                               
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDV360SPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDV360SPD();
-                        item.setvAgency(vAgency);
-                        item.setIdDaily(idDaily);
-                        item.setvCampaign("");
-                        item.setvInsertionOrder("");
-                        item.setvLineItem("");
-                        item.setvExchange("");
-                        item.setvDealName("");
-                        item.setvClient("");         
-                        item.setdMediaCosts(0.00);
-                        item.setiImpressions(0);
-                        item.setIdMontly(iMonthly);
-                        item.setdTotalMediaCosts(0.00);
-                        item.setdCPC(0.00);
-                        item.setdCPM(0.00);
-                        item.setdVCR(0.00);
-                        item.setdCTR(0.000);        
-                        item.setiClicks(0);
-                        item.setiCompleteViews(0);
-
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiAnio(Integer.valueOf(parts[0]));
-                                                    item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2])); 
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;  
-                                case 1://ADVERTISER
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvClient(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 2://CAMPAIGN
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvCampaign(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://Insertion Order
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvInsertionOrder(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Line Item
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvLineItem(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }                                           
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){                                                                                      
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 5://Device Type
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeviceType(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();                                                                                      
-                                    }
-                                    break;                                                                                                            
-                                case 9://Click Rate CTR
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdClickRate(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                    
-                                case 10://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiImpressions((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 11://Clicks
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiClicks((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }                                    
-                                    break;
-                                case 12://CompleteViews
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiCompleteViews((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }                                    
-                                    break;
-                                case 16://Revenue CPM
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdRevenueCPM(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;                                             
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 4){
-                            item = null;
-                            lbEndFile = true;
-                        }                        
-                        // Append to list
-                        if (item != null){
-                            localitemsDV360.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsDV360;
-    } 
-
     protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
             System.out.println("scrap_Perf_ABTDV360_Data");
             List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
@@ -1627,458 +1013,7 @@ public class DAOFile implements Serializable  {
 
             return localitemsDV360;
     }
-
-    protected List<TblDV360SPD> scrap_Perf_ABTDV360_Data_OLD(UploadedFile itemFile, String vAgency, Integer iMonthly) throws FileNotFoundException, IOException{
-        System.out.println("scrap_Perf_ABTDV360_Data");
-        TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
-        List<TblDV360SPD> localitemsDV360 = new ArrayList();
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();
-            if (lsFileName.endsWith(".xlsx")){                                               
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDV360SPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDV360SPD();
-                        item.setvAgency(vAgency);
-                        item.setIdDaily(idDaily);
-                        item.setvCampaign("");
-                        item.setvInsertionOrder("");
-                        item.setvLineItem("");
-                        item.setvExchange("");
-                        item.setvDealName("");
-                        item.setvClient("");         
-                        item.setdMediaCosts(0.00);
-                        item.setiImpressions(0);
-                        item.setiClicks(0);
-                        item.setIdMontly(iMonthly);
-                        item.setiCompleteViews(0);
-                        item.setdVCR(0.00);
-                        item.setdTotalMediaCosts(0.00);
-                        item.setdCPC(0.00);
-                        item.setdCPM(0.00);
-                        item.setdCTR(0.000);                        
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiAnio(Integer.valueOf(parts[0]));
-                                                    item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2])); 
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;  
-                                case 1://ADVERTISER
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvClient(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 2://CAMPAIGN
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvCampaign(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://Insertion Order
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvInsertionOrder(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Line Item
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvLineItem(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }                                           
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){                                                                                      
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 5://Device Type
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeviceType(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();                                                                                      
-                                    }
-                                    break;
-                                case 6://Revenue CPM
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdRevenueCPM(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;         
-                                case 8://Click Rate CTR
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdClickRate(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                    
-                                case 9://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiImpressions((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 10://Clicks
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiClicks((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 11://CompleteViews
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiCompleteViews((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;                                    
-                                    break;                                    
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 4){
-                            item = null;
-                            lbEndFile = true;
-                        }                        
-                        // Append to list
-                        if (item != null){
-                            localitemsDV360.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsDV360;
-    }     
     
-    protected List<TblDV360SPD> scrap_Perf_DV360_Data_OLD(UploadedFile itemFile, String vAgency, Integer iMonthly) throws FileNotFoundException, IOException{
-        System.out.println("scrap_Perf_DV360_Data");
-        TblDailyProcess idDaily = new TblDailyProcess(0,0,0, "");        
-        List<TblDV360SPD> localitemsDV360 = new ArrayList();
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();
-            if (lsFileName.endsWith(".xlsx")){                                               
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDV360SPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDV360SPD();
-                        item.setvAgency(vAgency);
-                        item.setIdDaily(idDaily);
-                        item.setvCampaign("");
-                        item.setvInsertionOrder("");
-                        item.setvLineItem("");
-                        item.setvExchange("");
-                        item.setvDealName("");
-                        item.setvClient("");         
-                        item.setdMediaCosts(0.00);
-                        item.setiImpressions(0);
-                        item.setiClicks(0);
-                        item.setIdMontly(iMonthly);
-                        item.setiCompleteViews(0);
-                        item.setdVCR(0.00);                        
-                        item.setdTotalMediaCosts(0.00);
-                        item.setdCPC(0.00);
-                        item.setdCPM(0.00);
-                        item.setdCTR(0.000);                        
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiAnio(Integer.valueOf(parts[0]));
-                                                    item.setiMes(Integer.valueOf(parts[1]));
-                                                    item.setiDia(Integer.valueOf(parts[2])); 
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;  
-                                case 1://ADVERTISER
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvClient(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 2://CAMPAIGN
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvCampaign(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://Insertion Order
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvInsertionOrder(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                            
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Line Item
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvLineItem(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }                                           
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){                                                                                      
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 5://Device Type
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeviceType(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();                                                                                      
-                                    }
-                                    break;
-                                case 6://Revenue CPM
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdRevenueCPM(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;         
-                                case 7://Click Rate CTR
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdClickRate(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                    
-                                case 8://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiImpressions((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 9://Clicks
-                                    try{
-                                        if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setiClicks((int) nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 4){
-                            item = null;
-                            lbEndFile = true;
-                        }                        
-                        // Append to list
-                        if (item != null){
-                            localitemsDV360.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsDV360;
-    } 
-
     protected List<TblDV360SPD> scrap_Perf_MRMDV360_Data(UploadedFile itemFile, String vAgency, Integer iMonthly) throws IOException {
             System.out.println("scrap_Perf_DV360_Data");
             List<TblDV360SPD> localitemsDV360 = new ArrayList<>();
@@ -2529,238 +1464,7 @@ public class DAOFile implements Serializable  {
         SimpleDateFormat mysqlFormat = new SimpleDateFormat("yyyy-MM-dd");
         return mysqlFormat.format(date);
     }       
-    
-    protected List<TblDVXANDRSPD> scrap_SSP_Equative_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException, Exception{
-        System.out.println("scrap_SSP_Equative_Format");
-        List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();
-        if (itemFile != null){
-            Integer iAnio, iMonth, iDia;
-            String lsFileName = itemFile.getFileName();                   
-            if (lsFileName.endsWith(".csv")){                
-                //Get first sheet from the workbook
-                try (SXSSFWorkbook workbook = convertCsvToXlsx(itemFile)) {
-                    //Get first sheet from the workbook
-                    String lsBase = "";
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  
-                    Boolean lbEndFile = false, lbEndCol = false, lbAddRow = true;
-                    int iColBlank;
-                    TblDVXANDRSPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        lbAddRow = true;
-                        item = new TblDVXANDRSPD();
-                        item.setdMediaCost(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalCost(0.00);
-                        item.setdCPM(0.00);                        
-                        item.setdDspFee(0.00);
-                        item.setdGrossMargin(0.00);
-                        item.setdNetRevenue(0.00);
-                        item.setdGrossRevenue(0.00);
-                        item.setdMargin(0.00);
-                        item.setdMlFee(0.00);
-                        item.setdMarginFee(0.00);
-                        item.setdTechFee(0.00);
-                        item.setdSalesRevenue(0.00);
-                        item.setdNetMargin(0.00);
-                        item.setvDevice("NA");
-                        item.setIdMonthly(idDaily.getId_monthly());
-                        item.setvDeal("");                                                    
-                        item.setvBrand("");
-                        item.setvAdvertiser("");                                                
-                        item.setvClient("");
-                        item.setvAgency("");
-                        item.setvDsp("");
-                        item.setvChannel("");
-                        item.setvSeat("");
-                        item.setvExchange("");                                                
-                        while (cellIterator.hasNext() && !lbEndCol && lbAddRow) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(convertToMySQLFormat(nextCell.getStringCellValue()));
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiYear(Integer.valueOf(parts[0])); 
-                                                    item.setiMonth(Integer.valueOf(parts[1]));
-                                                    item.setiDay(Integer.valueOf(parts[2]));                                                                                                        
-                                                }
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;  
-                                case 2://deal_external_id
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;  
-                                case 3://DealName
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeal(nextCell.getStringCellValue());    
-                                                item.setvDeal(item.getvDeal().replace("\"", ""));
-                                                item.setvBrand(getValueBetweenColumnsPredefined(item,"BRAND"));
-                                                item.setvAdvertiser(getValueBetweenColumnsPredefined(item,"ADVERTISER"));                                                
-                                                item.setvClient(item.getvBrand());
-                                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                                item.setvDsp(getValueBetweenColumnsPredefined(item,"DSP"));
-                                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                                item.setvSeat(getValueBetweenColumnsPredefined(item,"SEAT"));
-                                                item.setvExchange(getValueBetweenColumnsPredefined(item,"EXCHANGE"));                                                
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 7://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setiImpressions(Integer.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 11://SalesRevenue (SpendUSD)
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){  
-                                                item.setdSalesRevenue(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                                if(item.getdSalesRevenue() != null){
-                                                    item.setdTechFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                                    item.setdCPM((item.getiImpressions() > 0) ? (1000.00 * (item.getdSalesRevenue() / item.getiImpressions())) : 0.00);
-                                                    //item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                                                                        
-                                                    if ((item.getvDeal() != null && item.getvDeal().contains("-PP-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV360-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvSeat() != null && item.getvSeat().contains("-BAS"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-TTD"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                                    }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MRM"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MR1"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("Pulsepoint"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }
-                                                    
-                                                    if ((item.getvSeat()!=null && item.getvSeat().contains("DATAP-ML"))){
-                                                        item.setdMlFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                                    }                                                                                                
-                                                }     
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 12://curationMargin/GrossMargin
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdGrossMargin(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                                if(item.getdGrossMargin() != null && item.getdSalesRevenue() != null){
-                                                    item.setdMediaCost(item.getdSalesRevenue() - item.getdGrossMargin() - item.getdTechFee());
-                                                    
-                                                    if (item.getvSeat() != null){
-                                                        if(item.getvSeat().contains("DPX-EQT")){
-                                                            item.setdMarginFee((item.getdGrossMargin() * 8.00) / 100.00);
-                                                        }else if(item.getvSeat().contains("DPX-PUB")){
-                                                            item.setdMarginFee((item.getdGrossMargin() * 10.00) / 100.00);
-                                                        }else if(item.getvSeat().contains("DPX-OPX")){
-                                                            item.setdMarginFee((item.getdGrossMargin() * 6.00) / 100.00);
-                                                        }else if(item.getvSeat().contains("DPX-XAN")){
-                                                            item.setdMarginFee((item.getdGrossMargin() * 7.00) / 100.00);
-                                                        }
-                                                    }                                                                                                                                                     
-                                                }
-                                                item.setdGrossRevenue(item.getdGrossMargin() - item.getdMlFee());
-                                                item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
-                                                item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee()- item.getdDspFee());
-                                                if (item.getdSalesRevenue() > 0){
-                                                    item.setdMargin(item.getdGrossMargin() / item.getdSalesRevenue());
-                                                    item.setdNetMargin(item.getdNetRevenue() / item.getdSalesRevenue());
-                                                }                                                
-                                            }                                                        
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }
-                        // Append to list
-                        if (item != null && item.getiImpressions() > 0 && item.getdSalesRevenue() > 0 && lbAddRow){
-                            localitemsXANDR.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsXANDR;
-    }
-    
+      
     protected List<TblDVXANDRSPD> scrap_SSP_PubMatic_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws IOException, CsvValidationException {
             System.out.println("scrap_SSP_PubMatic_Format");
 
@@ -3180,235 +1884,6 @@ public class DAOFile implements Serializable  {
             return value == null ? "" : value.replace("\"", "").trim();
     }
 	
-    protected List<TblDVXANDRSPD> scrap_SSP_PubMatic_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException, Exception{
-        System.out.println("scrap_SSP_PubMatic_Format");
-        List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();      
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();                    
-            if (lsFileName.endsWith(".csv")){                
-                //Get first sheet from the workbook
-                try (SXSSFWorkbook workbook = convertCsvToXlsx(itemFile)) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  
-                    Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDVXANDRSPD item = null;                        
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDVXANDRSPD();
-                        item.setdMediaCost(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalCost(0.00);
-                        item.setdCPM(0.00);                        
-                        item.setdDspFee(0.00);
-                        item.setdGrossMargin(0.00);
-                        item.setdNetRevenue(0.00);
-                        item.setdGrossRevenue(0.00);
-                        item.setdMargin(0.00);
-                        item.setdNetMargin(0.00);
-                        item.setdMlFee(0.00);
-                        item.setdMarginFee(0.00);
-                        item.setdTechFee(0.00);
-                        item.setdSalesRevenue(0.00);
-                        item.setvDevice("NA");
-                        item.setIdMonthly(idDaily.getId_monthly());
-                        item.setvDeal("");                                                    
-                        item.setvBrand("");
-                        item.setvAdvertiser("");                                                
-                        item.setvClient("");
-                        item.setvAgency("");
-                        item.setvDsp("");
-                        item.setvChannel("");
-                        item.setvSeat("");
-                        item.setvExchange("");                                                
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(convertToMySQLFormat(nextCell.getStringCellValue()));
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiYear(Integer.valueOf(parts[0]));                                                    
-                                                    item.setiMonth(Integer.valueOf(parts[1]));
-                                                    item.setiDay(Integer.valueOf(parts[2]));                                                     
-                                                }
-                                                
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;   
-                                case 1://deal id
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                              
-                                case 2://DealName
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeal(nextCell.getStringCellValue());    
-                                                item.setvDeal(item.getvDeal().replace("\"", ""));                                                
-                                                item.setvBrand(getValueBetweenColumnsPredefined(item,"BRAND"));
-                                                item.setvAdvertiser(getValueBetweenColumnsPredefined(item,"ADVERTISER"));                                                
-                                                item.setvClient(item.getvBrand());
-                                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                                item.setvDsp(getValueBetweenColumnsPredefined(item,"DSP"));
-                                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                                item.setvSeat(getValueBetweenColumnsPredefined(item,"SEAT"));
-                                                item.setvExchange(getValueBetweenColumnsPredefined(item,"EXCHANGE"));                                                                                                
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setiImpressions(Integer.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://SalesRevenue (SpendUSD)
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){  
-                                                item.setdSalesRevenue(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                                if(item.getdSalesRevenue() != null){
-                                                    item.setdTechFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                                    item.setdCPM((item.getiImpressions() > 0) ? (1000.00 * (item.getdSalesRevenue() / item.getiImpressions())) : 0.00);
-                                                    //item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                                                                        
-                                                    if ((item.getvDeal() != null && item.getvDeal().contains("-PP-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV360-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvSeat() != null && item.getvSeat().contains("-BAS"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-TTD"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                                    }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MRM"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MR1"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("Pulsepoint"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                                    }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV-"))){
-                                                        item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                    }                                                    
-                                                    
-                                                    if ((item.getvSeat()!=null && item.getvSeat().contains("DATAP-ML"))){
-                                                        item.setdMlFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                                    }                                                                                                
-                                                }     
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 5://curationMargin/GrossMargin
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdGrossMargin(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                                if(item.getdGrossMargin() != null && item.getdSalesRevenue() != null){
-                                                    item.setdMediaCost(item.getdSalesRevenue() - item.getdGrossMargin() - item.getdTechFee());
-                                                }
-                                                
-                                                if (item.getvSeat() != null){
-                                                    if(item.getvSeat().contains("DPX-EQT")){
-                                                        item.setdMarginFee((item.getdGrossMargin() * 8.00) / 100.00);
-                                                    }else if(item.getvSeat().contains("DPX-PUB")){
-                                                        item.setdMarginFee((item.getdGrossMargin() * 10.00) / 100.00);
-                                                    }else if(item.getvSeat().contains("DPX-OPX")){
-                                                        item.setdMarginFee((item.getdGrossMargin() * 6.00) / 100.00);
-                                                    }else if(item.getvSeat().contains("DPX-XAN")){
-                                                        item.setdMarginFee((item.getdGrossMargin() * 7.00) / 100.00);
-                                                    }
-                                                }
-                                                
-                                                item.setdGrossRevenue(item.getdGrossMargin() - item.getdMlFee());
-                                                item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
-                                                item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee()- item.getdDspFee());
-                                                if (item.getdSalesRevenue() > 0){
-                                                    item.setdMargin((item.getdGrossMargin() * 1.00) / item.getdSalesRevenue());
-                                                    item.setdNetMargin((item.getdNetRevenue() * 1.00) / item.getdSalesRevenue());
-                                                }                                              
-                                            }                                                        
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }
-                        // Append to list
-                        if (item != null && item.getiImpressions() > 0 && item.getdSalesRevenue() > 0){
-                            localitemsXANDR.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-       return localitemsXANDR;
-    }
-
     protected List<TblDVXANDRSPD> scrap_SSP_Xandr_Data_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
         System.out.println("scrap_SSP_Xandr_Data_Format");
         List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();      
@@ -3764,332 +2239,7 @@ public class DAOFile implements Serializable  {
             default -> 0.0;
         };
     }
-    
-    
-    protected List<TblDVXANDRSPD> scrap_SSP_Xandr_MLM_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
-        System.out.println("scrap_SSP_Xandr_MLM_Format");
-        List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();      
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();       
-
-            if (lsFileName.endsWith(".xlsx")){                
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1
-                    }  
-                    Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDVXANDRSPD item = null;                        
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDVXANDRSPD();
-                        item.setdMediaCost(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalCost(0.00);
-                        item.setdCPM(0.00);                        
-                        item.setdDspFee(0.00);
-                        item.setdGrossMargin(0.00);
-                        item.setdNetRevenue(0.00);
-                        item.setdGrossRevenue(0.00);
-                        item.setdMargin(0.00);
-                        item.setdNetMargin(0.00);
-                        item.setdMlFee(0.00);
-                        item.setdMarginFee(0.00);
-                        item.setdTechFee(0.00);
-                        item.setdSalesRevenue(0.00);
-                        item.setvDevice("NA");
-                        item.setIdMonthly(idDaily.getId_monthly());
-                        item.setvDeal("");                                                    
-                        item.setvBrand("");
-                        item.setvAdvertiser("");                                                
-                        item.setvClient("");
-                        item.setvAgency("");
-                        item.setvDsp("");
-                        item.setvChannel("");
-                        item.setvSeat("");
-                        item.setvExchange("");                                                
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiYear(Integer.valueOf(parts[0]));                                                    
-                                                    item.setiMonth(Integer.valueOf(parts[1]));
-                                                    item.setiDay(Integer.valueOf(parts[2]));                                                     
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;   
-                                
-                                /*case 1://Advertiser
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvAdvertiser(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                    
-                                case 2://Brand
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvBrand(nextCell.getStringCellValue());
-                                                item.setvClient(getValueBetweenColumnsPredefined(item,"CLIENT"));                                               
-                                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;       */                             
-                                case 3://DealName
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeal(nextCell.getStringCellValue());                                                    
-                                                item.setvDsp(getValueBetweenColumnsPredefined(item,"DSP"));
-                                                item.setvBrand(getValueBetweenColumnsPredefined(item,"BRAND"));
-                                                item.setvAdvertiser(getValueBetweenColumnsPredefined(item,"ADVERTISER"));                                                                                                
-                                                item.setvClient((item.getvBrand()!= null && !item.getvBrand().isEmpty() && (item.getvBrand().contains("COREBRIDGE") || item.getvBrand().contains("SEISMIC"))) ? "MRM-COREBRIDGE" : item.getvBrand());                                                                                                                                               
-                                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                                item.setvSeat(getValueBetweenColumnsPredefined(item,"SEAT"));
-                                                item.setvExchange(getValueBetweenColumnsPredefined(item,"EXCHANGE"));   
-                                                item.setvAgency(item.getvAdvertiser());
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://Device
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDevice(nextCell.getStringCellValue());
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                     
-                                case 5://curationMargin/GrossMargin
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdGrossMargin(Double.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdGrossMargin(nextCell.getNumericCellValue());
-                                        }                                               
-                                        if (item.getvSeat() != null){
-                                            if(item.getvSeat().contains("DPX-EQT")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 8.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-PUB")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 10.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-OPX")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 6.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-XAN")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 7.00) / 100.00);
-                                            }
-                                        }                                                                                                                                                     
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                                                    
-                                case 6://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setiImpressions(Integer.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            Double ldvalue = nextCell.getNumericCellValue();
-                                            item.setiImpressions(ldvalue.intValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 7://curationRevenue/SalesRevenue
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdSalesRevenue(Double.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdSalesRevenue(nextCell.getNumericCellValue());
-                                        }                                                                                                                                                   
-                                        //item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                                                                                                                            
-                                        if ((item.getvDeal() != null && item.getvDeal().contains("-PP-"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                        }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV360-"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                        }else if ((item.getvSeat() != null && item.getvSeat().contains("-BAS"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                        }else if ((item.getvDeal() != null && item.getvDeal().contains("-TTD"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                        }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MRM"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                        }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MR1"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                        }else if ((item.getvDeal() != null && item.getvDeal().contains("Pulsepoint"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                        }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV-"))){
-                                            item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                        }                                        
-                                        
-                                        if ((item.getvSeat()!=null && item.getvSeat().contains("DATAP-ML"))){
-                                            item.setdMlFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                        }                                                                    
-                                        item.setdGrossRevenue(item.getdGrossMargin() - item.getdMlFee());       
-                                        if (item.getdSalesRevenue() > 0){
-                                            item.setdMargin((item.getdGrossMargin() * 1.00) / item.getdSalesRevenue());                                                                                        
-                                        }                                                                  
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                                                    
-                                case 8://techFees
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){  
-                                                item.setdTechFee(Double.valueOf(nextCell.getStringCellValue()));                                                   
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdTechFee(nextCell.getNumericCellValue());
-                                        }                                                                                                                                                   
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 9://mediaCost
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdMediaCost(Double.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdMediaCost(nextCell.getNumericCellValue());
-                                        }                                                                                                                                                   
-                                            
-                                        item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee()- item.getdDspFee());                                                                                                                                                                                             
-                                        if (item.getdSalesRevenue() > 0){
-                                            item.setdMargin((item.getdGrossMargin() * 1.00) / item.getdSalesRevenue());
-                                            item.setdNetMargin((item.getdNetRevenue() * 1.00) / item.getdSalesRevenue());
-                                        }  
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 10://TotalCost
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdTotalCost(Double.valueOf(nextCell.getStringCellValue()));                                                
-                                            }                                                        
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdTotalCost(nextCell.getNumericCellValue());
-                                        }                                                                                                                                                   
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 11://CPM
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdCPM(Double.valueOf(nextCell.getStringCellValue()));
-                                            }                                                        
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdCPM(nextCell.getNumericCellValue());
-                                        }                                                                                                                                                   
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;                                    
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }
-                        // Append to list
-                        if (item != null && item.getiImpressions() > 0 && item.getdSalesRevenue() > 0){
-                            localitemsXANDR.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-            }
-        }
-        return localitemsXANDR;
-    }    
-
+        
     protected List<TblDVXANDRSPD> scrap_SSP_OpenX_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws IOException {
         System.out.println("scrap_SSP_OpenX_Format");
         List<TblDVXANDRSPD> localItems = new ArrayList<>();
@@ -4228,7 +2378,6 @@ public class DAOFile implements Serializable  {
         return cell == null ? "" : cell.toString().replace("\"", "").trim();
     }
 
-
     private String getStringNumberFromStringValue(Cell cell) {
 		if (cell == null) return "";
 
@@ -4276,258 +2425,7 @@ public class DAOFile implements Serializable  {
         if (seat.contains("DPX-XAN")) return item.getdGrossMargin() * 0.07;
         return 0.0;
     }
-
-    
-    protected List<TblDVXANDRSPD> scrap_SSP_OpenX_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException{
-        System.out.println("scrap_SSP_OpenX_Format");
-        List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();      
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();       
-
-            if (lsFileName.endsWith(".xlsx")){                
-                //Get first sheet from the workbook
-                try (XSSFWorkbook workbook = new XSSFWorkbook(itemFile.getInputStream())) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // Period: 01/26/2024 00:
-                        rowIterator.next(); // OrderBy: Day DESC
-                        rowIterator.next(); // Day DealID DealName
-                    }  
-                    Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDVXANDRSPD item = null;                        
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDVXANDRSPD();
-                        item.setdMediaCost(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalCost(0.00);
-                        item.setdCPM(0.00);                        
-                        item.setdDspFee(0.00);
-                        item.setdGrossMargin(0.00);
-                        item.setdNetRevenue(0.00);
-                        item.setdGrossRevenue(0.00);
-                        item.setdMargin(0.00);
-                        item.setdMlFee(0.00);
-                        item.setdMarginFee(0.00);
-                        item.setdNetMargin(0.00);
-                        item.setdTechFee(0.00);
-                        item.setdSalesRevenue(0.00);
-                        item.setvDevice("NA");
-                        item.setIdMonthly(idDaily.getId_monthly());
-                        item.setvDeal("");                                                    
-                        item.setvBrand("");
-                        item.setvAdvertiser("");                                                
-                        item.setvClient("");
-                        item.setvAgency("");
-                        item.setvDsp("");
-                        item.setvChannel("");
-                        item.setvSeat("");
-                        item.setvExchange("");                                                
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.NUMERIC) {
-                                            if (DateUtil.isCellDateFormatted(nextCell)) {
-                                                Date date = nextCell.getDateCellValue();
-                                                // Formateas si quieres mostrarlo como String
-                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                                                String string = sdf.format(date);
-                                                item.setvDate(string);
-                                                String[] parts = string.split("-");
-                                                if (parts.length == 3){                                                    
-                                                    item.setiYear(Integer.valueOf(parts[0]));
-                                                    item.setiMonth(Integer.valueOf(parts[1]));
-                                                    item.setiDay(Integer.valueOf(parts[2]));                                                                                                                                                                                                                 
-                                                }                                                                                          
-                                            }
-                                        }else if (nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){                                                    
-                                                    item.setiMonth(Integer.valueOf(parts[0]));
-                                                    item.setiDay(Integer.valueOf(parts[1]));                                                     
-                                                    item.setiYear(Integer.valueOf(parts[2]));                                                                                                        
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;        
-                                case 1://deal id
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){     
-                                                item.setvDealId(nextCell.getStringCellValue().replace("\"", ""));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                         
-                                case 2://DealName
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeal(nextCell.getStringCellValue());   
-                                                item.setvBrand(getValueBetweenColumnsPredefined(item,"BRAND"));
-                                                item.setvAdvertiser(getValueBetweenColumnsPredefined(item,"ADVERTISER"));                                                
-                                                item.setvClient(item.getvBrand());
-                                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                                item.setvDsp(getValueBetweenColumnsPredefined(item,"DSP"));
-                                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                                item.setvSeat(getValueBetweenColumnsPredefined(item,"SEAT"));
-                                                item.setvExchange(getValueBetweenColumnsPredefined(item,"EXCHANGE"));                                                  
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 3://SalesRevenue (SpendUSD)
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){  
-                                                item.setdSalesRevenue(Double.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){    
-                                                item.setdSalesRevenue(nextCell.getNumericCellValue());
-                                        }                                                        
-                                        if(item.getdSalesRevenue() != null){
-                                            item.setdTechFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                            item.setdCPM((item.getiImpressions() > 0) ? (1000.00 * (item.getdSalesRevenue() / item.getiImpressions())) : 0.00);
-                                            //item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                                                                                                                                            
-                                            if ((item.getvDeal() != null && item.getvDeal().contains("-PP-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV360-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvSeat() != null && item.getvSeat().contains("-BAS"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-TTD"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                            }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MRM"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MR1"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("Pulsepoint"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }                            
-                                            
-                                            if ((item.getvSeat()!=null && item.getvSeat().contains("DATAP-ML"))){
-                                                item.setdMlFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                            }                                                                                                
-                                        }     
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 4://curationMargin/GrossMargin
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){ 
-                                                item.setdGrossMargin(Double.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdGrossMargin(nextCell.getNumericCellValue());
-                                        }        
-                                                                                                                                                
-                                        if(item.getdGrossMargin() != null && item.getdSalesRevenue() != null){
-                                            item.setdMediaCost(item.getdSalesRevenue() - item.getdGrossMargin() - item.getdTechFee());
-                                        }
-                                        if (item.getvSeat() != null){
-                                            if(item.getvSeat().contains("DPX-EQT")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 8.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-PUB")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 10.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-OPX")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 6.00) / 100.00);
-                                            }else if(item.getvSeat().contains("DPX-XAN")){
-                                                item.setdMarginFee((item.getdGrossMargin() * 7.00) / 100.00);
-                                            }
-                                        }                                                                                                                                                                                                    
-                                        item.setdGrossRevenue(item.getdGrossMargin() - item.getdMlFee());
-                                        item.setdTotalCost(item.getdMediaCost() + item.getdTechFee());
-                                        item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee()- item.getdDspFee());
-                                        if (item.getdSalesRevenue() > 0){
-                                            item.setdMargin((item.getdGrossMargin() * 1.00) / item.getdSalesRevenue());
-                                            item.setdNetMargin((item.getdNetRevenue() * 1.00) / item.getdSalesRevenue());                                            
-                                        }                                              
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 6://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setiImpressions(Integer.valueOf(nextCell.getStringCellValue()));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            Double ldval = nextCell.getNumericCellValue();
-                                            item.setiImpressions(ldval.intValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;                                    
-                                    break;
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }
-                        // Append to list
-                        if (item != null && item.getiImpressions() > 0 && item.getdSalesRevenue() > 0){
-                            localitemsXANDR.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-       return localitemsXANDR;
-    }
-
+  
     protected List<TblDVXANDRSPD> scrap_SSP_Triton_Format(UploadedFile itemFile, TblDailyProcess idDaily) throws IOException, CsvValidationException {
         System.out.println("scrap_SSP_Triton_Format CSV");
         List<TblDVXANDRSPD> items = new ArrayList<>();
@@ -4664,247 +2562,6 @@ public class DAOFile implements Serializable  {
         return items;
     }    
     
-    protected List<TblDVXANDRSPD> scrap_SSP_Triton_Format_OLD(UploadedFile itemFile, TblDailyProcess idDaily) throws FileNotFoundException, IOException, Exception{
-        System.out.println("scrap_SSP_Triton_Format CSV");
-        /*System.out.println("0:Day");
-        System.out.println("1:Ad Network Gross Revenue");
-        System.out.println("2:Impressions");
-        System.out.println("3:Wins");
-        System.out.println("4:Average Ad Network Clear Price");
-        System.out.println("5:Delivery Rate");
-        System.out.println("6:Media Cost");
-        System.out.println("7:Average Clear Price");
-        System.out.println("8:Deal Name");*/                
-        List<TblDVXANDRSPD> localitemsXANDR = new ArrayList();
-        if (itemFile != null){            
-            String lsFileName = itemFile.getFileName();                   
-            if (lsFileName.endsWith(".csv")){                
-                //Get first sheet from the workbook
-                try (SXSSFWorkbook workbook = convertCsvToXlsx(itemFile)) {
-                    //Get first sheet from the workbook
-                    Sheet firstSheet = workbook.getSheetAt(0);
-                    Iterator<Row> rowIterator = firstSheet.iterator();
-                    // skip the header row
-                    if (rowIterator.hasNext()) {
-                        rowIterator.next(); // 1 Report name - just column headers
-                        /*rowIterator.next(); // 2 Report frequency
-                        rowIterator.next(); // 3 Filters
-                        rowIterator.next(); // 4 Time range
-                        rowIterator.next(); // 5 Report link
-                        rowIterator.next(); // 6 Manage reports
-                        rowIterator.next(); // 7 Empty
-                        rowIterator.next(); // 8 Empty
-                        rowIterator.next(); // 9 Date	Winning Deal Name
-                        */
-                    }  
-                    Boolean lbEndFile = false, lbEndCol = false;
-                    int iColBlank;
-                    TblDVXANDRSPD item = null;                  
-                    while (rowIterator.hasNext() && !lbEndFile) {
-                        // aqui empiezo a iterar filas
-                        Row nextRow = rowIterator.next();
-                        Iterator<Cell> cellIterator = nextRow.cellIterator();
-                        lbEndCol = false;
-                        iColBlank = 0;
-                        item = new TblDVXANDRSPD();
-                        item.setdMediaCost(0.00);
-                        item.setiImpressions(0);
-                        item.setdTotalCost(0.00);
-                        item.setdCPM(0.00);                        
-                        item.setdDspFee(0.00);
-                        item.setdGrossMargin(0.00);
-                        item.setdNetRevenue(0.00);
-                        item.setdGrossRevenue(0.00);
-                        item.setdMargin(0.00);
-                        item.setdMlFee(0.00);
-                        item.setdMarginFee(0.00);
-                        item.setdTechFee(0.00);
-                        item.setdSalesRevenue(0.00);
-                        item.setdNetMargin(0.00);
-                        item.setvDevice("NA");
-                        item.setIdMonthly(idDaily.getId_monthly());
-                        item.setvDeal("");                                                    
-                        item.setvBrand("");
-                        item.setvAdvertiser("");                                                
-                        item.setvClient("");
-                        item.setvAgency("");
-                        item.setvDsp("");
-                        item.setvChannel("");
-                        item.setvSeat("");
-                        item.setvExchange("");                                                
-                        while (cellIterator.hasNext() && !lbEndCol) {
-                            // aqui empiezo a iterar las columnas
-                            Cell nextCell = cellIterator.next();
-                            
-                            int columnIndex = nextCell.getColumnIndex();
-                            
-                            /*if(nextCell.getCellType() == CellType.BLANK){
-                                iColBlank++;
-                            }*/
-                            switch (columnIndex) {
-                                case 0://Date
-                                    try{
-                                        if (nextCell.getCellType() == CellType.STRING){                                        
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDate(nextCell.getStringCellValue());
-                                                String string = item.getvDate();
-                                                String[] parts = (string.contains("-")) ? string.split("-") : string.split("/");
-                                                if (parts.length == 3){
-                                                    item.setiYear(Integer.valueOf(parts[0]));                                                                                                        
-                                                    item.setiMonth(Integer.valueOf(parts[1]));
-                                                    item.setiDay(Integer.valueOf(parts[2]));
-                                                }                                          
-                                            }else{
-                                                iColBlank++;    
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                       e.printStackTrace();
-                                    }catch (Exception ex){
-                                       ex.printStackTrace();
-                                    }
-                                    break;                                   
-                                case 1://Ad Network Gross Revenue
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){  
-                                                item.setdGrossRevenue(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                            }    
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdGrossRevenue(nextCell.getNumericCellValue());
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                    
-                                case 2://Impressions
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setiImpressions(Integer.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;                                     
-                                case 6://MediaCost
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){                                                
-                                                item.setdMediaCost(Double.valueOf(nextCell.getStringCellValue().replace("\"", "")));
-                                            }
-                                        }else if(nextCell.getCellType() == CellType.NUMERIC){
-                                            item.setdMediaCost(nextCell.getNumericCellValue());
-                                        }    
-                                                
-                                        if(item.getdMediaCost() != null){
-                                            item.setdGrossMargin(item.getdMediaCost() - item.getdGrossRevenue());
-                                            item.setdSalesRevenue(item.getdMediaCost());
-                                            item.setdTechFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                            item.setdMediaCost(item.getdSalesRevenue() - item.getdGrossMargin() - item.getdTechFee());
-                                            item.setdTotalCost(item.getdTechFee() + item.getdMediaCost());
-                                            item.setdCPM((item.getiImpressions() > 0) ? (1000.00 * (item.getdSalesRevenue() / item.getiImpressions())) : 0.00);
-
-                                            if ((item.getvDeal() != null && item.getvDeal().contains("-PP-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV360-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvSeat() != null && item.getvSeat().contains("-BAS"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-TTD"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 15.00) / 100.00);
-                                            }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MRM"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvAdvertiser() != null && item.getvAdvertiser().contains("MR1"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("Pulsepoint"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 20.00) / 100.00);
-                                            }else if ((item.getvDeal() != null && item.getvDeal().contains("-DV-"))){
-                                                item.setdDspFee((item.getdSalesRevenue() * 19.00) / 100.00);
-                                            }
-
-                                            if (item.getvSeat() != null){
-                                                
-                                                 if(item.getvSeat().contains("DPX-EQT")){
-                                                     item.setdMarginFee((item.getdGrossMargin() * 8.00) / 100.00);
-                                                 }else if(item.getvSeat().contains("DPX-PUB")){
-                                                     item.setdMarginFee((item.getdGrossMargin() * 10.00) / 100.00);
-                                                 }else if(item.getvSeat().contains("DPX-OPX")){
-                                                     item.setdMarginFee((item.getdGrossMargin() * 6.00) / 100.00);
-                                                 }else if(item.getvSeat().contains("DPX-XAN")){
-                                                     item.setdMarginFee((item.getdGrossMargin() * 7.00) / 100.00);
-                                                 }
-
-                                                if (item.getvSeat().contains("DATAP-ML")){
-                                                    item.setdMlFee((item.getdSalesRevenue() * 10.00) / 100.00);
-                                                }                                                  
-                                                 
-                                             }
-                                            
-
-                                            item.setdNetRevenue(item.getdSalesRevenue() - item.getdTechFee() - item.getdMediaCost() - item.getdMlFee() - item.getdMarginFee()- item.getdDspFee());
-                                            if (item.getdSalesRevenue() > 0){
-                                                item.setdMargin((item.getdGrossMargin() * 1.00) / item.getdSalesRevenue());
-                                                item.setdNetMargin((item.getdNetRevenue() * 1.00) / item.getdSalesRevenue());                                                
-                                            }                                              
-                                        }
-                                        
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    break;
-                                case 8://DealName
-                                    try{
-                                        if(nextCell.getCellType() == CellType.STRING){
-                                            if (!nextCell.getStringCellValue().isEmpty()){
-                                                item.setvDeal(nextCell.getStringCellValue());    
-                                                item.setvDeal(item.getvDeal().replace("\"", ""));
-                                                item.setvBrand(getValueBetweenColumnsPredefined(item,"BRAND"));
-                                                item.setvAdvertiser(getValueBetweenColumnsPredefined(item,"ADVERTISER"));                                                
-                                                item.setvClient(item.getvBrand());
-                                                item.setvAgency(getValueBetweenColumnsPredefined(item,"AGENCY"));
-                                                item.setvDsp(getValueBetweenColumnsPredefined(item,"DSP"));
-                                                item.setvChannel(getValueBetweenColumnsPredefined(item,"CHANNEL"));
-                                                item.setvSeat(getValueBetweenColumnsPredefined(item,"SEAT"));
-                                                item.setvExchange(getValueBetweenColumnsPredefined(item,"EXCHANGE"));                                                
-                                            }else{
-                                                iColBlank++;
-                                            }
-                                        }
-                                    }catch (IllegalStateException e) {
-                                        e.printStackTrace();
-                                    }catch (Exception ex){
-                                        ex.printStackTrace();
-                                    }
-                                    lbEndCol = true;
-                                    break;   
-                            }// END SWITCH
-                        }//END Col
-                        if(iColBlank > 3){
-                            item = null;
-                            lbEndFile = true;
-                        }
-                        // Append to list
-                        if (item != null && item.getiImpressions() > 0 && item.getdSalesRevenue() > 0){
-                            localitemsXANDR.add(item);
-                        }
-                        
-                    }// END ROWS
-                    workbook.close(); 
-                }               
-        }
-       }
-        return localitemsXANDR;
-    }
-
     protected boolean save_ItemsSSPDeleteFisrt(String lsFileName, List<TblDVXANDRSPD> localitemsXANDR, TblDailyProcess idDaily, String lsExchange){
         System.out.println("save_ItemsSSP "+lsFileName);
         if (localitemsXANDR != null && !localitemsXANDR.isEmpty() && !lsFileName.isEmpty()){
@@ -5348,7 +3005,7 @@ public class DAOFile implements Serializable  {
         try (Connection connect = DatabaseConnector.getConnection()) {
                 
                 TblUsers itemRes = null;
-                PreparedStatement pstmt = connect.prepareStatement("select `idUser`, `vName`, `vLastName`, `vUser`, `vPassword`, `dSystemDate`, `tbl_profiles`.`idProfile`, `tbl_profiles`.`vDescription`, `tbl_users`.`tStatus`, `tbl_users`.`vAgency` from `tbl_users`, `tbl_profiles` where `tbl_users`.`idProfile` = `tbl_profiles`.`idProfile` and `vUser` = ? and `vPassword` = ?");            
+                PreparedStatement pstmt = connect.prepareStatement("select `idUser`, `vName`, `vLastName`, `vUser`, `vPassword`, `dSystemDate`, `tbl_profiles`.`idProfile`, `tbl_profiles`.`vDescription`, `tbl_users`.`tStatus`, `tbl_users`.`vAgency`, `tbl_users`.`firstLogin` from `tbl_users`, `tbl_profiles` where `tbl_users`.`idProfile` = `tbl_profiles`.`idProfile` and `vUser` = ? and `vPassword` = ?");            
                 pstmt.setString(1, lsUsername);
                 pstmt.setString(2, lsPassword);
                 
@@ -5362,6 +3019,7 @@ public class DAOFile implements Serializable  {
                     itemRes.setvAgency(rs.getString("vAgency"));
                     itemRes.setvPassword(rs.getString("vPassword"));
                     itemRes.setiStatus(rs.getInt("tStatus"));
+                    itemRes.setFirstLogin(rs.getBoolean("firstLogin"));
                     TblProfiles itemProfile = new TblProfiles();
                     itemProfile.setIDProfile(rs.getInt("idProfile"));
                     itemProfile.setVDescription(rs.getString("vDescription"));
@@ -5382,18 +3040,35 @@ public class DAOFile implements Serializable  {
 
         try (Connection connect = DatabaseConnector.getConnection()) {
                 
-                PreparedStatement pstmt = connect.prepareStatement("update `tbl_users` set `vPassword` = ?, `dSystemDate` = now() where `idUser` = ?");            
+                PreparedStatement pstmt = connect.prepareStatement("update `tbl_users` set `vPassword` = ?, passwordChangedAt = now(), firstLogin = 0 where `idUser` = ?");            
                 pstmt.setString(1, itemUser.getvPassword());
                 pstmt.setInt(2, itemUser.getIdUser());
                 pstmt.executeUpdate();
                 pstmt.close();   
             } catch (Exception ex) {                
-                System.out.println("setUpdateUserById");
+                System.out.println("setUpdateUser");
                 System.out.println(ex.getMessage());
                 ex.printStackTrace();   
             }
     } 
-        
+
+    
+    public void setLastLogin(TblUsers itemUser){
+
+        try (Connection connect = DatabaseConnector.getConnection()) {
+                
+                PreparedStatement pstmt = connect.prepareStatement("update `tbl_users` set `lastLogin` = now() where `idUser` = ?");            
+                pstmt.setInt(1, itemUser.getIdUser());
+                pstmt.executeUpdate();
+                pstmt.close();   
+            } catch (Exception ex) {                
+                System.out.println("setLastLogin");
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();   
+            }
+    } 
+            
+    
     public List<String> getItemsColumnNames(String lsSource){
 
         try (Connection connect = DatabaseConnector.getConnection()) {
@@ -8475,6 +6150,8 @@ public class DAOFile implements Serializable  {
                     save_Items(lsFileName, scrap_DV360_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("HLK")){
                     save_Items(lsFileName, scrap_DV360_HLK_Format(itemFile, idDaily));
+                }else if (lsFileName.contains("TTD")){
+                    save_Items(lsFileName, scrap_MRM_TTD_Format(itemFile, idDaily));
                 }else if (lsFileName.contains("Basis")){
                     save_Items(lsFileName, scrap_BASIS_Format(itemFile, idDaily));                          
                 }else if (lsFileName.contains("Domain-Detailed")){

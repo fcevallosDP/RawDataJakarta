@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import javax.management.Notification;
+import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -36,12 +37,15 @@ import javax.management.Notification;
 public class LoginBean implements Serializable {
     private String username;
     private String password;
+    private String newPassword;
+    private String confirmPassword;    
     private TblUsers LoggedInUser;
     private BigInteger currentView = null;
     private String autorizacion = "";
     private String hostname;
     private Boolean notificatorOpened = false;
     private String notificationTitle;
+    private boolean showFirstLoginDialog;
     private boolean lbIfAdmin = false;
     private String ipaddress;
     private List<TblRawDataNotifications> notificaciones;
@@ -52,6 +56,14 @@ public class LoginBean implements Serializable {
         return hostname;
     }
 
+    public boolean isShowFirstLoginDialog() { return showFirstLoginDialog; }
+    public void setShowFirstLoginDialog(boolean v) { showFirstLoginDialog = v; }		
+
+    public String getNewPassword() { return newPassword; }
+    public void setNewPassword(String s) { newPassword = s; }
+    public String getConfirmPassword() { return confirmPassword; }
+    public void setConfirmPassword(String s) { confirmPassword = s; }
+    
     public List<TblRawDataNotifications> getNotificaciones() {
         return notificaciones;
     }
@@ -215,21 +227,79 @@ public class LoginBean implements Serializable {
     
     public void resetPassword()
     {
-        try{
-            DAOFile dbCon = new DAOFile();       
-            LoggedInUser = dbCon.getItemUserById(LoggedInUser.getIdUser());
-            if (LoggedInUser != null){
-                LoggedInUser.setvPassword(JsfUtil.generateHash(password));
-                dbCon.setUpdateUser(LoggedInUser);
-                this.setPassword("");
-                JsfUtil.addSuccessMessage("Password changed successfully!");                    
+        if (newPassword == null || !newPassword.equals(confirmPassword)) {
+            JsfUtil.addErrorMessage("Passwords do not match");
+        }else{        
+            try{
+                DAOFile dbCon = new DAOFile();       
+                LoggedInUser = dbCon.getItemUserById(LoggedInUser.getIdUser());
+                if (LoggedInUser != null){
+                    LoggedInUser.setvPassword(JsfUtil.generateHash(newPassword));
+                    LoggedInUser.setFirstLogin(false);
+                    dbCon.setUpdateUser(LoggedInUser);
+                    newPassword = null;
+                    confirmPassword = null;                    
+                    showFirstLoginDialog = false;
+                    JsfUtil.addSuccessMessage("Password changed successfully!");                    
+                }
+            }catch (Exception e) {        
+                e.printStackTrace();
+                JsfUtil.addErrorMessage("Something went wrong");
             }
-        }catch (Exception e) {        
-            e.printStackTrace();
-            JsfUtil.addErrorMessage("Something went wrong");
         }
     }
+    
     @Produces
+    public String login() {
+        try {
+            DAOFile dbCon = new DAOFile();
+            notificaciones = new ArrayList<>();
+            TblUsers u = dbCon.getItemUserByUserAndPass(username, JsfUtil.generateHash(password));
+
+            if (u == null) {
+                this.password = "";
+                JsfUtil.addErrorMessage("Login failed!");
+                return "login";
+            }
+
+            if (u.getiStatus() == 0) { // inactivo
+                this.password = "";
+                JsfUtil.addErrorMessage("The user is inactive");
+                return "login";
+            }
+            
+            lbIfAdmin = false;   
+            TblProfiles perfil = u.getIdProfile();
+            HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+            request.getSession().setAttribute("SESVAR_Usuario", u);                
+            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+            this.hostname = request.getRemoteHost();
+            this.hostname = InetAddress.getByName(hostname).getCanonicalHostName();                
+            this.ipaddress = request.getRemoteAddr();                
+            if(perfil != null){
+
+                dbCon.insertSessionLog(u.getIdUser(), this.hostname, this.ipaddress);
+                if (perfil.getVDescription().toUpperCase().contains("ADMIN")){
+                    lbIfAdmin = true;                        
+                }
+                notificaciones = dbCon.getNotificaciones(u.getvAgency());                                        
+                this.setLoggedInUser(u);
+                dbCon.setLastLogin(u);
+                showFirstLoginDialog = Boolean.TRUE.equals(u.getFirstLogin());                
+                externalContext.redirect(externalContext.getRequestContextPath() + "/index.xhtml");                
+                return "index";
+            }                        
+
+            return null; 
+            
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage("Something went wrong!");
+            this.password = "";
+            return "login";
+        }
+    }
+    
+/*
     public String login()
     {
         try
@@ -282,7 +352,7 @@ public class LoginBean implements Serializable {
         }
         return "login";
     }
-    
+ */   
     public void logout() throws IOException {
         HttpSession session = JsfUtil.getSession();
         if(session != null){

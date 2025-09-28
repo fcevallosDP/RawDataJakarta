@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<ui:composition>
+
+  <p:dialog id="FirstLoginDlg"
+            widgetVar="FirstLoginDialog"
+            modal="true"
+            closable="false" minimizable="false" maximizable="false"
+            draggable="false" resizable="false"
+            appendTo="@(body)"
+            header="First Login - Change Password Needed"
+            styleClass="ui-fluid"
+            width="450"
+            visible="#{loginBean.showFirstLoginDialog}">
+
+    <h:form id="FirstLoginForm">
+      <p:growl id="growl2" life="3000" />
+
+      <div class="field grid">
+        <p:outputLabel for="fullName" styleClass="col-fixed" style="width:120px" value="Name:"/>
+        <div class="col">
+          <p:outputLabel id="fullName" value="#{loginBean.loggedInUser.fullName}" />
+        </div>
+      </div>
+
+      <div class="field grid">
+        <p:outputLabel for="userName" styleClass="col-fixed" style="width:120px" value="Username:"/>
+        <div class="col">
+          <p:outputLabel id="userName" value="#{loginBean.username}" />
+        </div>
+      </div>
+      
+      <div class="field grid">
+        <p:outputLabel for="pwd1" styleClass="col-fixed" style="width:120px" value="Password" />
+        <div class="col">
+          <p:password id="pwd1" required="true" widgetVar="pwd1W"
+                      value="#{loginBean.newPassword}"
+                      toggleMask="true" feedback="true"
+                      promptLabel="Type a new password"
+                      weakLabel="Weak" goodLabel="Good" strongLabel="Strong"                      
+                      requiredMessage="Password is required"                      
+                      styleClass="w-full">
+          </p:password>
+          <p:message for="pwd1" display="icon"/>
+          <small>Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo (@$!%*?&amp;._-).</small>
+        </div>
+      </div>
+      
+      <div class="field grid">
+        <p:outputLabel for="pwd2" styleClass="col-fixed" style="width:120px" value="Confirm Password" />
+        <div class="col">
+          <p:password id="pwd2" widgetVar="pwd2W"
+                      value="#{loginBean.confirmPassword}"
+                      toggleMask="true"
+                      required="true"
+                      requiredMessage="Please confirm your password"
+                      match="pwd1"                      
+                      styleClass="w-full">            
+          </p:password>
+          <p:message for="pwd2" display="icon"/>
+        </div>
+      </div>
+
+      <div class="field grid">
+        <div class="col-offset-4 col" style="display:flex;justify-content:flex-end;gap:.5rem;">
+            
+            <p:commandButton value="Update"
+                             action="#{loginBean.resetPassword}"
+                             process="@form" update="@form growl2"
+                             onclick="return dpValidateFirstLogin()"
+                             oncomplete="if(!args.validationFailed){PF('FirstLoginDialog').hide();}"
+                             style="background:#0097A7;font-size:.75rem;padding:.4rem 1.2rem;min-width:90px;border:none;"
+                              styleClass="ui-button ui-widget ui-state-default ui-corner-all"/>            
+        </div>
+      </div>
+
+    </h:form>
+  </p:dialog>
+    
+    <h:outputScript target="body">
+      //<![CDATA[
+      window.dpValidateFirstLogin = function () {
+        var form = document.getElementById('FirstLoginForm');
+        if (!form) return false;
+
+        // Soporta id "pwd1" o "pwd1_input" que usa PF en algunos temas
+        var p1 = form.querySelector('input[id$="pwd1"], input[id$="pwd1_input"]');
+        var p2 = form.querySelector('input[id$="pwd2"], input[id$="pwd2_input"]');
+
+        if (!p1 || !p2) { console.warn('Password inputs no encontrados'); return false; }
+
+        // limpia mensajes previos
+        p1.setCustomValidity && p1.setCustomValidity('');
+        p2.setCustomValidity && p2.setCustomValidity('');
+
+        // 0) Requeridos
+        if (!p1.value) { 
+          p1.setCustomValidity && p1.setCustomValidity('Password is required');
+          p1.reportValidity && p1.reportValidity();
+          return false;
+        }
+        if (!p2.value) {
+          p2.setCustomValidity && p2.setCustomValidity('Please confirm your password');
+          p2.reportValidity && p2.reportValidity();
+          return false;
+        }
+
+        // 1) Complejidad mínima
+        var v = p1.value;
+        var ok = v.length >= 8 &&
+                 /[A-Z]/.test(v) &&
+                 /[a-z]/.test(v) &&
+                 /[0-9]/.test(v) &&
+                 /[@$!%*?&._-]/.test(v);
+
+        if (!ok) {
+          p1.setCustomValidity && p1.setCustomValidity(
+            'Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo (@$!%*?&._-).'
+          );
+          p1.reportValidity && p1.reportValidity();
+          return false;
+        }
+
+        // 2) Coincidencia
+        if (p1.value !== p2.value) {
+          p2.setCustomValidity && p2.setCustomValidity('Passwords do not match');
+          p2.reportValidity && p2.reportValidity();
+          return false;
+        }
+
+        return true; // OK -> se envía el Ajax
+      };
+      //]]>
+    </h:outputScript>
+
+
+
+</ui:composition>
+</html>

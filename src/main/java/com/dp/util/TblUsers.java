@@ -20,6 +20,9 @@ public class TblUsers implements Serializable  {
     private Date dSystemDate;
     private TblProfiles idProfile;
     private int iStatus;
+    private Boolean firstLogin;
+    private Date lastLogin;
+    private Date passwordChangedAt;
 
     public Integer getIdUser() {
         return idUser;
@@ -47,6 +50,30 @@ public class TblUsers implements Serializable  {
 
     public String getvLastName() {
         return vLastName;
+    }
+
+    public Boolean getFirstLogin() {
+        return firstLogin;
+    }
+
+    public void setFirstLogin(Boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
+
+    public Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Date lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public Date getPasswordChangedAt() {
+        return passwordChangedAt;
+    }
+
+    public void setPasswordChangedAt(Date passwordChangedAt) {
+        this.passwordChangedAt = passwordChangedAt;
     }
 
     public String getFullName(){

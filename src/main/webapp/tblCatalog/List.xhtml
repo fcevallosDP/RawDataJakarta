@@ -71,10 +71,26 @@
                             <div class="flex justify-content-end">
                                 <p:commandButton id="createButton" icon="pi pi-plus" title="Create" actionListener="#{tblCatalogController.prepareCreate}" update=":TblCatalogCreateForm" oncomplete="PF('TblCatalogCreateDialog').show()"/>
                                 <p:commandButton id="deleteButton" icon="pi pi-trash" style="margin-left: 2px;"
-                                                title="Delete" actionListener="#{tblCatalogController.destroy}" 
-                                                update="datalist" disabled="#{empty tblCatalogController.selected}">                                    
-                                    <p:confirm header="Confirmation" message="Are you sure you want to delete selected catalog item?" icon="pi pi-trash"/>
-                                
+                                                title="Delete"
+                                                disabled="#{empty tblCatalogController.selected}"                                                
+                                                 update="catalogConfirmDialog"
+                                                 oncomplete="PF('confirmDialogWidget').show()"
+                                                 process="@this"                                                                                                
+                                                >                                    
+
+                                <p:dialog id="catalogConfirmDialog" widgetVar="confirmDialogWidget" header="Confirmation"
+                                          modal="true" closable="false" resizable="false" draggable="false">
+                                    <h:outputText value="Are you sure you want to delete selected catalog item?" />
+                                    <p:separator />
+                                    <p:commandButton value="Yes" icon="pi pi-check" 
+                                                     actionListener="#{tblCatalogController.destroy}"
+                                                     update="datalist" style="margin-left: 2px;"
+                                                     oncomplete="PF('confirmDialogWidget').hide()" />
+                                    <p:commandButton value="No" icon="pi pi-times" style="margin-left: 2px;"
+                                                     onclick="PF('confirmDialogWidget').hide(); return false;" type="button"/>
+                                </p:dialog>                                    
+                                    
+                                    
                                 </p:commandButton>
                             </div>
                         </f:facet>                                                                         

@@ -48,7 +48,7 @@
                       styleClass="w-full">
           </p:password>
           <p:message for="pwd1" display="icon"/>
-          <small>Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo (@$!%*?&amp;._-).</small>
+          <small>Minimum 8 characters, including uppercase, lowercase, number, and symbol (@$!%*?&amp;._-).</small>
         </div>
       </div>
       
@@ -59,8 +59,7 @@
                       value="#{loginBean.confirmPassword}"
                       toggleMask="true"
                       required="true"
-                      requiredMessage="Please confirm your password"
-                      match="pwd1"                      
+                      requiredMessage="Please confirm your password"         
                       styleClass="w-full">            
           </p:password>
           <p:message for="pwd2" display="icon"/>
@@ -76,7 +75,7 @@
                              onclick="return dpValidateFirstLogin()"
                              oncomplete="if(!args.validationFailed){PF('FirstLoginDialog').hide();}"
                              style="background:#0097A7;font-size:.75rem;padding:.4rem 1.2rem;min-width:90px;border:none;"
-                              styleClass="ui-button ui-widget ui-state-default ui-corner-all"/>            
+                             styleClass="ui-button ui-widget ui-state-default ui-corner-all"/>            
         </div>
       </div>
 
@@ -138,7 +137,6 @@
       };
       //]]>
     </h:outputScript>
-
 
 
 </ui:composition>

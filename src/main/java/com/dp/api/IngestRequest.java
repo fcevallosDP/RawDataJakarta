@@ -15,18 +15,19 @@ import java.util.Map;
 
 public class IngestRequest {
     @NotBlank
-    private String source;                     // "openx" | "pubmatic" | ...
+    private String source;
 
     @NotNull
-    private List<Map<String, Object>> rows;    // list[dict] que te envía Python
+    private List<RowDto> rows;
 
-    private Long sent_at;                      // opcional
+    // opcional
+    private Long sent_at;
 
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
 
-    public List<Map<String, Object>> getRows() { return rows; }
-    public void setRows(List<Map<String, Object>> rows) { this.rows = rows; }
+    public List<RowDto> getRows() { return rows; }
+    public void setRows(List<RowDto> rows) { this.rows = rows; }
 
     public Long getSent_at() { return sent_at; }
     public void setSent_at(Long sent_at) { this.sent_at = sent_at; }

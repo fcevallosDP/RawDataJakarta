@@ -8,6 +8,7 @@ package com.dp.api;
  *
  * @author ZAMBRED
  */
+import com.dp.util.DAOFile;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -20,7 +21,7 @@ public class DealPerformanceResource {
     private static final String API_KEY = "IMKw1BAltJdcbQqFt50oatUQw4wTs/j+rDmu8wtf";
     @POST
     @Path("/ingest")
-    public Response ingest(@HeaderParam("X-Api-Key") String apiKey, @Valid IngestRequest req) {
+    public Response ingest(@HeaderParam("X-Api-Key") String apiKey, @Valid IngestRequest req) throws ClassNotFoundException, Exception {
 
         // 1) Validar API key
         if (apiKey == null || !API_KEY.equals(apiKey)) {
@@ -29,21 +30,15 @@ public class DealPerformanceResource {
                                            .build();
         }
 
-        // 2) Procesar la data
-        int saved = new DealPerformanceDAO().bulkInsert(req.getSource(), req.getRows());
-
-        // 3) Responder OK
-        return Response.ok(new Msg("ok", "saved=" + saved)).build();
+        new DAOFile().IncomingSSPJsonData(req.getSource(), req.getRows());
+        int saved = req.getRows().size();
+        return Response.ok(new Msg("ok", "saved=" + saved)).build();        
+        
     }
 
-    // Clase auxiliar para respuesta
     public static class Msg {
             public String status;
             public String detail;
-
-            public Msg(String s, String d) {
-                    this.status = s;
-                    this.detail = d;
-            }
-    }
+            public Msg(String s, String d) { this.status = s; this.detail = d; }
+        }
 }

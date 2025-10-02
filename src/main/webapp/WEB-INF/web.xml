@@ -16,10 +16,21 @@
       <param-value>server</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>primefaces.UPLOADER</param-name>
+        <param-value>native</param-value>
+    </context-param>
+
     <servlet>
       <servlet-name>Faces Servlet</servlet-name>
       <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
-      <load-on-startup>1</load-on-startup>
+      <load-on-startup>1</load-on-startup>  
+      <!-- límites del lado servidor -->
+      <multipart-config>
+        <max-file-size>2097152</max-file-size>        <!-- 2 MiB por archivo -->
+        <max-request-size>8388608</max-request-size> <!-- 8 MiB por request (si subes varios) -->
+        <file-size-threshold>0</file-size-threshold>
+      </multipart-config>              
     </servlet>
 
     <servlet-mapping>

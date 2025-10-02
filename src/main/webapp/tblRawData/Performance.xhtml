@@ -176,9 +176,9 @@
                         </p:selectOneMenu> 
                         <p:fileUpload id="idFile" listener="#{tblRawDataController.handleFilePerfUploadWeeklyData}" 
                                   mode="advanced" sequential="true"
-                                  update="TblRawDataListForm:datalist, messages" sizeLimit="5000000" 
+                                  update="TblRawDataListForm:datalist, messages" sizeLimit="2097152" 
                                   allowTypes="/(\.|\/)(csv|xlsx)$/" accept=".csv,.xlsx"                                       
-                                  invalidSizeMessage="Maximum file size allowed is 1MB"
+                                  invalidSizeMessage="Maximum file size allowed is 2MB"
                                   invalidFileMessage="only xlsx or csv is allowed" 
                                   >                                    
                         </p:fileUpload>

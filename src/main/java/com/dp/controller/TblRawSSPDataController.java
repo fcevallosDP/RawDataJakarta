@@ -538,7 +538,8 @@ public class TblRawSSPDataController implements Serializable {
         }
     }
     
-    public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {            
+    public void handleFileUpload(FileUploadEvent event) throws ClassNotFoundException, Exception {
+        System.out.println(">>> handleFileUpload ENTER " + new java.util.Date()); System.out.flush();
         if( dMonthSelected != null){
             if (event != null && event.getFile() != null){
                 DAOFile dbCon = new DAOFile();

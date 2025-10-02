@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
 @Path("/v1/deal-performance")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -21,7 +22,7 @@ public class DealPerformanceResource {
     private static final String API_KEY = "IMKw1BAltJdcbQqFt50oatUQw4wTs/j+rDmu8wtf";
     @POST
     @Path("/ingest")
-    public Response ingest(@HeaderParam("X-Api-Key") String apiKey, @Valid IngestRequest req) throws ClassNotFoundException, Exception {
+    public Response ingest(@HeaderParam("X-Api-Key") String apiKey, @Valid IngestRequest req) {
 
         // 1) Validar API key
         if (apiKey == null || !API_KEY.equals(apiKey)) {
@@ -29,9 +30,16 @@ public class DealPerformanceResource {
                                            .entity(new Msg("unauthorized", "Invalid or missing API key"))
                                            .build();
         }
+        int saved = 0;
+        try {
+            List<RowDto> sanitized = RowSanitizer.sanitize(req.getRows());
+            DAOFile dbCon = new DAOFile(null);
+            dbCon.IncomingSSPJsonData(req.getSource(), sanitized);
+            saved = sanitized.size();          
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        new DAOFile().IncomingSSPJsonData(req.getSource(), req.getRows());
-        int saved = req.getRows().size();
         return Response.ok(new Msg("ok", "saved=" + saved)).build();        
         
     }

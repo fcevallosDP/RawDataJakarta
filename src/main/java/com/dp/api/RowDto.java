@@ -98,6 +98,10 @@ public class RowDto {
         return totalCost;
     }
 
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
+
     public BigDecimal getGrossMargin() {
         return grossMargin;
     }

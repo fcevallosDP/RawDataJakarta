@@ -115,7 +115,7 @@ public class JsfUtil {
             return usuario;
 
         } catch (Exception e) {
-            addErrorMessage("Something went wrong trying to get the user");
+            System.out.println("Something went wrong trying to get the user");
             return null;
         }
     }    

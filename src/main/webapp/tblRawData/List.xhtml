@@ -43,8 +43,8 @@
                                  >
                         <f:facet name="header">
                             <h:outputText value="DSP Daily DATA" style="font-size: larger"/>
-                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" rendered="#{!(empty tblRawDataController.diaEstadoItems)}"/>
-                            <ui:repeat value="#{tblRawDataController.diaEstadoItems}" var="dia">
+                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" rendered="#{not empty tblRawDataController.diaEstadoItems}"/>
+                            <ui:repeat value="#{tblRawDataController.diaEstadoItems}" var="dia"  rendered="#{not empty tblRawDataController.diaEstadoItems}">
                                 <p:badge value="#{dia.iDia}"
                                          severity="danger"
                                          style="margin: 0.25rem;" />
@@ -54,7 +54,7 @@
                                 <p:datePicker id="disabledDD" value="#{tblRawDataController.DMonthSelected}"
                                       readonlyInput="true" view="month" pattern="MMM/yyyy" 
                                       yearNavigator="true" yearRange="2025:2026" size="10">                               
-                                    <p:ajax event="change" listener="#{tblRawDataController.getItemCalendarByMonth()}"
+                                    <p:ajax event="change" listener="#{tblRawDataController.onMonthChange()}"
                                             update="TblRawDataListForm, exchanges, partners, campaigns"
                                             onstart="PF('buiDatatable').show()"
                                             oncomplete="PF('buiDatatable').hide()"
@@ -68,7 +68,7 @@
                                 <p:commandButton id="idunlock" title="Remove data"
                                                  action="#{tblRawDataController.prepareClean()}"
                                                  icon="pi pi-trash" style="margin-left: 2px;"
-                                                 disabled="#{empty tblRawDataController.items}" 
+                                                 disabled="#{empty tblRawDataController.filteredItems}" 
                                                  update="confirmDialog"
                                                  oncomplete="PF('confirmDialogWidget').show()"
                                                  process="@this"/> 
@@ -129,6 +129,8 @@
                                 <p:selectOneMenu id="partners" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter" >
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawPartners}" />
+                                    
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                            
                             <h:outputText value="#{item.vPartner}"/>
@@ -138,6 +140,7 @@
                                 <p:selectOneMenu id="campaigns" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawCampaign}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                              
                             <h:outputText value="#{item.vCampaign}"/>
@@ -147,6 +150,7 @@
                                 <p:selectOneMenu id="insertionOrders" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawInsertionOrders}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                            
                             <h:outputText value="#{item.vInsertionOrder}"/>
@@ -159,6 +163,7 @@
                                 <p:selectOneMenu id="exchanges" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawExchanges}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                                
                             <h:outputText value="#{item.vExchange}"/>
@@ -183,6 +188,7 @@
                                 <p:selectOneMenu id="iddsps" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawDsp}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                             
                             <h:outputText value="#{item.vDSP}"/>
@@ -192,6 +198,7 @@
                                 <p:selectOneMenu id="idclients" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawClient}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                             
                             <h:outputText value="#{item.vClient}"/>
@@ -201,6 +208,7 @@
                                 <p:selectOneMenu id="agencies" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawAgency}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                             
                             <h:outputText value="#{item.vAgency}"/>
@@ -210,6 +218,7 @@
                                 <p:selectOneMenu id="chanels" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawChannel}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                             
                             <h:outputText value="#{item.vChannel}"/>
@@ -222,6 +231,7 @@
                                 <p:selectOneMenu id="vendors" onchange="PF('WdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawDataController.rawVendor}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                             
                             <h:outputText value="#{item.vVendor}"/>                            

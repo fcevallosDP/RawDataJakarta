@@ -13,6 +13,7 @@ import com.dp.util.TblDiaEstado;
 import com.dp.util.TblHistoricalDSP;
 import com.dp.util.TblLineItems;
 import com.dp.util.TblPacing;
+import jakarta.annotation.PostConstruct;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,7 +29,9 @@ import java.util.Random;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.faces.view.ViewScoped;
+import java.time.Instant;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
@@ -36,7 +39,9 @@ import org.primefaces.event.TabChangeEvent;
 import org.primefaces.util.LangUtils;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -111,35 +116,68 @@ public class TblRawDataController implements Serializable {
     private String filterPartner;    
     private String globalFilterText;
     private String confirmMessage;
-    private List<TblDiaEstado> diaEstadoItems;
-            
-    public List<TblDiaEstado> getDiaEstadoItems() {
-    
-        if(this.items != null && !this.items.isEmpty()){
-                              
-            Set<Integer> diasConDatos = items.stream()
-                .map(r -> {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(r.getdDate());
-                    return cal.get(Calendar.DAY_OF_MONTH);
-                })
-                .collect(Collectors.toSet());
-            
-            diaEstadoItems = new ArrayList<>();
-            LocalDate now = LocalDate.now();
-            int diasMes = now.getDayOfMonth();
+    private List<TblDiaEstado> diaEstadoItems = new ArrayList<>();
 
-            for (int i = 1; i <= diasMes; i++) {
-                LocalDate dia = now.withDayOfMonth(i);
-                String estado;
-                if (!diasConDatos.contains(i) && dia.isBefore(now)) {
-                    estado = "vencido";
-                    diaEstadoItems.add(new TblDiaEstado(i, estado));
-                }
+    public List<TblDiaEstado> getDiaEstadoItems() {
+        return diaEstadoItems; 
+    }
+
+    private static LocalDate toLocalDate(Date date) {
+        if (date == null) return null;
+        if (date instanceof java.sql.Date) {
+            // Evita toInstant() en java.sql.Date
+            return ((java.sql.Date) date).toLocalDate();
+        }
+        return Instant.ofEpochMilli(date.getTime())
+                      .atZone(ZoneId.systemDefault())
+                      .toLocalDate();
+    }
+    
+    public void recalcularDiasPendientes() {
+        // Si no hay mes seleccionado, deja lista vacía pero MUTABLE
+        if (dMonthSelected == null) {
+            this.diaEstadoItems = new ArrayList<>();
+            return;
+        }
+
+        // Mes/año seleccionado
+        LocalDate fechaSel = dMonthSelected.toInstant()
+                                           .atZone(ZoneId.systemDefault())
+                                           .toLocalDate();
+        YearMonth ym = YearMonth.of(fechaSel.getYear(), fechaSel.getMonthValue());
+
+        LocalDate hoy = LocalDate.now();
+        YearMonth ymHoy = YearMonth.from(hoy);
+
+        int endDay;
+        if (ym.isBefore(ymHoy)) {
+            endDay = ym.lengthOfMonth();                 // mes pasado: todo el mes
+        } else if (ym.equals(ymHoy)) {
+            endDay = Math.max(0, hoy.getDayOfMonth() - 1); // mes actual: hasta ayer
+        } else {
+            endDay = 0;                                  // futuro: nada pendiente
+        }
+
+        // Días con datos (usa conversión segura y Set mutable)
+        Set<Integer> diasConDatos =
+            (items == null || items.isEmpty())
+            ? new HashSet<>()
+            : items.stream()
+                   .map(r -> toLocalDate(r.getdDate()))
+                   .filter(Objects::nonNull)
+                   .filter(d -> YearMonth.from(d).equals(ym))
+                   .map(LocalDate::getDayOfMonth)
+                   .collect(Collectors.toCollection(HashSet::new));
+
+        List<TblDiaEstado> pendientes = new ArrayList<>();
+        for (int d = 1; d <= endDay; d++) {
+            if (!diasConDatos.contains(d)) {
+                pendientes.add(new TblDiaEstado(d, "vencido"));
             }
-            
-        }        
-        return diaEstadoItems;                
+        }
+
+        // Asigna lista MUTABLE
+        this.diaEstadoItems = pendientes;
     }
 
     public void setDiaEstadoItems(List<TblDiaEstado> diaEstadoItems) {
@@ -244,7 +282,7 @@ public class TblRawDataController implements Serializable {
 
     public List<TblDV360SPD> getItemsPerf() {
         if(itemsPerf == null || itemsPerf.isEmpty()){
-            getItemPerfByMonthYear();
+            getItemPerfByMonthYear();    
         }
         return itemsPerf;
     }
@@ -818,12 +856,30 @@ public class TblRawDataController implements Serializable {
         this.todayAsString = todayAsString;
     }
 
-    public List<TblDV360SPD> getItems() {
+    @PostConstruct
+    public void init() {
+        // 1) Mes vigente como primer día del mes (para el datePicker)
+        YearMonth ym = YearMonth.now();
+        LocalDate firstDay = ym.atDay(1);
+        this.dMonthSelected = Date.from(firstDay.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        // 2) Derivar id_monthly / id_daily en base a dMonthSelected (tu lógica actual)
+        getItemCalendarByMonth();
+
+        // 3) Cargar datos y derivados
+        cargarItemsYDerivados();
+
+        // 4) Calcular días pendientes para ese mes
+        recalcularDiasPendientes();
+    }
+    
+
+    public void cargarItemsYDerivados() {
         if ((items == null || items.isEmpty()) && dMonthSelected != null) {
             cleanInternalFilters();
             DAOFile dbCon = new DAOFile();
             items = dbCon.getRawDatabyDate(idDailySelected.getId_monthly(),JsfUtil.getUsuarioSesion().getvAgency());
-            if (items != null && !items.isEmpty()){
+            if (items != null && !items.isEmpty()){                
                 setRawPartners(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vPartner"));
                 setRawAgency(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vAgency"));
                 setRawCampaign(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vCampaign"));
@@ -835,12 +891,25 @@ public class TblRawDataController implements Serializable {
                 setRawDeviceTypes(new ArrayList());//dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_daily(),"vDeviceTypes"));
                 setRawVendor(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vVendor"));
                 setRawInsertionOrders(dbCon.getRawDatabyDateDistinctbyPattern("DSP", idDailySelected.getId_monthly(),"vInsertionOrder"));
-                //setRawLineItems(dbCon.getRawDatabyDateDistinctbyPattern(idDailySelected.getId_daily(),"vLineItem"));
                 setLbDataFound(true);            
             }else{
                  setLbDataFound(false);
             }
         }
+    }
+
+    public void onMonthChange() { // listener del datePicker
+        getItemCalendarByMonth();
+        cargarItemsYDerivados();
+        recalcularDiasPendientes();
+    }
+
+    public void onMonthChangePerf() { // listener del datePicker
+        getItemCalendarByMonth();
+        getItemPerfByMonthYear();
+    }    
+    
+    public List<TblDV360SPD> getItems() {
         return items;
     }
 

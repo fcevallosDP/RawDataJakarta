@@ -44,8 +44,8 @@
                                  >
                         <f:facet name="header">
                             <h:outputText value="SSP Daily DATA" style="font-size: larger"/>
-                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" rendered="#{!(empty tblRawSSPDataController.diaEstadoItems)}"/>
-                            <ui:repeat value="#{tblRawSSPDataController.diaEstadoItems}" var="dia">
+                            <h:outputText value="(pending days)" style="margin-left: 15px; font-size: smaller;" />
+                            <ui:repeat value="#{tblRawSSPDataController.diaEstadoItems}" var="dia" >
                                 <p:badge value="#{dia.iDia}"
                                          severity="danger"
                                          style="margin: 0.25rem;" />
@@ -55,7 +55,7 @@
                                 <p:datePicker id="disabledDD" value="#{tblRawSSPDataController.DMonthSelected}"
                                       readonlyInput="true" view="month" pattern="MMM/yyyy" 
                                       yearNavigator="true" yearRange="2025:2026" size="10">                               
-                                    <p:ajax event="change" listener="#{tblRawSSPDataController.getItemCalendarByMonth()}"
+                                    <p:ajax event="change" listener="#{tblRawSSPDataController.onMonthChange()}"
                                             update="TblRawSSPDataListForm"
                                             onstart="PF('buiDatatable').show()"
                                             oncomplete="PF('buiDatatable').hide()"                                            
@@ -68,7 +68,7 @@
                                 <p:commandButton id="idunlock" title="Remove data"
                                                  action="#{tblRawSSPDataController.prepareClean()}"
                                                  icon="pi pi-trash" style="margin-left: 2px;"
-                                                 disabled="#{empty tblRawSSPDataController.items}" 
+                                                 disabled="#{empty tblRawSSPDataController.filteredItems}" 
                                                  update="confirmDialog"
                                                  oncomplete="PF('confirmDialogWidget').show()"
                                                  process="@this"/> 
@@ -130,6 +130,7 @@
                                 <p:selectOneMenu id="idadvertiser" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawSSPDataController.rawAdvertiser}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                               
                             <h:outputText value="#{item.vAdvertiser}"/>
@@ -139,6 +140,7 @@
                                 <p:selectOneMenu id="idbrand" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawSSPDataController.rawBrand}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>                              
                             <h:outputText value="#{item.vBrand}"/>
@@ -277,6 +279,7 @@
                                 <p:selectOneMenu id="idexange" onchange="PF('WSSPdataList').filter()" styleClass="ui-custom-filter">
                                     <f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
                                     <f:selectItems value="#{tblRawSSPDataController.rawExchange}" />
+                                    <p:ajax event="change" update="idunlock" process="@this"/>
                                 </p:selectOneMenu>
                             </f:facet>    
                             <h:outputText value="#{item.vExchange}"/>

@@ -46,7 +46,7 @@
                         <f:facet name="header">
                             <h:outputText value="Performance DATA" style="font-size: larger"/>
                         </f:facet>
-                        <f:facet name="paginatorTopLeft">                    
+                        <f:facet name="paginatorTopLeft">  
                                <p:datePicker id="disabledDD" value="#{tblRawDataController.DMonthSelected}"
                                       readonlyInput="true" view="month" pattern="MMM/yyyy" 
                                       yearNavigator="true" yearRange="2023:2030" size="10">                               
@@ -70,7 +70,7 @@
                                     <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" />
                                 </p:confirmDialog>                                                              
                                 
-                                <p:commandButton id="btnExpor" icon="pi pi-file-excel" style="margin-left: 2px;" ajax="false" title="Export as excel file" disabled="#{( empty tblRawDataController.items)}">
+                                <p:commandButton id="btnExpor" icon="pi pi-file-excel" style="margin-left: 2px;" ajax="false" title="Export as excel file" disabled="#{empty tblRawDataController.items}">
                                     <p:dataExporter type="xls" target="TblRawDataListForm:datalist" fileName="RawData_PERF_#{tblRawDataController.todayAsString}" exportHeader="true" />
                                 </p:commandButton>                                                                                                      
 
